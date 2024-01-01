@@ -95,12 +95,13 @@ export_excel <- function(data, filepath) {
         ") is available in the \"data\" sheet. In this sheet, the \"value\" ",
         "field contains the character string extracted from the associated ",
         "PDF MDUFA report. The \"value_formatted\" field ",
-        "includes the numeric version of percent metrics and uses ",
-        "metric-specific cell formatting. ",
-        "For example, integer metrics will ",
-        "be formatted as numbers that do not include decimal places in the ",
-        "\"value_formatted\" field while other numeric metrics will be ",
-        "formatted as numbers with decimal places."
+        "includes the numeric version of percent metrics."
+        # " and uses ",
+        # "metric-specific cell formatting. ",
+        # "For example, integer metrics will ",
+        # "be formatted as numbers that do not include decimal places in the ",
+        # "\"value_formatted\" field while other numeric metrics will be ",
+        # "formatted as numbers with decimal places."
       ) %>%
         stringr::str_wrap() %>%
         stringr::str_split(pattern = "\\n"),
@@ -108,8 +109,9 @@ export_excel <- function(data, filepath) {
       paste0(
         "Subsequent sheets filter the data from the \"data\" sheet ",
         "by type (integer metrics, percentage metrics, etc.) and pivot ",
-        "it by year. The values in these sheets are from the ",
-        "\"value_formatted\" field in the \"data\" sheet."
+        "it by year. "
+        # "The values in these sheets are from the ",
+        # "\"value_formatted\" field in the \"data\" sheet."
       ) %>%
         stringr::str_wrap() %>%
         stringr::str_split(pattern = "\\n"),
@@ -140,7 +142,7 @@ export_excel <- function(data, filepath) {
       "",
       paste0(
         "If you find a problem in this dataset, please report it here: ",
-        "https://github.com/bjoleary/mdufa/issues. "
+        "https://github.com/bjoleary/mdufa/issues"
       ) %>%
         stringr::str_wrap() %>%
         stringr::str_split(pattern = "\\n"),
