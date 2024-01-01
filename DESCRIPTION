@@ -1,0 +1,39 @@
+Package: mdufa
+Title: Structured Data on FDA's Medical Device User Fee Program Performance 
+Version: 0.1.0
+Authors@R: 
+    person(given = "Brendan",
+           family = "O'Leary",
+           role = c("aut", "cre"),
+           email = "brendan@boleary.com",
+           comment = c(ORCID = "0000-0001-8753-917X"))
+Description: |
+    This package includes structured data from the FDA's quarterly Medical 
+    Device User Fee Ammendments (MDUFA) programs, which are published as PDFs 
+    on fda.gov. The package includes functions to scrape those PDFs to extract 
+    the data and includes the most recent dataset as of publication. 
+License: MIT + file LICENSE
+Suggests: 
+    lintr,
+    pdftools,
+    rprojroot,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+Imports: 
+    openxlsx,
+    dplyr,
+    janitor,
+    magrittr,
+    purrr,
+    readr,
+    stringr,
+    tibble,
+    tidyr,
+    tidyselect,
+    chk
+Depends: 
+    R (>= 2.10)

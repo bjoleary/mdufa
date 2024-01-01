@@ -1,0 +1,11 @@
+^mdufa\.Rproj$
+^\.Rproj\.user$
+^LICENSE\.md$
+^README\.Rmd$
+^cran-comments\.md$
+^\.github$
+^\.lintr$
+^data-raw$
+scratchpad.R
+^codecov\.yml$
+.xlsx
