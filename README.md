@@ -35,14 +35,6 @@ are more difficult to retrieve and may be more likely to be incomplete
 or to be inaccurate. Similarly, some tables in the reports have
 footnotes, and they are not included in this dataset.
 
-Aside from some spot-checks, the data provided by the mdufa R package
-and included in this workbook has had limited verification and may be
-inaccurate. Use this information at your own risk and verify information
-using the reports provided directly by FDA. To facilitate this, each
-data point provided includes information about its source, including a
-link to the FDA report from which it came, the relevant page number, and
-more.
-
 If you find a problem in this dataset, please report it
 [here](https://github.com/bjoleary/mdufa/issues).
 
@@ -123,7 +115,7 @@ graph_caption <-
   paste0(
     "Source: ",
     data$report_description %>% unique(),
-    " available at ",
+    "\nAvailable at: ",
     data$report_link %>% unique()
   )
 graph <- 
