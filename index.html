@@ -68,7 +68,6 @@
 <p>This package includes structured data from the FDA’s quarterly Medical Device User Fee Amendments (MDUFA) programs, which are published as PDFs on <a href="https://www.fda.gov/industry/medical-device-user-fee-amendments-mdufa/mdufa-reports" class="external-link">fda.gov</a>. The package includes functions to scrape those PDFs to extract the data and includes the most recent dataset as of publication.</p>
 <p>Aside from some spot-checks, the data provided by the <code>mdufa</code> R package has had limited verification and may be inaccurate. Use this information at your own risk and verify information using the reports provided directly by FDA. To facilitate this, each data point provided includes information about its source, including a link to the FDA report from which it came, the relevant page number, and more.</p>
 <p>“Text” metrics are typically descriptions of the MDUFA performance goals themselves (e.g. “90% Within 320 FDA Days”). Because of the way these values break across lines within table cells in the PDF reports, they are more difficult to retrieve and may be more likely to be incomplete or to be inaccurate. Similarly, some tables in the reports have footnotes, and they are not included in this dataset.</p>
-<p>Aside from some spot-checks, the data provided by the mdufa R package and included in this workbook has had limited verification and may be inaccurate. Use this information at your own risk and verify information using the reports provided directly by FDA. To facilitate this, each data point provided includes information about its source, including a link to the FDA report from which it came, the relevant page number, and more.</p>
 <p>If you find a problem in this dataset, please report it <a href="https://github.com/bjoleary/mdufa/issues" class="external-link">here</a>.</p>
 <p>Please carefully read the <a href="https://github.com/bjoleary/mdufa/blob/main/LICENSE.md" class="external-link">license</a> for additional important information.</p>
 <div class="section level2">
@@ -135,7 +134,7 @@
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span></span>
 <span>    <span class="st">"Source: "</span>,</span>
 <span>    <span class="va">data</span><span class="op">$</span><span class="va">report_description</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>    <span class="st">" available at "</span>,</span>
+<span>    <span class="st">"\nAvailable at: "</span>,</span>
 <span>    <span class="va">data</span><span class="op">$</span><span class="va">report_link</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="va">graph</span> <span class="op">&lt;-</span> </span>
