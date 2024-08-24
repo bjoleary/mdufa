@@ -98,6 +98,8 @@ get_m5 <- function(report_description, report_link, report_date) {
       "fy_2027",
       dplyr::everything()
     ) %>%
+    # remove all NA
+    dplyr::select(tidyselect::where(~ !all(is.na(.)))) %>%
     tidyr::pivot_longer(
       cols = tidyselect::contains("fy"),
       names_to = "fy",

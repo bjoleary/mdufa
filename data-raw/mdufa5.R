@@ -81,8 +81,6 @@ mdufa5 <-
     report_date = current_report$report_date
   )
 
-openxlsx::write.xlsx(mdufa5, file = "m5.xlsx", asTable = TRUE, overwrite = TRUE)
-
 usethis::use_data(mdufa5, overwrite = TRUE)
 
 # Document the dataset ---------------------------------------------------------
