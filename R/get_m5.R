@@ -82,6 +82,9 @@ get_m5 <- function(report_description, report_link, report_date) {
       y = metric_types("MDUFA V"),
       by = c("performance_metric" = "performance_metric")
     ) %>%
+    # Add page back in...
+    dplyr::mutate(page = NA_character_) %>%
+    # ...
     dplyr::select(
       "source",
       "page",
@@ -100,6 +103,14 @@ get_m5 <- function(report_description, report_link, report_date) {
     ) %>%
     # remove all NA
     dplyr::select(tidyselect::where(~ !all(is.na(.)))) %>%
+    # Add page back in...
+    dplyr::mutate(page = NA_character_) %>%
+    dplyr::select(
+      "source",
+      "page",
+      dplyr::everything()
+    ) %>%
+    # ...
     tidyr::pivot_longer(
       cols = tidyselect::contains("fy"),
       names_to = "fy",

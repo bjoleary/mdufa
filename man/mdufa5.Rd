@@ -5,17 +5,17 @@
 \alias{mdufa5}
 \title{MDUFA V}
 \format{
-A tibble with 14255 rows and 14 fields:
+A tibble with 13825 rows and 14 fields:
 
 \describe{
-\item{report_description}{chr "May 31, 2024, MDUFA V Performance Report",
-"M…}
-\item{report_link}{chr "https://www.fda.gov/media/179001/download?att…}
-\item{report_date}{date 2024-05-31, 2024-05-31, 2024-05-31, 2024-05-3…}
+\item{report_description}{chr "September 6, 2024 MDUFA V Performance
+Report"…}
+\item{report_link}{chr "https://www.fda.gov/media/181680/download?att…}
+\item{report_date}{date 2024-09-06, 2024-09-06, 2024-09-06, 2024-09-0…}
 \item{report_mdufa_period}{chr "MDUFA V", "MDUFA V", "MDUFA V", "MDUFA V",
 "M…}
 \item{source}{chr "Table 1.1 CDRH - PMA Original and Panel-Track…}
-\item{page}{chr "30", "30", "30", "30", "30", "30", "30", "30"…}
+\item{page}{chr NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA…}
 \item{table_number}{chr "1.1", "1.1", "1.1", "1.1", "1.1", "1.1", "1.1…}
 \item{organization}{chr "CDRH", "CDRH", "CDRH", "CDRH", "CDRH", "CDRH"…}
 \item{program}{chr "PMA Original and Panel-Track Supplements", "P…}
@@ -24,12 +24,12 @@ A tibble with 14255 rows and 14 fields:
 \item{performance_metric}{chr "Number Received", "Number Received", "Number
 …}
 \item{fy}{chr "2023", "2024", "2025", "2026", "2027", "2023"…}
-\item{value}{chr "73", "28", NA, NA, NA, "0", "0", NA, NA, NA, …}
+\item{value}{chr "73", "51", NA, NA, NA, "0", "0", NA, NA, NA, …}
 }
 }
 \source{
 \href{https://www.fda.gov/industry/medical-device-user-fee-amendments-mdufa/mdufa-reports}{FDA MDUFA Reports} # nolint: line_length_linter.
-accessed 2024-08-24.
+accessed 2024-09-16.
 }
 \usage{
 mdufa5
