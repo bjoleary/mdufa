@@ -543,8 +543,8 @@ get_table <- function(text_string) {
       page = text_string$page
     ) %>%
     dplyr::select(
-      .data$source,
-      .data$page,
+      "source",
+      "page",
       dplyr::everything()
     )
 
@@ -574,6 +574,52 @@ process_page <- function(page_string) {
     # TODO: Why did I comment this? Is this function used at all?
     # brute_force_row_fix() %>%
     get_page_number()
+
+  # How many tables?
+  table_count <-
+    stringr::str_extract_all(
+      string = page_data$trimmed_string,
+      pattern = table_title_text_pattern(),
+      simplify = TRUE
+    ) %>%
+    seq_along()
+
+  output <- vector(mode = "list", length = max(table_count))
+
+  for (i in table_count) {
+    page_data <-
+      page_data %>%
+      get_table_title() %>%
+      get_table()
+    output[[i]] <- page_data$table
+  }
+  output
+}
+
+#' Process a PDF Page
+#'
+#' These reports don't always have page numbers, complicating the procedure.
+#'
+#' @param page_string The character string of text on the page.
+#' @param page_number The page number based on the pdf index.
+#'
+#' @return A list of the page's tables.
+#' @export
+#'
+process_page_m5 <- function(page_string, page_number) {
+  page_data <-
+    page_string %>%
+    remove_unnecessary_text() %>%
+    collapse_line_breaks() %>%
+    add_missing_table_headers() %>%
+    insert_delim() %>%
+    # TODO: Why did I comment this? Is this function used at all?
+    # brute_force_row_fix() %>%
+    get_page_number()
+
+  if (is.na(page_data$page)) {
+    page_data$page <- page_number
+  }
 
   # How many tables?
   table_count <-

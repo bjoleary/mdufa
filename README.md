@@ -80,9 +80,6 @@ library(dplyr)
 #> The following objects are masked from 'package:base':
 #> 
 #>     intersect, setdiff, setequal, union
-```
-
-``` r
 set.seed(1)
 mdufa::mdufa3 %>% 
   select(organization, program, metric_type, performance_metric, fy, value) %>% 

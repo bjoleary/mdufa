@@ -28,5 +28,5 @@
 #'
 #' @source
 #' [FDA MDUFA Reports](https://www.fda.gov/industry/medical-device-user-fee-amendments-mdufa/mdufa-reports) # nolint: line_length_linter.
-#' accessed 2024-09-16.
+#' accessed 2024-08-24.
 "mdufa4"
