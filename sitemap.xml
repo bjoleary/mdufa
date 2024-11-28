@@ -1,126 +1,46 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>/404.html</loc>
-  </url>
-  <url>
-    <loc>/LICENSE-text.html</loc>
-  </url>
-  <url>
-    <loc>/LICENSE.html</loc>
-  </url>
-  <url>
-    <loc>/authors.html</loc>
-  </url>
-  <url>
-    <loc>/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/add_missing_table_headers.html</loc>
-  </url>
-  <url>
-    <loc>/reference/brute_force_row_fix.html</loc>
-  </url>
-  <url>
-    <loc>/reference/build_pivot.html</loc>
-  </url>
-  <url>
-    <loc>/reference/collapse_line_breaks.html</loc>
-  </url>
-  <url>
-    <loc>/reference/export_excel.html</loc>
-  </url>
-  <url>
-    <loc>/reference/extract_text.html</loc>
-  </url>
-  <url>
-    <loc>/reference/filter_metrics.html</loc>
-  </url>
-  <url>
-    <loc>/reference/fix_empty_rows.html</loc>
-  </url>
-  <url>
-    <loc>/reference/fix_goal_row.html</loc>
-  </url>
-  <url>
-    <loc>/reference/fix_si_row.html</loc>
-  </url>
-  <url>
-    <loc>/reference/fy_start_line_pattern.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_m5.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_page_number.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_table.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_table_title.html</loc>
-  </url>
-  <url>
-    <loc>/reference/goal_days_line_pattern.html</loc>
-  </url>
-  <url>
-    <loc>/reference/goal_days_pattern.html</loc>
-  </url>
-  <url>
-    <loc>/reference/goal_percent_line_pattern.html</loc>
-  </url>
-  <url>
-    <loc>/reference/goal_percent_pattern.html</loc>
-  </url>
-  <url>
-    <loc>/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/insert_delim.html</loc>
-  </url>
-  <url>
-    <loc>/reference/make_clean_tibble.html</loc>
-  </url>
-  <url>
-    <loc>/reference/mdufa2.html</loc>
-  </url>
-  <url>
-    <loc>/reference/mdufa3.html</loc>
-  </url>
-  <url>
-    <loc>/reference/mdufa4.html</loc>
-  </url>
-  <url>
-    <loc>/reference/mdufa5.html</loc>
-  </url>
-  <url>
-    <loc>/reference/metric_types.html</loc>
-  </url>
-  <url>
-    <loc>/reference/pipe.html</loc>
-  </url>
-  <url>
-    <loc>/reference/process_page.html</loc>
-  </url>
-  <url>
-    <loc>/reference/remove_unnecessary_text.html</loc>
-  </url>
-  <url>
-    <loc>/reference/si_metric_pattern.html</loc>
-  </url>
-  <url>
-    <loc>/reference/table_title_text_pattern.html</loc>
-  </url>
-  <url>
-    <loc>/reference/type_metrics.html</loc>
-  </url>
-  <url>
-    <loc>/reference/unnecessary_text_pattern.html</loc>
-  </url>
-  <url>
-    <loc>/reference/within_days_line_pattern.html</loc>
-  </url>
-  <url>
-    <loc>/reference/within_days_pattern.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>/404.html</loc></url>
+<url><loc>/LICENSE-text.html</loc></url>
+<url><loc>/LICENSE.html</loc></url>
+<url><loc>/authors.html</loc></url>
+<url><loc>/index.html</loc></url>
+<url><loc>/reference/add_missing_table_headers.html</loc></url>
+<url><loc>/reference/brute_force_row_fix.html</loc></url>
+<url><loc>/reference/build_pivot.html</loc></url>
+<url><loc>/reference/collapse_line_breaks.html</loc></url>
+<url><loc>/reference/export_excel.html</loc></url>
+<url><loc>/reference/extract_text.html</loc></url>
+<url><loc>/reference/extract_text_m5.html</loc></url>
+<url><loc>/reference/filter_metrics.html</loc></url>
+<url><loc>/reference/fix_empty_rows.html</loc></url>
+<url><loc>/reference/fix_goal_row.html</loc></url>
+<url><loc>/reference/fix_si_row.html</loc></url>
+<url><loc>/reference/fy_start_line_pattern.html</loc></url>
+<url><loc>/reference/get_m5.html</loc></url>
+<url><loc>/reference/get_page_number.html</loc></url>
+<url><loc>/reference/get_table.html</loc></url>
+<url><loc>/reference/get_table_title.html</loc></url>
+<url><loc>/reference/goal_days_line_pattern.html</loc></url>
+<url><loc>/reference/goal_days_pattern.html</loc></url>
+<url><loc>/reference/goal_percent_line_pattern.html</loc></url>
+<url><loc>/reference/goal_percent_pattern.html</loc></url>
+<url><loc>/reference/index.html</loc></url>
+<url><loc>/reference/insert_delim.html</loc></url>
+<url><loc>/reference/make_clean_tibble.html</loc></url>
+<url><loc>/reference/mdufa2.html</loc></url>
+<url><loc>/reference/mdufa3.html</loc></url>
+<url><loc>/reference/mdufa4.html</loc></url>
+<url><loc>/reference/mdufa5.html</loc></url>
+<url><loc>/reference/metric_types.html</loc></url>
+<url><loc>/reference/pipe.html</loc></url>
+<url><loc>/reference/process_page.html</loc></url>
+<url><loc>/reference/process_page_m5.html</loc></url>
+<url><loc>/reference/remove_unnecessary_text.html</loc></url>
+<url><loc>/reference/si_metric_pattern.html</loc></url>
+<url><loc>/reference/table_title_text_pattern.html</loc></url>
+<url><loc>/reference/type_metrics.html</loc></url>
+<url><loc>/reference/unnecessary_text_pattern.html</loc></url>
+<url><loc>/reference/within_days_line_pattern.html</loc></url>
+<url><loc>/reference/within_days_pattern.html</loc></url>
 </urlset>
+
