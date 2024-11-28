@@ -201,6 +201,7 @@ goal_days_line_pattern <- function() {
 #' @return A regular expression pattern
 table_title_text_pattern <- function() {
   stringr::regex(
+    # pattern = "(Table\\s\\d*\\.\\d*\\.{0,1}\\s[^\\|\\v]*(?=\\v))",
     pattern = "(Table\\s\\d*\\.\\d*\\.{0,1}\\s[^\\|]*(?=\\v))",
     ignore_case = FALSE,
     multiline = FALSE

@@ -77,11 +77,11 @@ current_report <-
 mdufa5 <-
   get_m5(
     report_description = current_report$report_description,
-    report_link = current_report$report_link,
+    report_link =
+      current_report$report_link %>%
+      stringr::str_remove("\\?attachment$"),
     report_date = current_report$report_date
   )
-
-openxlsx::write.xlsx(mdufa5, file = "m5.xlsx", asTable = TRUE, overwrite = TRUE)
 
 usethis::use_data(mdufa5, overwrite = TRUE)
 

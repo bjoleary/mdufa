@@ -22,13 +22,18 @@ get_m5 <- function(report_description, report_link, report_date) {
       report_description, report_link, report_date, "MDUFA V"
     )
   raw_data <- pdftools::pdf_data(report_link) # nolint: object_usage_linter.
-  raw_text <- extract_text(report_link)
+  raw_text <- extract_text_m5(report_link)
 
   # Extract the tables
-  report_tables <- vector(mode = "list", length = max(seq_along(raw_text)))
+  report_tables <-
+    vector(mode = "list", length = max(seq_along(raw_text$raw_text)))
 
-  for (i in seq_along(raw_text)) {
-    report_tables[[i]] <- process_page(raw_text[[i]])
+  for (i in seq_along(raw_text$raw_text)) {
+    report_tables[[i]] <-
+      process_page_m5(
+        page_string = raw_text$raw_text[[i]],
+        page_number = raw_text$page_number[[i]]
+      )
   }
 
   mdufa5 <- # nolint: object_usage_linter.
@@ -98,6 +103,8 @@ get_m5 <- function(report_description, report_link, report_date) {
       "fy_2027",
       dplyr::everything()
     ) %>%
+    # remove all NA
+    dplyr::select(tidyselect::where(~ !all(is.na(.)))) %>%
     tidyr::pivot_longer(
       cols = tidyselect::contains("fy"),
       names_to = "fy",
