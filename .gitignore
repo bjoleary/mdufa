@@ -5,3 +5,13 @@
 .DS_Store
 scratchpad.R
 *.xlsx
+data-raw/pdf_reports/
+
+# LLM coding agent files
+CLAUDE.md
+.cursorrules
+.cursor/
+.github/copilot-instructions.md
+.aider*
+.continue/
+.codeium/
