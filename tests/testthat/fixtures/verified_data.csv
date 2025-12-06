@@ -1,0 +1,26 @@
+dataset,report_date,table_number,organization,expected_metric,fy,value
+mdufa3,2018-12-10,6.5,DCD,Average FDA days to MDUFA decision,2013,68.29
+mdufa3,2018-12-10,6.5,DCD,Average FDA days to MDUFA decision,2014,69
+mdufa3,2018-12-10,6.5,DCD,Average FDA days to MDUFA decision,2015,69.51
+mdufa3,2018-12-10,6.5,DCD,Average FDA days to MDUFA decision,2016,74.2
+mdufa3,2018-12-10,6.5,DCD,Average FDA days to MDUFA decision,2017,71.73
+mdufa3,2018-12-10,6.1,DCD,Number Received,2013,340
+mdufa3,2018-12-10,6.1,DCD,Number Received,2014,410
+mdufa3,2018-12-10,6.1,DCD,Number Received,2015,411
+mdufa3,2018-12-10,6.1,DCD,Number Received,2016,405
+mdufa3,2018-12-10,6.1,DCD,Number Received,2017,464
+mdufa4,2023-11-16,6.5,OHT2,Average FDA days to MDUFA IV decision,2018,71.68
+mdufa4,2023-11-16,6.5,OHT2,Average FDA days to MDUFA IV decision,2019,71.37
+mdufa4,2023-11-16,6.5,OHT2,Average FDA days to MDUFA IV decision,2020,75.07
+mdufa4,2023-11-16,6.5,OHT2,Average FDA days to MDUFA IV decision,2021,74.18
+mdufa4,2023-11-16,6.5,OHT2,Average FDA days to MDUFA IV decision,2022,75.58
+mdufa4,2023-11-16,6.1,OHT2,Number Received,2018,357
+mdufa4,2023-11-16,6.1,OHT2,Number Received,2019,378
+mdufa4,2023-11-16,6.1,OHT2,Number Received,2020,376
+mdufa4,2023-11-16,6.1,OHT2,Number Received,2021,383
+mdufa4,2023-11-16,6.1,OHT2,Number Received,2022,354
+mdufa5,2023-11-16,6.5,OHT2,Average FDA days to MDUFA V decision,2023,67.38
+mdufa5,2023-11-16,6.5,OHT2,Average FDA days to MDUFA V decision,2024,NA
+mdufa5,2023-11-16,6.5,OHT2,Average FDA days to MDUFA V decision,2025,NA
+mdufa5,2023-11-16,6.5,OHT2,Average FDA days to MDUFA V decision,2026,NA
+mdufa5,2023-11-16,6.5,OHT2,Average FDA days to MDUFA V decision,2027,NA

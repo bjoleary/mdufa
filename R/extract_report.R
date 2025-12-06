@@ -1,0 +1,426 @@
+#' Extract MDUFA Report Data from PDF
+#'
+#' Extracts and processes table data from an MDUFA performance report PDF.
+#' This is the core extraction function used for both building package datasets
+#' and regression testing.
+#'
+#' @param pdf_path Path to the PDF file (local file or URL)
+#' @param mdufa_period Character string indicating the MDUFA period
+#'   (e.g., "MDUFA III", "MDUFA IV", "MDUFA V")
+#' @param report_date Optional date of the report. If NULL, will not be added
+#'   to output.
+#' @param report_description Optional description of the report.
+#' @param report_link Optional link to the report.
+#'
+#' @return A tibble containing the extracted table data with columns:
+#'   source, page, table_number, organization, program, table_title,
+#'   metric_type, performance_metric, fy, value
+#'
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' # Extract from a local PDF
+#' data <- extract_report(
+#'   pdf_path = "path/to/mdufa-4_2023-11-16.pdf",
+#'   mdufa_period = "MDUFA IV"
+#' )
+#' }
+extract_report <- function(pdf_path,
+                           mdufa_period,
+                           report_date = NULL,
+                           report_description = NULL,
+                           report_link = NULL) {
+  if (!requireNamespace("pdftools", quietly = TRUE)) {
+    stop("The 'pdftools' package is required. Please install it.")
+  }
+
+  # Determine which extraction method to use based on MDUFA period
+  if (mdufa_period == "MDUFA V") {
+    return(extract_report_m5(
+      pdf_path = pdf_path,
+      mdufa_period = mdufa_period,
+      report_date = report_date,
+      report_description = report_description,
+      report_link = report_link
+    ))
+  }
+
+  # Extract raw text from PDF
+  raw_text <- pdftools::pdf_text(pdf_path)
+
+  # For MDUFA III, skip first 10 pages
+  if (mdufa_period == "MDUFA III") {
+    raw_text <- raw_text[-seq(1, min(10, length(raw_text)), 1)]
+  }
+
+  # Filter to pages with table titles
+  raw_text <- raw_text[
+    stringr::str_detect(
+      string = raw_text,
+      pattern = table_title_text_pattern()
+    )
+  ]
+
+  # Remove appendices for MDUFA IV
+  if (mdufa_period == "MDUFA IV") {
+    start_of_appendix <- stringr::str_which(
+      string = raw_text,
+      pattern = stringr::regex("^Appendix A")
+    )
+    if (length(start_of_appendix) > 0) {
+      start_of_cber <- stringr::str_which(
+        string = raw_text,
+        pattern = stringr::regex(".*CBER.*")
+      )
+      if (length(start_of_cber) > 0) {
+        raw_text <- raw_text[-(start_of_appendix[1]:start_of_cber[1])]
+      }
+    }
+  }
+
+  # Apply text cleaning for MDUFA III
+  if (mdufa_period == "MDUFA III") {
+    raw_text <- raw_text |>
+      # Remove whitespace before the term "performance"
+      stringr::str_remove_all(
+        pattern = stringr::regex(
+          "(?<=\\v)\\s{2,}(?=\\bPerformance\\b)",
+          ignore_case = TRUE
+        )
+      ) |>
+      # Replace the term "Performance Goals" with "Performance Metric"
+      stringr::str_replace_all(
+        pattern = stringr::regex(
+          "\\v\\s{0,}Performance Goals\\b",
+          ignore_case = TRUE
+        ),
+        replacement = "\nPerformance Metric"
+      ) |>
+      # Replace "PMA Submissions Received" at beginning of line
+      stringr::str_replace_all(
+        pattern = stringr::regex(
+          "\\v\\s*PMA Submissions Received\\b",
+          ignore_case = TRUE
+        ),
+        replacement = "\nPerformance Metric"
+      ) |>
+      # Fix table numbers running into office names
+      stringr::str_replace_all(
+        pattern = "(?<=^Table\\s\\d{1,5}\\.\\d{1,5}\\.{0,1})O",
+        replacement = " O"
+      )
+  }
+
+  # Extract tables from each page
+  report_tables <- vector(mode = "list", length = length(raw_text))
+  for (i in seq_along(raw_text)) {
+    report_tables[[i]] <- tryCatch(
+      process_page(raw_text[[i]]),
+      error = function(e) NULL
+    )
+  }
+
+  # Combine all tables
+  combined <- dplyr::bind_rows(report_tables)
+
+  if (nrow(combined) == 0) {
+    return(tibble::tibble())
+  }
+
+  # Build submission type regex
+  submission_type <- build_submission_type_regex(mdufa_period)
+
+  # Clean and structure the data
+  result <- combined |>
+    # Filter out problematic tables
+    dplyr::filter(
+      !stringr::str_detect(
+        string = .data$source,
+        pattern = stringr::fixed("Table 5.3")
+      ),
+      !stringr::str_detect(
+        string = .data$source,
+        pattern = stringr::fixed("Table 9.2")
+      )
+    ) |>
+    # Remove empty columns
+    janitor::remove_empty(which = c("cols")) |>
+    # Extract table metadata
+    dplyr::mutate(
+      table_number = stringr::str_extract(
+        string = .data$source,
+        pattern = "(?<=^Table\\s)\\d*\\.\\d*\\b"
+      ),
+      organization = stringr::str_extract(
+        string = .data$source,
+        pattern = paste0(
+          "CDRH|CBER|ODE|OIR|DAGRID|DCD|DNPMD|DOD|DOED|DRGUD|DSD|",
+          "DCTD|DIHD|DMD|DMGP|DRH|",
+          "OHT1|OHT2|OHT3|OHT4|OHT5|OHT6|OHT7|OHT8"
+        )
+      ),
+      program = stringr::str_extract(
+        string = .data$source,
+        pattern = submission_type
+      ),
+      table_title = stringr::str_extract(
+        string = .data$source,
+        pattern = paste0("(?=", submission_type, ").*$")
+      )
+    )
+
+
+  # Fix empty metric labels in Tables 6.5 (MDUFA III specific)
+  # The "Average FDA days" row has an empty performance_metric cell
+  # Use lag() to detect when previous row is "Number with MDUFA III decision"
+  if (mdufa_period == "MDUFA III") {
+    prev_metric <- "Number with MDUFA III decision"
+    avg_fda_days <- "Average FDA days to MDUFA III decision"
+    result <- result |>
+      dplyr::mutate(
+        performance_metric = dplyr::case_when(
+          (dplyr::lag(.data$performance_metric) == prev_metric &
+            is.na(.data$performance_metric) &
+            .data$table_number == "6.5") ~ avg_fda_days,
+          TRUE ~ stringr::str_remove(
+            .data$performance_metric,
+            stringr::regex("^decision\\s")
+          ) |>
+            stringr::str_replace(
+              "days\\sto\\sMDUFA\\sIII$",
+              "days to MDUFA III decision"
+            ) |>
+            # Fix concatenated "Max Industry days...Avg Total days..." text
+            stringr::str_remove(
+              stringr::regex(
+                paste0(
+                  "(Maximum Industry days to MDUFA III decision\\s)",
+                  "(?=(Average Total days to MDUFA III decision))"
+                )
+              )
+            )
+        )
+      )
+  }
+
+  # Add metric types
+  result <- result |>
+    dplyr::left_join(
+      y = metric_types(report_mdufa_period = mdufa_period),
+      by = c("performance_metric" = "performance_metric")
+    )
+
+  # Pivot to long format
+  fy_cols <- names(result)[stringr::str_detect(names(result), "^fy_")]
+
+  if (length(fy_cols) > 0) {
+    result <- result |>
+      dplyr::select(
+        dplyr::any_of(c(
+          "source", "page", "table_number", "organization",
+          "program", "table_title", "metric_type", "performance_metric"
+        )),
+        dplyr::starts_with("fy_")
+      ) |>
+      tidyr::pivot_longer(
+        cols = tidyselect::starts_with("fy_"),
+        names_to = "fy",
+        names_prefix = "fy_",
+        values_to = "value"
+      )
+  }
+
+  # Remove performance goal text rows (MDUFA III specific)
+  if (mdufa_period == "MDUFA III") {
+    result <- result |>
+      dplyr::filter(
+        !(is.na(.data$performance_metric) &
+          stringr::str_detect(
+            .data$value,
+            stringr::regex("within|days|SI|substantive", ignore_case = TRUE)
+          ))
+      )
+  }
+
+  # Remove rows without metric types
+  result <- result |>
+    dplyr::filter(!is.na(.data$metric_type))
+
+  # Add report metadata if provided
+  if (!is.null(report_date)) {
+    result$report_date <- report_date
+  }
+  if (!is.null(report_description)) {
+    result$report_description <- report_description
+  }
+  if (!is.null(report_link)) {
+    result$report_link <- report_link
+  }
+  result$report_mdufa_period <- mdufa_period
+
+  # Squish all character fields
+  result <- result |>
+    dplyr::mutate(
+      dplyr::across(
+        .cols = tidyselect::where(is.character),
+        ~ stringr::str_squish(.x)
+      )
+    )
+
+  result
+}
+
+#' Build Submission Type Regex
+#'
+#' Creates a regex pattern for matching submission types based on MDUFA period.
+#'
+#' @param mdufa_period The MDUFA period
+#'
+#' @return A regex pattern
+#' @keywords internal
+build_submission_type_regex <- function(mdufa_period) {
+  if (mdufa_period == "MDUFA III") {
+    types <- c(
+      "510.{0,4}",
+      "De Novo",
+      "PMA Original and Panel-Track Supplements",
+      "PMA",
+      "Pre-Submissions",
+      "Pre-Submission"
+    )
+  } else {
+    types <- c(
+      "510.{0,4}",
+      "De Novo",
+      "PMA Original and Panel\\-Track Supplements",
+      "PMA Originals and Panel Tracked Supplements",
+      "PMA 180\\-Day Supplements",
+      "PMA Real-Time Supplements",
+      "Pre\\-Market Report Submissions",
+      "IDE",
+      "Pre\\-Sub"
+    )
+  }
+
+  types <- unique(types)
+  types <- paste0("\\b", types, "\\b")
+  types <- c(types, "PMAs \\(All Review Tracks\\)")
+  paste(types, collapse = "|") |>
+    stringr::regex()
+}
+
+#' Extract MDUFA V Report Data
+#'
+#' Internal function for extracting MDUFA V reports which use a different
+#' format.
+#'
+#' @inheritParams extract_report
+#' @return A tibble containing the extracted table data
+#' @keywords internal
+extract_report_m5 <- function(pdf_path,
+                              mdufa_period,
+                              report_date = NULL,
+                              report_description = NULL,
+                              report_link = NULL) {
+
+  # Use M5-specific extraction (returns tibble with page_number, raw_text)
+  raw_text_df <- extract_text_m5(pdf_path)
+
+  if (is.null(raw_text_df) || nrow(raw_text_df) == 0) {
+    return(tibble::tibble())
+  }
+
+  # Extract tables from each page - iterate over rows of the tibble
+  report_tables <- vector(mode = "list", length = nrow(raw_text_df))
+  for (i in seq_len(nrow(raw_text_df))) {
+    report_tables[[i]] <- tryCatch(
+      process_page_m5(raw_text_df$raw_text[[i]]),
+      error = function(e) NULL
+    )
+  }
+
+  # Combine all tables
+  combined <- dplyr::bind_rows(report_tables)
+
+  if (nrow(combined) == 0) {
+    return(tibble::tibble())
+  }
+
+  # Clean and structure similar to extract_report
+  submission_type <- build_submission_type_regex(mdufa_period)
+
+  result <- combined |>
+    janitor::remove_empty(which = c("cols")) |>
+    dplyr::mutate(
+      table_number = stringr::str_extract(
+        string = .data$source,
+        pattern = "(?<=^Table\\s)\\d*\\.\\d*\\b"
+      ),
+      organization = stringr::str_extract(
+        string = .data$source,
+        pattern = paste0(
+          "OHT1|OHT2|OHT3|OHT4|OHT5|OHT6|OHT7|OHT8|",
+          "CDRH|CBER"
+        )
+      ),
+      program = stringr::str_extract(
+        string = .data$source,
+        pattern = submission_type
+      ),
+      table_title = stringr::str_extract(
+        string = .data$source,
+        pattern = paste0("(?=", submission_type, ").*$")
+      )
+    )
+
+  # Add metric types
+  result <- result |>
+    dplyr::left_join(
+      y = metric_types(report_mdufa_period = mdufa_period),
+      by = c("performance_metric" = "performance_metric")
+    )
+
+  # Pivot to long format
+  fy_cols <- names(result)[stringr::str_detect(names(result), "^fy_")]
+
+  if (length(fy_cols) > 0) {
+    result <- result |>
+      dplyr::select(
+        dplyr::any_of(c(
+          "source", "page", "table_number", "organization",
+          "program", "table_title", "metric_type", "performance_metric"
+        )),
+        dplyr::starts_with("fy_")
+      ) |>
+      tidyr::pivot_longer(
+        cols = tidyselect::starts_with("fy_"),
+        names_to = "fy",
+        names_prefix = "fy_",
+        values_to = "value"
+      )
+  }
+
+  # Add report metadata
+  if (!is.null(report_date)) {
+    result$report_date <- report_date
+  }
+  if (!is.null(report_description)) {
+    result$report_description <- report_description
+  }
+  if (!is.null(report_link)) {
+    result$report_link <- report_link
+  }
+  result$report_mdufa_period <- mdufa_period
+
+  # Squish all character fields
+  result <- result |>
+    dplyr::mutate(
+      dplyr::across(
+        .cols = tidyselect::where(is.character),
+        ~ stringr::str_squish(.x)
+      )
+    )
+
+  result
+}
