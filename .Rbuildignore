@@ -9,3 +9,10 @@
 scratchpad.R
 ^codecov\.yml$
 .xlsx
+^CLAUDE\.md$
+^\.claude$
+^\.cursorrules$
+^\.cursor$
+^\.aider
+^\.continue$
+^\.codeium$
