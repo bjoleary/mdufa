@@ -54,7 +54,7 @@ mdufa_reports <-
             "^\\w*\\s\\d{1,2},\\s\\d{4}"
           )
       ) %>%
-      lubridate::as_date(format = "%B %d, %Y"),
+        lubridate::as_date(format = "%B %d, %Y"),
     report_mdufa_period =
       stringr::str_extract(
         string = .data$report_description,
@@ -63,7 +63,7 @@ mdufa_reports <-
             "\\bMDUFA\\s[IVXL]{1,}\\b"
           )
       ) %>%
-      tidyr::replace_na("MDUFA II")
+        tidyr::replace_na("MDUFA II")
   )
 
 # Get the most recent report
@@ -79,7 +79,7 @@ mdufa5 <-
     report_description = current_report$report_description,
     report_link =
       current_report$report_link %>%
-      stringr::str_remove("\\?attachment$"),
+        stringr::str_remove("\\?attachment$"),
     report_date = current_report$report_date
   )
 
@@ -139,7 +139,7 @@ documentation_text <-
         width = 76
       ) %>%
       stringr::str_split(pattern = "\\n") %>%
-      unlist() ,
+      unlist(),
     "}",
     "",
     "@source ",

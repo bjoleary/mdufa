@@ -22,7 +22,7 @@ fix_empty_rows <- function(data, name_column) {
     purrr::pmap(
       .f = ~ is.na(.x),
       .id = NULL
-    )  %>%
+    ) %>%
     # Turn the resulting vector into a tibble with one field labeled "empty"
     unlist() %>%
     tibble::enframe(
@@ -44,23 +44,23 @@ fix_empty_rows <- function(data, name_column) {
           !(is.na(.data[[name_column]])) ~ .data[[name_column]],
           # This row has data and both the 2 rows above and the 2 rows below
           # are empty
-            .data$empty == FALSE &
+          .data$empty == FALSE &
             dplyr::lag(.data$empty) == TRUE &
             dplyr::lead(.data$empty) == TRUE ~
-              # Concatenate the names of the previous row and the following row
-              paste(
-                dplyr::lag(.data[[name_column]]),
-                dplyr::lead(.data[[name_column]])
-              ),
-            # Otherwise, if only the previous row is empty
-            .data$empty == FALSE &
-              dplyr::lag(.data$empty) == TRUE ~
-              paste(
-                dplyr::lag(.data[[name_column]]),
-                .data[[name_column]] %>% tidyr::replace_na("")
-              ),
-            # Otherwise, just use what you've go.
-            TRUE ~ .data[[name_column]]
+            # Concatenate the names of the previous row and the following row
+            paste(
+              dplyr::lag(.data[[name_column]]),
+              dplyr::lead(.data[[name_column]])
+            ),
+          # Otherwise, if only the previous row is empty
+          .data$empty == FALSE &
+            dplyr::lag(.data$empty) == TRUE ~
+            paste(
+              dplyr::lag(.data[[name_column]]),
+              .data[[name_column]] %>% tidyr::replace_na("")
+            ),
+          # Otherwise, just use what you've go.
+          TRUE ~ .data[[name_column]]
         )
     ) %>%
     # Remove empty rows

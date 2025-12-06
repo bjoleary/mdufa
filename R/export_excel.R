@@ -430,9 +430,8 @@ export_excel <- function(data, filepath) {
 #'
 build_pivot <-
   function(
-    data,
-    metric_type_filter = c("integer", "double", "percent", "text")
-  ) {
+      data,
+      metric_type_filter = c("integer", "double", "percent", "text")) {
     chk::check_names(
       x = data,
       names =
@@ -443,16 +442,16 @@ build_pivot <-
           "value_formatted"
         )
     )
-  data %>%
-    dplyr::filter(
-      .data$metric_type == metric_type_filter
-    ) %>%
-    dplyr::select(
-      -"value"
-    ) %>%
-    dplyr::distinct() %>%
-    tidyr::pivot_wider(
-      names_from = "fy",
-      values_from = "value_formatted"
-    )
-}
+    data %>%
+      dplyr::filter(
+        .data$metric_type == metric_type_filter
+      ) %>%
+      dplyr::select(
+        -"value"
+      ) %>%
+      dplyr::distinct() %>%
+      tidyr::pivot_wider(
+        names_from = "fy",
+        values_from = "value_formatted"
+      )
+  }

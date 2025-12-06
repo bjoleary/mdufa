@@ -9,7 +9,7 @@ test_that("only valid metric_types are accepted", {
   expect_error(
     object =
       mdufa::quarterly_performance %>%
-      filter_metrics(metric_type = metric_type),
+        filter_metrics(metric_type = metric_type),
     regexp = "^metric_type"
   )
 })
@@ -26,7 +26,7 @@ test_that("filter_metric works", {
   expect_equal(
     object =
       test_cases %>%
-      filter_metrics("percent"),
+        filter_metrics("percent"),
     expected =
       tibble::tribble(
         ~metric_type, ~value,
@@ -36,7 +36,7 @@ test_that("filter_metric works", {
   expect_equal(
     object =
       test_cases %>%
-      filter_metrics("integer"),
+        filter_metrics("integer"),
     expected =
       tibble::tribble(
         ~metric_type, ~value,
@@ -46,7 +46,7 @@ test_that("filter_metric works", {
   expect_equal(
     object =
       test_cases %>%
-      filter_metrics("text"),
+        filter_metrics("text"),
     expected =
       tibble::tribble(
         ~metric_type, ~value,
@@ -56,7 +56,7 @@ test_that("filter_metric works", {
   expect_equal(
     object =
       test_cases %>%
-      filter_metrics("double"),
+        filter_metrics("double"),
     expected =
       tibble::tribble(
         ~metric_type, ~value,

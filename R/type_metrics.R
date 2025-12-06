@@ -18,7 +18,7 @@ type_metrics <- function(data) {
     purrr::map_dfr(
       .f =
         ~ filter_metrics(data, .x) %>%
-        dplyr::mutate(value = as.list(.data$value))
+          dplyr::mutate(value = as.list(.data$value))
     ) %>%
     dplyr::bind_rows(
       .,

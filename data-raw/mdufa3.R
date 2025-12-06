@@ -64,7 +64,7 @@ mdufa_reports <-
             "^\\w*\\s\\d{1,2},\\s\\d{4}"
           )
       ) %>%
-      lubridate::as_date(format = "%B %d, %Y"),
+        lubridate::as_date(format = "%B %d, %Y"),
     report_mdufa_period =
       stringr::str_extract(
         string = .data$report_description,
@@ -73,7 +73,7 @@ mdufa_reports <-
             "\\bMDUFA\\s[IVXL]{1,}\\b"
           )
       ) %>%
-      tidyr::replace_na("MDUFA II")
+        tidyr::replace_na("MDUFA II")
   )
 
 ## Get the most recent report -----
@@ -232,7 +232,7 @@ mdufa3 <-
     performance_metric =
       dplyr::case_when(
         (dplyr::lag(.data$performance_metric) ==
-           "Number with MDUFA III decision" &
+          "Number with MDUFA III decision" &
           is.na(.data$performance_metric) &
           .data$table_number == "6.5") ~
           "Average FDA days to MDUFA III decision",
@@ -291,11 +291,11 @@ mdufa3 <-
   # Remove performance goal text rows.
   dplyr::filter(
     !(is.na(.data$performance_metric) &
-        stringr::str_detect(
-          string = .data$value,
-          pattern =
-            stringr::regex("within|days|SI|substantive", ignore_case = TRUE)
-        )
+      stringr::str_detect(
+        string = .data$value,
+        pattern =
+          stringr::regex("within|days|SI|substantive", ignore_case = TRUE)
+      )
     )
   ) %>%
   # Squish all character fields
@@ -304,7 +304,7 @@ mdufa3 <-
       .cols = tidyselect:::where(is.character),
       ~ stringr::str_squish(.x)
     )
-  )  %>%
+  ) %>%
   # No idea why these aren't matching. Smells like a character encoding issue?
   dplyr::mutate(
     metric_type =
@@ -397,7 +397,7 @@ documentation_text <-
         width = 76
       ) %>%
       stringr::str_split(pattern = "\\n") %>%
-      unlist() ,
+      unlist(),
     "}",
     "",
     "@source ",

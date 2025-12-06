@@ -27,7 +27,7 @@ filter_metrics <- function(data, metric_type) {
         string = x,
         pattern = "[^0-9.]"
       ) %>%
-      as.integer()
+        as.integer()
     } else if (filter_to == "percent") {
       stringr::str_remove(
         string = x,

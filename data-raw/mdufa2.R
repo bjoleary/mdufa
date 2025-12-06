@@ -94,7 +94,7 @@ documentation_text <-
         width = 76
       ) %>%
       stringr::str_split(pattern = "\\n") %>%
-      unlist() ,
+      unlist(),
     "}",
     "",
     "@source ",

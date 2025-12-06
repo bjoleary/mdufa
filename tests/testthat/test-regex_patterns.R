@@ -4,48 +4,62 @@ test_that("fy_start_line_pattern() returns correct regular expression pattern", 
   # Test that the function returns a regular expression pattern that matches a
   # line that includes the string "FY" followed by a space and four digits,
   # repeated five times
-  expect_true(stringr::str_detect("\n FY 2020 FY 2021 FY 2022 FY 2023 FY 2024 \n", # nolint: line_length_linter.
-                                  fy_start_line_pattern()))
+  expect_true(stringr::str_detect(
+    "\n FY 2020 FY 2021 FY 2022 FY 2023 FY 2024 \n", # nolint: line_length_linter.
+    fy_start_line_pattern()
+  ))
 
   # Test that the function returns a regular expression pattern that does not
   # match a line that includes the string "FY" followed by a space and four
   # digits, repeated four times
-  expect_false(stringr::str_detect("\n FY 2020 FY 2021 FY 2022 FY 2023 \n",
-                                   fy_start_line_pattern()))
+  expect_false(stringr::str_detect(
+    "\n FY 2020 FY 2021 FY 2022 FY 2023 \n",
+    fy_start_line_pattern()
+  ))
 
   # Test that the function returns a regular expression pattern that does not
   # match a line that includes the string "FY" followed by a space and four
   # digits, repeated six times
-  expect_false(stringr::str_detect("\n FY 2020 FY 2021 FY 2022 FY 2023 FY 2024 FY 2025 \n", # nolint: line_length_linter.
-                                   fy_start_line_pattern()))
+  expect_false(stringr::str_detect(
+    "\n FY 2020 FY 2021 FY 2022 FY 2023 FY 2024 FY 2025 \n", # nolint: line_length_linter.
+    fy_start_line_pattern()
+  ))
 })
 
 test_that("within_days_line_pattern() returns correct regular expression pattern", { # nolint: line_length_linter.
   # Test that the function returns a regular expression pattern that matches a
   # line that includes white space and five copies of the within days pattern,
   # followed by white space and a new line
-  expect_true(stringr::str_detect("\n |Within 0|Within 0|Within 0|Within 0|Within 0\n", # nolint: line_length_linter.
-                                  within_days_line_pattern()))
+  expect_true(stringr::str_detect(
+    "\n |Within 0|Within 0|Within 0|Within 0|Within 0\n", # nolint: line_length_linter.
+    within_days_line_pattern()
+  ))
 
   # Test that the function returns a regular expression pattern that does not
   # match a line that includes white space and four copies of the within days
   # pattern, followed by white space and a new line
-  expect_false(stringr::str_detect("\n |Within 0|Within 0|Within 0|Within 0\n",
-                                   within_days_line_pattern()))
+  expect_false(stringr::str_detect(
+    "\n |Within 0|Within 0|Within 0|Within 0\n",
+    within_days_line_pattern()
+  ))
 })
 
 test_that("goal_percent_line_pattern() returns correct regular expression pattern", { # nolint: line_length_linter.
   # Test that the function returns a regular expression pattern that matches a
   # line that includes white space and five copies of the goal percent pattern,
   # followed by white space and a new line
-  expect_true(stringr::str_detect("\n |50% Complete|50% Complete|50% Complete|50% Complete|50% Complete\n", # nolint: line_length_linter.
-                                  goal_percent_line_pattern()))
+  expect_true(stringr::str_detect(
+    "\n |50% Complete|50% Complete|50% Complete|50% Complete|50% Complete\n", # nolint: line_length_linter.
+    goal_percent_line_pattern()
+  ))
 
   # Test that the function returns a regular expression pattern that does not
   # match a line that includes white space and four copies of the goal percent
   # pattern, followed by white space and a new line
-  expect_false(stringr::str_detect("\n |50% Complete|50% Complete|50% Complete|50% Complete\n", # nolint: line_length_linter.
-                                   goal_percent_line_pattern()))
+  expect_false(stringr::str_detect(
+    "\n |50% Complete|50% Complete|50% Complete|50% Complete\n", # nolint: line_length_linter.
+    goal_percent_line_pattern()
+  ))
 })
 
 test_that("goal_percent_pattern() returns correct regular expression pattern", {
@@ -73,8 +87,10 @@ test_that("goal_days_line_pattern() returns correct regular expression pattern",
   # Test that the function returns a regular expression pattern that matches a
   # line that includes white space and five copies of the goal days pattern,
   # followed by white space and a new line
-  expect_true(stringr::str_detect("\n |20 Industry Days|21 Industry Days|22 Industry Days|23 Industry Days|24 Industry Days\n", # nolint: line_length_linter.
-                                  goal_days_line_pattern()))
+  expect_true(stringr::str_detect(
+    "\n |20 Industry Days|21 Industry Days|22 Industry Days|23 Industry Days|24 Industry Days\n", # nolint: line_length_linter.
+    goal_days_line_pattern()
+  ))
 })
 
 test_that("si_metric_pattern() matches correct text", {

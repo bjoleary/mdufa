@@ -108,7 +108,6 @@ test_that("inserting delimiters works", {
     insert_delim(multiple_text_elements[[1]]),
     "Column 1|Column 2|Column 3|Column 4"
   )
-
 })
 
 test_that("collapsing line breaks works", {
@@ -203,7 +202,6 @@ test_that("fix_goal_row() returns correct output", {
     fix_goal_row("\n | 2020 Industry Days| 2021 Industry Days| 2022 Industry Days| 2023 Industry Days| 2024 Industry Days\n"), # nolint: line_length_linter.
     "\n | 2020 Industry Days| 2021 Industry Days| 2022 Industry Days| 2023 Industry Days| 2024 Industry Days\n" # nolint: line_length_linter.
   )
-
 })
 
 test_that("fix_si_row() works", {
@@ -220,7 +218,7 @@ test_that("fix_si_row() works", {
         )
       ),
     expected =
-      # This text does not have extraneous line breaks
+    # This text does not have extraneous line breaks
       paste0(
         "\nAverage number of FDA days to Substantive Interaction|",
         "\nMaximum FDA days to Substantive Interaction|",

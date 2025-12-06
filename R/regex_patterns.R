@@ -208,23 +208,23 @@ table_title_text_pattern <- function() {
   )
 }
 
-#'Substantive Interaction Metric Pattern
+#' Substantive Interaction Metric Pattern
 #'
-#'This function generates a regular expression pattern for matching performance
-#'metrics associated with Substantive Interactions in text.
+#' This function generates a regular expression pattern for matching performance
+#' metrics associated with Substantive Interactions in text.
 #'
-#'This function returns a regular expression pattern that matches three
-#'different types of Substantive Interaction metrics: Average Number of
-#'FDA/Industry days to Substantive Interaction, Xth Percentile FDA/Industry days
-#'to Substantive Interaction, and Maximum FDA/Industry days to Substantive
-#'Interaction. The function ignores case and does not match across multiple
-#'lines.
+#' This function returns a regular expression pattern that matches three
+#' different types of Substantive Interaction metrics: Average Number of
+#' FDA/Industry days to Substantive Interaction, Xth Percentile FDA/Industry
+#' days to Substantive Interaction, and Maximum FDA/Industry days to
+#' Substantive Interaction. The function ignores case and does not match
+#' across multiple lines.
 #'
-#'The final word needs to be followed by a | for this expression to match.
+#' The final word needs to be followed by a | for this expression to match.
 #'
-#'@return a regular expression pattern
+#' @return a regular expression pattern
 #'
-#'@export
+#' @export
 #'
 #' @examples
 #' testthat::expect_true(

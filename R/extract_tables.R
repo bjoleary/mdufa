@@ -70,8 +70,8 @@ insert_delim <- function(text_string, whitespace = 2) {
     pattern =
       paste0(
         "\\h{",
-        whitespace,   # Replace this many horizontal white-spaces
-        ",}"          # or more
+        whitespace, # Replace this many horizontal white-spaces
+        ",}" # or more
       ),
     replacement = "|" # With a pipe character
   ) %>%
@@ -110,8 +110,8 @@ collapse_line_breaks <- function(text_string, number_of_breaks = 2) {
     pattern =
       paste0(
         "\\v{",
-        number_of_breaks,   # Replace this many vertical whitespaces
-        ",}"                # or more
+        number_of_breaks, # Replace this many vertical whitespaces
+        ",}" # or more
       ),
     replacement = "\n" # With a single line break
   )
@@ -445,7 +445,7 @@ fix_goal_row <- function(text_string) {
 #'       )
 #'     ),
 #'   expected =
-#'     # This text does not have extraneous line breaks
+#'   # This text does not have extraneous line breaks
 #'     paste0(
 #'       "\nAverage number of FDA days to Substantive Interaction|",
 #'       "\nMaximum FDA days to Substantive Interaction|",

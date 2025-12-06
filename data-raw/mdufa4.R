@@ -62,7 +62,7 @@ mdufa_reports <-
             "^\\w*\\s\\d{1,2},\\s\\d{4}"
           )
       ) %>%
-      lubridate::as_date(format = "%B %d, %Y"),
+        lubridate::as_date(format = "%B %d, %Y"),
     report_mdufa_period =
       stringr::str_extract(
         string = .data$report_description,
@@ -71,7 +71,7 @@ mdufa_reports <-
             "\\bMDUFA\\s[IVXL]{1,}\\b"
           )
       ) %>%
-      tidyr::replace_na("MDUFA II")
+        tidyr::replace_na("MDUFA II")
   )
 
 # Get the most recent report
@@ -145,7 +145,7 @@ mdufa4 <-
       stringr::str_extract(
         string = .data$source,
         pattern = "\\w*(?=\\b\\s(\\-|\\\\032))" # CBER & CDRH use different
-                                                # hyphens...
+        # hyphens...
         # TODO: Rather than handle the non-ascii dash character, I should
         # probably strip it from the string at the outset.
       ),
@@ -255,7 +255,7 @@ documentation_text <-
         width = 76
       ) %>%
       stringr::str_split(pattern = "\\n") %>%
-      unlist() ,
+      unlist(),
     "}",
     "",
     "@source ",

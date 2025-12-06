@@ -39,6 +39,6 @@ extract_text <- function(url_report) {
     warning(
       "The \"pdftools\" package is required for this function. Please ",
       "install it and try again."
-      )
+    )
   }
 }
