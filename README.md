@@ -53,8 +53,11 @@ additional important information.
 ## Installation
 
 <!-- You can install the released version of mdufa from [CRAN](https://CRAN.R-project.org) with: -->
+
 <!-- ``` r -->
+
 <!-- install.packages("mdufa") -->
+
 <!-- ``` -->
 
 Install the development version from
@@ -81,9 +84,9 @@ library(dplyr)
 #> 
 #>     intersect, setdiff, setequal, union
 set.seed(1)
-mdufa::mdufa3 %>% 
-  select(organization, program, metric_type, performance_metric, fy, value) %>% 
-  sample_n(5) %>% 
+mdufa::mdufa3 %>%
+  select(organization, program, metric_type, performance_metric, fy, value) %>%
+  sample_n(5) %>%
   print()
 #> # A tibble: 5 × 6
 #>   organization program metric_type performance_metric                fy    value
@@ -103,33 +106,33 @@ Metrics can be assessed and graphed over time:
 
 ``` r
 library(ggplot2)
-data <- 
-  mdufa::mdufa4 %>% 
+data <-
+  mdufa::mdufa4 %>%
   mdufa::filter_metrics("double") %>%
   filter(
     report_date == max(report_date),
     organization == "CDRH",
     program == "510(k)",
     performance_metric == "Average Number of Total Days to MDUFA IV Decision"
-  ) %>% 
+  ) %>%
   dplyr::mutate(
     fy = as.integer(fy)
   )
-graph_title <- 
+graph_title <-
   paste(data$performance_metric %>% unique(), "by Fiscal Year Received")
 x_label <- "Fiscal Year Received"
 y_label <- data$performance_metric %>% unique()
-graph_caption <- 
+graph_caption <-
   paste0(
     "Source: ",
     data$report_description %>% unique(),
     " available at ",
     data$report_link %>% unique()
   )
-graph <- 
+graph <-
   ggplot(
     data = data,
-    mapping = 
+    mapping =
       aes(
         x = fy,
         y = value
@@ -137,7 +140,7 @@ graph <-
   ) +
   geom_point() +
   theme_classic() +
-  scale_y_continuous(limits = c(0, NA)) + 
+  scale_y_continuous(limits = c(0, NA)) +
   labs(
     title = graph_title,
     y = y_label,
@@ -161,6 +164,27 @@ mdufa::export_excel(
   filepath = "mdufa4_quarterly_performance.xlsx"
 )
 ```
+
+# Extracting data from PDF reports
+
+You can extract data directly from MDUFA PDF reports using
+`extract_report()`:
+
+``` r
+# Extract from a local PDF file
+data <- mdufa::extract_report(
+  pdf_path = "path/to/mdufa-4_2023-11-16.pdf",
+  mdufa_period = "MDUFA IV"
+)
+
+# Or from a URL
+data <- mdufa::extract_report(
+  pdf_path = "https://www.fda.gov/media/...",
+  mdufa_period = "MDUFA V"
+)
+```
+
+This function supports MDUFA III, IV, and V report formats.
 
 # Building the datasets for yourself
 

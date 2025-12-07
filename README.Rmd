@@ -153,7 +153,27 @@ mdufa::export_excel(
 )
 ```
 
+# Extracting data from PDF reports
+
+You can extract data directly from MDUFA PDF reports using `extract_report()`:
+
+```{r eval=FALSE}
+# Extract from a local PDF file
+data <- mdufa::extract_report(
+  pdf_path = "path/to/mdufa-4_2023-11-16.pdf",
+  mdufa_period = "MDUFA IV"
+)
+
+# Or from a URL
+data <- mdufa::extract_report(
+  pdf_path = "https://www.fda.gov/media/...",
+  mdufa_period = "MDUFA V"
+)
+```
+
+This function supports MDUFA III, IV, and V report formats.
+
 # Building the datasets for yourself
 
-Code to build the datasets for yourself can be found in 
+Code to build the datasets for yourself can be found in
 [data-raw/](data-raw/). 
