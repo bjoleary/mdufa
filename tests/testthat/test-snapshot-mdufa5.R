@@ -85,3 +85,35 @@ test_that("MDUFA V 2025-02-27 extraction matches snapshot", {
   # Use testthat's native snapshot testing
   expect_snapshot_value(actual, style = "json2")
 })
+
+test_that("MDUFA V 2023-03-01 extraction matches snapshot", {
+  skip_if_not_installed("pdftools")
+  pdf_path <- find_local_pdf("mdufa-5_2023-03-01")
+  skip_if(is.null(pdf_path), "MDUFA V 2023-03-01 PDF not available locally")
+
+  # Handle 508 coversheet if present
+  pdf_path <- remove_coversheet_if_present(pdf_path)
+
+  # Extract from PDF
+  extracted <- suppressMessages(suppressWarnings(
+    mdufa::extract_report(
+      pdf_path = pdf_path,
+      mdufa_period = "MDUFA V"
+    )
+  ))
+
+  # Ensure page is integer for consistent comparison
+  extracted$page <- as.integer(extracted$page)
+
+  # Select columns for snapshot comparison
+  snapshot_cols <- c(
+    "source", "page", "table_number", "organization", "program",
+    "table_title", "metric_type", "performance_metric", "fy", "value"
+  )
+
+  actual <- extracted[, snapshot_cols] |>
+    dplyr::arrange(table_number, page, performance_metric, fy)
+
+  # Use testthat's native snapshot testing
+  expect_snapshot_value(actual, style = "json2")
+})

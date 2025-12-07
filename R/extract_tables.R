@@ -489,7 +489,8 @@ fix_table_9_2_header <- function(text_string) {
     "\\n[|][^\\n]*Within MDUFA[^\\n]*",            # |Within MDUFA...
     "\\n[|][^\\n]*MDUFA Goal[^\\n]*",              # |MDUFA Goal...
     "\\n[|]Goal [^\\n]*",                          # |Goal 1... or |Goal ¹...
-    "\\nPerformance Metric[|]90%[^\\n]*"           # Performance Metric|90%...
+    "\\nPerformance Metric[|]90%[^\\n]*",         # Performance Metric|90%...
+    "\\nPerformance Metric[|]Within MDUFA[^\\n]*" # Perf Metric|Within...
   )
 
   for (pattern in junk_patterns) {
@@ -497,6 +498,62 @@ fix_table_9_2_header <- function(text_string) {
   }
 
   result
+}
+
+#' Fix Breakthrough/STeP Multi-Line Metric
+#'
+#' In Table 9.1 (Pre-Sub Acceptance Review Decision), the metric "Interactions
+#' for Breakthrough Designated Products & Products Included in STeP" spans
+#' 3 lines in the PDF:
+#'
+#' \preformatted{
+#' Interactions for Breakthrough
+#' Designated Products & Products                    24
+#' Included in STeP
+#' }
+#'
+#' This function merges those lines into a single row.
+#'
+#' @param text_string The string to process.
+#'
+#' @return The string with the Breakthrough metric row properly combined.
+#' @export
+#'
+fix_breakthrough_metric <- function(text_string) {
+  # Pattern to match the 3-line metric name with value on middle line
+  # After delimiter insertion, it looks like:
+  #  Interactions for Breakthrough
+  #  Designated Products & Products|24
+  #  Included in STeP
+  # (lines start with space, not pipe)
+  #
+  # We need to merge into:
+  # Interactions for Breakthrough Designated Products & Products Included in
+  # STeP|24
+
+  pattern <- paste0(
+    "(\\s*Interactions for Breakthrough)", # Line 1 (may have leading space)
+    "\\v",                                  # Line break
+    "\\s*Designated Products & Products",  # Line 2 start
+    "\\|",                                  # Delimiter before value
+    "([^\\v]+)",                            # Value (capture group 2)
+    "\\v",                                  # Line break
+    "\\s*Included in STeP"                  # Line 3
+  )
+
+  if (stringr::str_detect(text_string, stringr::regex(pattern))) {
+    text_string <- stringr::str_replace_all(
+      string = text_string,
+      pattern = stringr::regex(pattern),
+      replacement = paste0(
+        "\nInteractions for Breakthrough ",
+        "Designated Products & Products ",
+        "Included in STeP|\\2"
+      )
+    )
+  }
+
+  text_string
 }
 
 #' Fix MDUFA III SI Goals Row
@@ -693,7 +750,8 @@ get_table <- function(text_string) {
     paste0(text_string_element[[1]], "\n") %>%
     fix_m3_si_goal_row() %>%
     fix_goal_row() %>%
-    fix_si_row()
+    fix_si_row() %>%
+    fix_breakthrough_metric()
 
   # Apply Table 9.2 fix if this is that table (MDUFA V specific)
   if (!is.null(text_string$title) &&

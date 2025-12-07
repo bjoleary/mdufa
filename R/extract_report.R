@@ -459,18 +459,9 @@ extract_report_m5 <- function(pdf_path,
   result <- dplyr::distinct(result)
 
 
-  # Remove garbage rows where value contains header text (orphaned header lines)
-  # These occur when multi-line headers like "90% Within 180 / FDA Days" get
-
-  # split and the continuation line is parsed as data
+  # Remove garbage rows (orphaned header lines with NA performance_metric)
   result <- result |>
-    dplyr::filter(
-      !(is.na(.data$performance_metric) &
-        stringr::str_detect(
-          .data$value,
-          stringr::regex("^\\d*\\s*FDA Days", ignore_case = TRUE)
-        ))
-    )
+    dplyr::filter(!is.na(.data$performance_metric))
 
   # Add report metadata
   if (!is.null(report_date)) {

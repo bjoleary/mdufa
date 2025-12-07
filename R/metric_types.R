@@ -669,7 +669,12 @@ metric_types <- function(report_mdufa_period = "MDUFA IV") {
       "Number Pending MDUFA Action", "integer",
       "Pending MDUFA Action Past Goal", "integer",
       "Number in MDUFA Cohort (up to max 4300)\u2074", "integer",
-      "Current Performance Percent Within Goal", "percent"
+      "Current Performance Percent Within Goal", "percent",
+      # Table 9.1 Pre-Sub Acceptance Review Decision - multi-line metric
+      paste0(
+        "Interactions for Breakthrough Designated Products & Products ",
+        "Included in STeP"
+      ), "integer"
     )
   }
 }
