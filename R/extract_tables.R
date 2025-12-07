@@ -420,6 +420,95 @@ fix_goal_row <- function(text_string) {
   }
 }
 
+#' Fix MDUFA III SI Goals Row
+#'
+#' This function fixes the Substantive Interaction Goals row in MDUFA III
+#' reports, where varying percentages (65%, 75%, 85%, 95%) span multiple lines.
+#'
+#' @param text_string The string to process.
+#'
+#' @return The string with SI Goals row properly combined.
+#' @export
+#'
+fix_m3_si_goal_row <- function(text_string) {
+  # MDUFA III has two different SI Goals patterns:
+  #
+  # Pattern A (page 20 - 5 lines with FY17 split differently):
+  # |65% SI|75% SI|85% SI|95% SI
+  # |95% SI within
+  # |Substantive Interaction (SI) Goals:|within 90|within 90|within 90|within 90
+  # |90 FDA days
+  # |FDA days|FDA days|FDA days|FDA days
+  #
+  # Pattern B (page 27 and others - 3 lines):
+  # |65% SI|75% SI|85% SI|95% SI|95% SI
+  # Substantive Interaction (SI) Goals:|within 90|within 90|within 90|...
+  # |FDA days|FDA days|FDA days|FDA days|FDA days
+
+  # First check if the base pattern exists
+  if (!stringr::str_detect(
+    string = text_string,
+    pattern = stringr::regex(
+      "\\|65% SI\\|75% SI\\|85% SI\\|95% SI",
+      ignore_case = FALSE
+    )
+  )) {
+    return(text_string)
+  }
+
+  # Build the replacement string (same for both patterns)
+  replacement <- paste0(
+    "\nSubstantive Interaction (SI) Goals:|",
+    "65% SI within 90 FDA days|",
+    "75% SI within 90 FDA days|",
+    "85% SI within 90 FDA days|",
+    "95% SI within 90 FDA days|",
+    "95% SI within 90 FDA days"
+  )
+
+  # Try Pattern A first (5-line pattern from page 20)
+  pattern_a <- paste0(
+    "(\\|65% SI\\|75% SI\\|85% SI\\|95% SI)", # Line 1: percentages
+    "\\v",
+    "(\\|95% SI within)", # Line 2: FY17 partial
+    "\\v",
+    "(\\|Substantive Interaction \\(SI\\) Goals:\\|", # Line 3: metric name
+    "within 90\\|within 90\\|within 90\\|within 90)", # and within values
+    "\\v",
+    "(\\|90 FDA days)", # Line 4: FY17 days
+    "\\v",
+    "(\\|FDA days\\|FDA days\\|FDA days\\|FDA days)" # Line 5: FDA days
+  )
+
+  if (stringr::str_detect(text_string, stringr::regex(pattern_a))) {
+    return(stringr::str_replace(
+      string = text_string,
+      pattern = stringr::regex(pattern_a),
+      replacement = replacement
+    ))
+  }
+
+  # Try Pattern B (3-line pattern from page 27, 33, etc.)
+  pattern_b <- paste0(
+    "(\\|65% SI\\|75% SI\\|85% SI\\|95% SI\\|95% SI)", # Line 1: percentages
+    "\\v",
+    "(\\s*Substantive Interaction \\(SI\\) Goals:\\|", # Line 2: metric
+    "within 90\\|within 90\\|within 90\\|within 90\\|within 90)", # within
+    "\\v",
+    "(\\|FDA days\\|FDA days\\|FDA days\\|FDA days\\|FDA days)" # Line 3
+  )
+
+  if (stringr::str_detect(text_string, stringr::regex(pattern_b))) {
+    return(stringr::str_replace(
+      string = text_string,
+      pattern = stringr::regex(pattern_b),
+      replacement = replacement
+    ))
+  }
+
+  text_string
+}
+
 #' Fix Substantive Interaction Rows
 #'
 #' This function fixes performance goals for substantive interactions that break
@@ -523,6 +612,7 @@ get_table <- function(text_string) {
   # recognize it as literal data rather than a file name.
   current_table <-
     paste0(text_string_element[[1]], "\n") %>%
+    fix_m3_si_goal_row() %>%
     fix_goal_row() %>%
     fix_si_row()
   additional_tables <-
