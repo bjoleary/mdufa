@@ -13,8 +13,9 @@ Description: |
     on fda.gov. The package includes functions to scrape those PDFs to extract 
     the data and includes the most recent dataset as of publication. 
 License: MIT + file LICENSE
-Suggests: 
+Suggests:
     lintr,
+    magick,
     pdftools,
     rprojroot,
     testthat (>= 3.0.0)

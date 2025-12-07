@@ -618,7 +618,7 @@ process_page_m5 <- function(page_string, page_number) {
     get_page_number()
 
   if (is.na(page_data$page)) {
-    page_data$page <- page_number
+    page_data$page <- as.character(page_number)
   }
 
   # How many tables?

@@ -31,7 +31,7 @@ testthat::expect_equal(
       )
     ),
   expected =
-    # This text does not have extraneous line breaks
+  # This text does not have extraneous line breaks
     paste0(
       "\nAverage number of FDA days to Substantive Interaction|",
       "\nMaximum FDA days to Substantive Interaction|",

@@ -62,22 +62,10 @@ extract_report <- function(pdf_path,
     )
   ]
 
-  # Remove appendices for MDUFA IV
-  if (mdufa_period == "MDUFA IV") {
-    start_of_appendix <- stringr::str_which(
-      string = raw_text,
-      pattern = stringr::regex("^Appendix A")
-    )
-    if (length(start_of_appendix) > 0) {
-      start_of_cber <- stringr::str_which(
-        string = raw_text,
-        pattern = stringr::regex(".*CBER.*")
-      )
-      if (length(start_of_cber) > 0) {
-        raw_text <- raw_text[-(start_of_appendix[1]:start_of_cber[1])]
-      }
-    }
-  }
+
+  # NOTE: Previous appendix removal for MDUFA IV was discarding CBER tables
+  # (11.x, 12.x). These tables are in the appendix but contain valid data.
+  # The table pattern filter already excludes non-table pages.
 
   # Apply text cleaning for MDUFA III
   if (mdufa_period == "MDUFA III") {
@@ -109,6 +97,15 @@ extract_report <- function(pdf_path,
       stringr::str_replace_all(
         pattern = "(?<=^Table\\s\\d{1,5}\\.\\d{1,5}\\.{0,1})O",
         replacement = " O"
+      ) |>
+      # Fix "MDUFA III Decisions within X FDA Days" rows where the label is on
+      # a separate line from the values (common in CBER tables)
+      stringr::str_replace_all(
+        pattern = stringr::regex(
+          "(MDUFA III Decisions within \\d+ FDA Days)\\s*\\n(\\s+)",
+          ignore_case = FALSE
+        ),
+        replacement = "\\1  "
       )
   }
 
@@ -135,13 +132,16 @@ extract_report <- function(pdf_path,
   result <- combined |>
     # Filter out problematic tables
     dplyr::filter(
-      !stringr::str_detect(
-        string = .data$source,
-        pattern = stringr::fixed("Table 5.3")
-      ),
+      # Table 9.2 has unusual structure that causes parsing issues
       !stringr::str_detect(
         string = .data$source,
         pattern = stringr::fixed("Table 9.2")
+      ),
+      # Filter out Appendix A - Variable Definitions pages
+      # These have source patterns like "Table 1.1 and Tables 1.1.x"
+      !stringr::str_detect(
+        string = .data$source,
+        pattern = "and Tables \\d"
       )
     ) |>
     # Remove empty columns
@@ -171,18 +171,38 @@ extract_report <- function(pdf_path,
     )
 
 
-  # Fix empty metric labels in Tables 6.5 (MDUFA III specific)
-  # The "Average FDA days" row has an empty performance_metric cell
-  # Use lag() to detect when previous row is "Number with MDUFA III decision"
+  # Fix empty metric labels (MDUFA III specific)
+  # Several tables have rows with empty performance_metric cells that follow
+
+  # a known pattern. Use lag() to detect and fill these.
   if (mdufa_period == "MDUFA III") {
+    # Table 6.5: After "Number with MDUFA III decision" comes
+    # "Average FDA days to MDUFA III decision"
     prev_metric <- "Number with MDUFA III decision"
     avg_fda_days <- "Average FDA days to MDUFA III decision"
+
+    # Tables 1.4, 1.5, 2.2, 3.1, 6.4: After "MDUFA III Decisions" comes
+    # "MDUFA III Decisions within X FDA Days" (X varies by table)
+    decisions_within_map <- c(
+      "1.4" = "MDUFA III Decisions within 180 FDA Days",
+      "1.5" = "MDUFA III Decisions within 320 FDA Days",
+      "2.2" = "MDUFA III Decisions within 180 FDA Days",
+      "3.1" = "MDUFA III Decisions within 90 FDA Days",
+      "6.4" = "MDUFA III Decisions within 90 FDA Days"
+    )
+
     result <- result |>
       dplyr::mutate(
         performance_metric = dplyr::case_when(
+          # Table 6.5 fix
           (dplyr::lag(.data$performance_metric) == prev_metric &
             is.na(.data$performance_metric) &
             .data$table_number == "6.5") ~ avg_fda_days,
+          # Tables 1.4, 1.5, 2.2, 3.1, 6.4 fix
+          (dplyr::lag(.data$performance_metric) == "MDUFA III Decisions" &
+            is.na(.data$performance_metric) &
+            .data$table_number %in% names(decisions_within_map)) ~
+            decisions_within_map[.data$table_number],
           TRUE ~ stringr::str_remove(
             .data$performance_metric,
             stringr::regex("^decision\\s")
@@ -243,9 +263,25 @@ extract_report <- function(pdf_path,
       )
   }
 
-  # Remove rows without metric types
+
+  # Remove rows without metric types (MDUFA III only)
+  # MDUFA IV and V have valid data with NA metric_types (CLIA waiver tables)
+  if (mdufa_period == "MDUFA III") {
+    result <- result |>
+      dplyr::filter(!is.na(.data$metric_type))
+  }
+
+  # Remove duplicate rows
+  result <- dplyr::distinct(result)
+
+  # Remove garbage rows where performance_metric, value, AND organization
+  # are all NA (stray headers from definitions pages)
   result <- result |>
-    dplyr::filter(!is.na(.data$metric_type))
+    dplyr::filter(
+      !is.na(.data$performance_metric) |
+        !is.na(.data$value) |
+        !is.na(.data$organization)
+    )
 
   # Add report metadata if provided
   if (!is.null(report_date)) {
@@ -323,7 +359,6 @@ extract_report_m5 <- function(pdf_path,
                               report_date = NULL,
                               report_description = NULL,
                               report_link = NULL) {
-
   # Use M5-specific extraction (returns tibble with page_number, raw_text)
   raw_text_df <- extract_text_m5(pdf_path)
 
@@ -335,7 +370,7 @@ extract_report_m5 <- function(pdf_path,
   report_tables <- vector(mode = "list", length = nrow(raw_text_df))
   for (i in seq_len(nrow(raw_text_df))) {
     report_tables[[i]] <- tryCatch(
-      process_page_m5(raw_text_df$raw_text[[i]]),
+      process_page_m5(raw_text_df$raw_text[[i]], raw_text_df$page_number[[i]]),
       error = function(e) NULL
     )
   }
@@ -400,6 +435,9 @@ extract_report_m5 <- function(pdf_path,
         values_to = "value"
       )
   }
+
+  # Remove duplicate rows
+  result <- dplyr::distinct(result)
 
   # Add report metadata
   if (!is.null(report_date)) {
