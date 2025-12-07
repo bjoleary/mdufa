@@ -56,10 +56,11 @@ get_m5 <- function(report_description, report_link, report_date) {
     dplyr::mutate(
       # Let's detect the table numbers, which are the digits right after the
       # word "Table" at the beginning of the string.
+      # Lookahead handles malformed headers like "Table 9.1DAGRID"
       table_number =
         stringr::str_extract(
           string = .data$source,
-          pattern = "(?<=^Table\\s)\\d*\\.\\d*\\b"
+          pattern = "(?<=^Table\\s)\\d+\\.\\d+(?=\\.|[A-Z]|\\s|-)"
         ),
       # And the organization, which is the word right before the hyphen
       organization =

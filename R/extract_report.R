@@ -148,9 +148,10 @@ extract_report <- function(pdf_path,
     janitor::remove_empty(which = c("cols")) |>
     # Extract table metadata
     dplyr::mutate(
+      # Lookahead handles malformed headers like "Table 9.1DAGRID"
       table_number = stringr::str_extract(
         string = .data$source,
-        pattern = "(?<=^Table\\s)\\d*\\.\\d*\\b"
+        pattern = "(?<=^Table\\s)\\d+\\.\\d+(?=\\.|[A-Z]|\\s|-)"
       ),
       organization = stringr::str_extract(
         string = .data$source,
@@ -388,9 +389,10 @@ extract_report_m5 <- function(pdf_path,
   result <- combined |>
     janitor::remove_empty(which = c("cols")) |>
     dplyr::mutate(
+      # Lookahead handles malformed headers like "Table 9.1DAGRID"
       table_number = stringr::str_extract(
         string = .data$source,
-        pattern = "(?<=^Table\\s)\\d*\\.\\d*\\b"
+        pattern = "(?<=^Table\\s)\\d+\\.\\d+(?=\\.|[A-Z]|\\s|-)"
       ),
       # Extract organization - prefer OHT (more specific) over CDRH/CBER
       # First try OHT, then fall back to CDRH/CBER if no OHT found

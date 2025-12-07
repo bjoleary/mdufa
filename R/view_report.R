@@ -1,3 +1,27 @@
+#' Find PDF Index from Printed Page Number
+#'
+#' PDFs may have printed page numbers (e.g., "Page 210 of 313") that differ
+#' from the PDF index due to cover pages. This function finds the PDF index
+#' that contains the specified printed page number.
+#'
+#' @param pdf_path Path to the PDF file
+#' @param printed_page The printed page number to find
+#'
+#' @return The PDF index (1-based) containing the printed page, or NA if not
+#'
+#' @keywords internal
+find_pdf_index <- function(pdf_path, printed_page) {
+  pages <- pdftools::pdf_text(pdf_path)
+  pattern <- paste0("Page ", printed_page, " of \\d+")
+
+  for (i in seq_along(pages)) {
+    if (grepl(pattern, pages[i])) {
+      return(i)
+    }
+  }
+  NA_integer_
+}
+
 #' View MDUFA Report Page
 #'
 #' Opens a MDUFA report PDF to a specific page. Extracts the requested page
@@ -272,22 +296,34 @@ verify_row <- function(row, pdf_dir = "data-raw/pdf_reports", dpi = 150) {
 
   pdf_path <- pdf_files[1]
 
+  # Find actual PDF index from printed page number
+  # The data stores printed page numbers, but we need PDF index to render
+  pdf_index <- find_pdf_index(pdf_path, page)
+  if (is.na(pdf_index)) {
+    # Fall back to using page directly if no printed page found
+    pdf_index <- page
+  }
+
   # Get word-level data with coordinates
   all_page_data <- pdftools::pdf_data(pdf_path)
-  page_data <- all_page_data[[page]]
+  page_data <- all_page_data[[pdf_index]]
 
   # Get page dimensions
   pdf_info <- pdftools::pdf_pagesize(pdf_path)
-  page_width <- pdf_info$width[page]
-  page_height <- pdf_info$height[page]
+  page_width <- pdf_info$width[pdf_index]
+  page_height <- pdf_info$height[pdf_index]
 
 
   # Find the table title to establish table boundaries
   # Look for "Table X.Y" pattern to find where our table starts
- table_title_rows <- page_data[page_data$text == "Table", ]
+  table_title_rows <- page_data[page_data$text == "Table", ]
+
 
   # Find the specific table number after "Table" word
-  table_num_pattern <- paste0("^", gsub("\\.", "\\\\.", table_num), "$")
+  # Match table number at START of text (e.g., "2.2" in "2.2.DCTD")
+  # but not as suffix (e.g., don't match "12.2" when looking for "2.2")
+  table_num_escaped <- gsub("\\.", "\\\\.", table_num)
+  table_num_pattern <- paste0("^", table_num_escaped, "([^0-9]|$)")
   table_num_matches <- page_data[grepl(table_num_pattern, page_data$text), ]
 
   # Establish table y-boundaries
@@ -321,21 +357,28 @@ verify_row <- function(row, pdf_dir = "data-raw/pdf_reports", dpi = 150) {
 
   # Find the value in the page data within table boundaries
   # Clean value for matching (handle percentages, parentheses, etc.)
+  # Skip matching for NA/empty values - they'll be handled separately
   value_clean <- trimws(value)
-  value_matches <- page_data[
-    page_data$text == value_clean &
-      page_data$y >= table_start_y &
-      page_data$y <= table_end_y,
-  ]
+  value_is_empty <- is.na(value) || value == "" || value == "NA" ||
+    value == "<NA>" || tolower(value) == "na"
 
-  # If exact match fails, try first word of value
-  if (nrow(value_matches) == 0 && !is.na(value)) {
-    first_word <- strsplit(value_clean, "\\s+")[[1]][1]
+  value_matches <- data.frame()
+  if (!value_is_empty) {
     value_matches <- page_data[
-      page_data$text == first_word &
+      page_data$text == value_clean &
         page_data$y >= table_start_y &
         page_data$y <= table_end_y,
     ]
+
+    # If exact match fails, try first word of value
+    if (nrow(value_matches) == 0) {
+      first_word <- strsplit(value_clean, "\\s+")[[1]][1]
+      value_matches <- page_data[
+        page_data$text == first_word &
+          page_data$y >= table_start_y &
+          page_data$y <= table_end_y,
+      ]
+    }
   }
 
   # Find metric words for row identification - look for unique/distinctive words
@@ -352,39 +395,87 @@ verify_row <- function(row, pdf_dir = "data-raw/pdf_reports", dpi = 150) {
     distinctive <- metric_words[
       !metric_words %in% common_words & nchar(metric_words) > 3
     ]
-    word_order <- c(distinctive, metric_words[!metric_words %in% distinctive])
 
-    for (word in word_order) {
+    # Collect y-positions for all distinctive words
+    # Find rows where multiple distinctive words co-occur
+    y_tolerance <- 5  # pixels tolerance for same row
+    word_y_positions <- list()
+
+    for (word in distinctive) {
       matches <- page_data[
         page_data$text == word &
           page_data$y >= table_start_y &
           page_data$y <= table_end_y,
       ]
       if (nrow(matches) > 0) {
-        # If we have FY header, prefer metric matches that are below the header
         if (nrow(fy_header) > 0) {
           header_y <- min(fy_header$y)
           matches <- matches[matches$y > header_y, ]
         }
-        # If only one match, use it; otherwise keep looking for unique match
-        if (nrow(matches) == 1) {
-          metric_y <- matches$y[1]
-          break
-        } else if (nrow(matches) > 0 && is.null(metric_y)) {
-          # Store first match as fallback
-          metric_y <- matches$y[1]
+        if (nrow(matches) > 0) {
+          word_y_positions[[word]] <- matches$y
+        }
+      }
+    }
+
+    # Find y-position where most distinctive words co-occur
+    if (length(word_y_positions) > 0) {
+      all_ys <- unlist(word_y_positions)
+      unique_ys <- unique(all_ys)
+
+      best_y <- NULL
+      best_count <- 0
+
+      for (y in unique_ys) {
+        # Count how many words have a match near this y
+        count <- sum(sapply(word_y_positions, function(ys) {
+          any(abs(ys - y) <= y_tolerance)
+        }))
+        if (count > best_count) {
+          best_count <- count
+          best_y <- y
+        }
+      }
+
+      if (!is.null(best_y)) {
+        metric_y <- best_y
+      }
+    }
+
+    # Fallback: try each word individually
+    if (is.null(metric_y)) {
+      word_order <- c(distinctive, metric_words[!metric_words %in% distinctive])
+      for (word in word_order) {
+        matches <- page_data[
+          page_data$text == word &
+            page_data$y >= table_start_y &
+            page_data$y <= table_end_y,
+        ]
+        if (nrow(matches) > 0) {
+          if (nrow(fy_header) > 0) {
+            header_y <- min(fy_header$y)
+            matches <- matches[matches$y > header_y, ]
+          }
+          if (nrow(matches) == 1) {
+            metric_y <- matches$y[1]
+            break
+          } else if (nrow(matches) > 0 && is.null(metric_y)) {
+            metric_y <- matches$y[1]
+          }
         }
       }
     }
   }
 
   # Render page as image
-  img <- magick::image_read_pdf(pdf_path, pages = page, density = dpi)
+  img <- magick::image_read_pdf(pdf_path, pages = pdf_index, density = dpi)
 
   # Calculate scale factor (pdf coordinates are in points, 72 per inch)
   scale <- dpi / 72
 
   # Draw highlights
+  highlight_drawn <- FALSE
+
   if (nrow(value_matches) > 0) {
     # Use FY column x-position and metric row y-position to find cell
     if (!is.null(metric_y) && nrow(fy_header) > 0) {
@@ -413,6 +504,30 @@ verify_row <- function(row, pdf_dir = "data-raw/pdf_reports", dpi = 150) {
     graphics::rect(x - 2, y - 2, x + w + 2, y + h + 2,
       col = grDevices::adjustcolor("yellow", alpha.f = 0.4),
       border = "red", lwd = 2
+    )
+    grDevices::dev.off()
+    highlight_drawn <- TRUE
+  }
+
+  # For NA/empty values, highlight cell at metric row and FY column
+  if (!highlight_drawn && !is.null(metric_y) && nrow(fy_header) > 0) {
+    fy_x <- fy_header$x[1]
+    fy_w <- fy_header$width[1]
+
+    # Estimate cell dimensions (use typical cell size)
+    cell_w <- max(40, fy_w * 1.5)
+    cell_h <- 15
+
+    x <- fy_x * scale
+    y <- metric_y * scale
+    w <- cell_w * scale
+    h <- cell_h * scale
+
+    # Draw red dashed box for empty cell
+    img <- magick::image_draw(img)
+    graphics::rect(x - 5, y - 5, x + w + 5, y + h + 5,
+      col = grDevices::adjustcolor("orange", alpha.f = 0.3),
+      border = "red", lwd = 2, lty = 2
     )
     grDevices::dev.off()
   }
