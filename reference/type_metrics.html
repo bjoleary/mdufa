@@ -18,13 +18,16 @@ multiple metric types can be accommodated."><!-- mathjax --><script src="https:/
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">mdufa</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav"><li>
   <a href="../reference/index.html">Reference</a>
+</li>
+<li>
+  <a href="../news/index.html">Changelog</a>
 </li>
       </ul><ul class="nav navbar-nav navbar-right"></ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
@@ -67,7 +70,7 @@ multiple metric types can be accommodated.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">type_metrics</span><span class="op">(</span><span class="fu">mdufa</span><span class="fu">::</span><span class="va"><a href="mdufa4.html">mdufa4</a></span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>There was 1 warning in `dplyr::mutate()`.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> In argument: `value = convert_data(x = .data$value, filter_to = filter_to)`.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> Caused by warning in `stringr::str_remove(string = x, pattern = "\\%$") %&gt;% as.numeric()`:</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> Caused by warning in `convert_data()`:</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> NAs introduced by coercion</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 15,550 × 14</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    report_description   report_link report_date report_mdufa_period source page </span>
