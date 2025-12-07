@@ -11,11 +11,11 @@
 extract_text_m5 <- function(url_report) {
   if (requireNamespace("pdftools", quietly = TRUE)) {
     raw_text <-
-      pdftools::pdf_text(url_report) %>%
+      pdftools::pdf_text(url_report) |>
       tibble::enframe(
         name = "page_number",
         value = "raw_text"
-      ) %>%
+      ) |>
       dplyr::filter(
         .data$page_number > 10,
         stringr::str_detect(
@@ -29,15 +29,15 @@ extract_text_m5 <- function(url_report) {
       stringr::str_which(
         string = raw_text$raw_text,
         pattern = stringr::regex("^Appendix A")
-      ) %>%
-      magrittr::extract2(1)
+      ) |>
+      (\(x) x[[1]])()
 
     start_of_cber <-
       stringr::str_which(
         string = raw_text$raw_text,
         pattern = stringr::regex(".*CBER.*")
-      ) %>%
-      magrittr::extract2(1)
+      ) |>
+      (\(x) x[[1]])()
 
     raw_text <- raw_text[-(start_of_appendix:start_of_cber), ]
   } else {

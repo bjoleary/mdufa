@@ -38,7 +38,7 @@ metric_types <- function(report_mdufa_period = "MDUFA IV") {
       "80th Percentile Industry Days to MDUFA IV Decision", "integer",
       "80th Percentile Total Days to MDUFA IV Decision", "integer",
       "Average Days to Scheduling for Meetings Scheduled After Day 30",
-        "double",
+      "double",
       "Average FDA Days to MDUFA IV Decision", "double",
       "Average FDA Days to Written Feedback", "double",
       "Average Industry Days to MDUFA IV Decision", "double",
@@ -117,9 +117,9 @@ metric_types <- function(report_mdufa_period = "MDUFA IV") {
       "Number With MDUFA IV Decision", "integer",
       "Number With MDUFA IV Decisions", "integer",
       "Number Without a RTA Review and <= 15 Days Since Date Received",
-        "integer",
+      "integer",
       "Number Without a RTA Review and > 15 Days Since Date Received",
-        "integer",
+      "integer",
       "Number Without a RTA Review and > 15 Days Since Date Received**",
       "integer",
       "Performance Metric", "text",
@@ -259,9 +259,9 @@ metric_types <- function(report_mdufa_period = "MDUFA IV") {
       "Closed before RTA action", "integer",
       "Number with accepted RTA review", "integer",
       "Number without a RTA Review and > 15 Days since Date Received",
-        "integer",
+      "integer",
       "Number without a RTA Review and <= 15 Days since Date Received",
-        "integer",
+      "integer",
       "Rate of submissions not accepted for filing review", "percent",
       "Rate of submissions Not Filed", "percent",
       "Closed without SI", "integer",
@@ -357,7 +357,7 @@ metric_types <- function(report_mdufa_period = "MDUFA IV") {
       "Number with MDUFA III Decision", "integer",
       "Percent of cohort closed", "percent",
       "Number with MDUFA III decision after trimming the upper and lower 2%",
-        "integer",
+      "integer",
       "Average Total Time to MDUFA III decision", "double",
       "Number of De Novo Requests Received", "integer",
       "Number of De Novo Requests with Decision", "integer",
@@ -660,7 +660,21 @@ metric_types <- function(report_mdufa_period = "MDUFA IV") {
       "Rate of Submissions Not Accepted for Review on First RTA Cycle", "percent", # nolint: line_length_linter.
       "Rate of Submissions Not Accepted for Review or Failed TS on First Cycle", "percent", # nolint: line_length_linter.
       "Supplements Pending MDUFA Decision", "integer",
-      "Supplements Pending MDUFA Decision Past Goal", "integer"
+      "Supplements Pending MDUFA Decision Past Goal", "integer",
+      # Table 9.2 Pre-Sub Performance Goals metrics
+      "Number Accepted / Eligible for MDUFA Action", "integer",
+      "Number with Non-MDUFA Action \u00B3", "integer",
+      "Number with MDUFA Action", "integer",
+      "Written Feedback Provided Within Goal", "integer",
+      "Number Pending MDUFA Action", "integer",
+      "Pending MDUFA Action Past Goal", "integer",
+      "Number in MDUFA Cohort (up to max 4300)\u2074", "integer",
+      "Current Performance Percent Within Goal", "percent",
+      # Table 9.1 Pre-Sub Acceptance Review Decision - multi-line metric
+      paste0(
+        "Interactions for Breakthrough Designated Products & Products ",
+        "Included in STeP"
+      ), "integer"
     )
   }
 }

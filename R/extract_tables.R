@@ -70,16 +70,15 @@ insert_delim <- function(text_string, whitespace = 2) {
     pattern =
       paste0(
         "\\h{",
-        whitespace,   # Replace this many horizontal white-spaces
-        ",}"          # or more
+        whitespace, # Replace this many horizontal white-spaces
+        ",}" # or more
       ),
     replacement = "|" # With a pipe character
-  ) %>%
+  ) |>
     # If you have FY XXXX followed by white-space followed by another FY XXXX,
     # that white-space should almost certainly be replaced with a pipe. Let's
     # use some lookaheads and lookbehinds to catch that.
     stringr::str_replace_all(
-      string = .,
       pattern =
         stringr::regex(
           "(?<=\\bFY\\s\\d{4})\\s*(?=FY\\s\\d{4})"
@@ -110,8 +109,8 @@ collapse_line_breaks <- function(text_string, number_of_breaks = 2) {
     pattern =
       paste0(
         "\\v{",
-        number_of_breaks,   # Replace this many vertical whitespaces
-        ",}"                # or more
+        number_of_breaks, # Replace this many vertical whitespaces
+        ",}" # or more
       ),
     replacement = "\n" # With a single line break
   )
@@ -132,7 +131,7 @@ collapse_line_breaks <- function(text_string, number_of_breaks = 2) {
 #' @export
 #'
 get_page_number <- function(text_string) {
-  text_string_element <- text_string[[1]] %>% collapse_line_breaks()
+  text_string_element <- text_string[[1]] |> collapse_line_breaks()
   page <-
     stringr::str_extract(
       string = text_string_element,
@@ -168,12 +167,12 @@ get_page_number <- function(text_string) {
 #' @export
 #'
 get_table_title <- function(text_string) {
-  text_string_element <- text_string[[1]] %>% collapse_line_breaks()
+  text_string_element <- text_string[[1]] |> collapse_line_breaks()
   title <-
     stringr::str_extract(
       string = text_string_element,
       pattern = table_title_text_pattern()
-    ) %>%
+    ) |>
     stringr::str_squish()
   trimmed_string <-
     stringr::str_remove(
@@ -202,16 +201,16 @@ get_table_title <- function(text_string) {
 #' @export
 #'
 brute_force_row_fix <- function(text_string) {
-  text_string_element <- text_string[[1]] %>% collapse_line_breaks()
+  text_string_element <- text_string[[1]] |> collapse_line_breaks()
   patterns <-
     c(
       # 1
       stringr::fixed(
         pattern =
           paste0(
-            rep("90% Within 320", 5) %>% paste(collapse = " "),
+            rep("90% Within 320", 5) |> paste(collapse = " "),
             "\n|",
-            rep("FDA Days", 5) %>% paste(collapse = "|")
+            rep("FDA Days", 5) |> paste(collapse = "|")
           )
       ),
       # 2
@@ -221,7 +220,7 @@ brute_force_row_fix <- function(text_string) {
             "95% SI Within 95% SI Within 95% SI Within 95% SI Within",
             "|95% SI Within",
             "\n|",
-            rep("90 FDA Days", 5) %>% paste(collapse = "|")
+            rep("90 FDA Days", 5) |> paste(collapse = "|")
           )
       )
     )
@@ -229,9 +228,9 @@ brute_force_row_fix <- function(text_string) {
   replacements <-
     c(
       # 1
-      rep("90% Within 320 FDA Days", 5) %>% paste(collapse = "|"),
+      rep("90% Within 320 FDA Days", 5) |> paste(collapse = "|"),
       # 2
-      rep("95% SI Within 90 FDA Days", 5) %>% paste(collapse = "|")
+      rep("95% SI Within 90 FDA Days", 5) |> paste(collapse = "|")
     )
   trimmed_string <- text_string_element
   for (i in seq_along(patterns)) {
@@ -308,7 +307,7 @@ fix_goal_row <- function(text_string) {
           string = text_string,
           pattern = goal_days_line_pattern()
         )
-      ) %>%
+      ) |>
       collapse_line_breaks()
     # First, let's get the name of the goal
     goal_name <-
@@ -329,24 +328,24 @@ fix_goal_row <- function(text_string) {
         string = string_to_replace,
         pattern = goal_percent_pattern(),
         simplify = TRUE
-      ) %>%
+      ) |>
       stringr::str_squish()
     goal_within_cols <-
       stringr::str_extract_all(
         string = string_to_replace,
         pattern = within_days_pattern(),
         simplify = TRUE
-      ) %>%
+      ) |>
       stringr::str_squish()
     goal_days_cols <-
       stringr::str_extract_all(
         string = string_to_replace,
         pattern = goal_days_pattern(),
         simplify = TRUE
-      ) %>%
+      ) |>
       stringr::str_squish()
     goal_columns <-
-      paste(goal_percent_cols, goal_within_cols, goal_days_cols) %>%
+      paste(goal_percent_cols, goal_within_cols, goal_days_cols) |>
       paste(collapse = "|")
     replacement_string <-
       paste0(
@@ -372,7 +371,7 @@ fix_goal_row <- function(text_string) {
           string = text_string,
           pattern = goal_days_line_pattern()
         )
-      ) %>%
+      ) |>
       collapse_line_breaks()
     # First, let's get the name of the goal
     goal_name <-
@@ -393,17 +392,17 @@ fix_goal_row <- function(text_string) {
         string = string_to_replace,
         pattern = goal_percent_pattern(),
         simplify = TRUE
-      ) %>%
+      ) |>
       stringr::str_squish()
     goal_days_cols <-
       stringr::str_extract_all(
         string = string_to_replace,
         pattern = goal_days_pattern(),
         simplify = TRUE
-      ) %>%
+      ) |>
       stringr::str_squish()
     goal_columns <-
-      paste(goal_percent_cols, goal_days_cols) %>%
+      paste(goal_percent_cols, goal_days_cols) |>
       paste(collapse = "|")
     replacement_string <-
       paste0(
@@ -418,6 +417,231 @@ fix_goal_row <- function(text_string) {
       replacement = replacement_string
     )
   }
+}
+
+#' Fix Table 9.2 Header (MDUFA V)
+#'
+#' Table 9.2 in MDUFA V reports has a complex multi-line header with goal
+#' descriptions that confuses the parser. This function removes those extra
+#' header lines while preserving the FY columns and data rows.
+#'
+#' There are two variants of this table:
+#'
+#' CDRH variant (all FY columns on one line):
+#' \preformatted{
+#' |MDUFA V Goal (# of Submissions Received During FY with Written
+#' |Feedback Provided by Day 70 or 5 Days Prior to Meeting)
+#' Performance Metric|FY 2023|FY 2024|FY 2025|FY 2026|FY 2027
+#' |90% / 75%|90% / 80%|90% Within|90% Within|90% Within
+#' |Within MDUFA|Within MDUFA|MDUFA Goal|MDUFA Goal|MDUFA Goal
+#' |Goal 1|Goal 2
+#' }
+#'
+#' CBER variant (FY columns split across lines):
+#' \preformatted{
+#' |MDUFA V Goal (# of Submissions Received During FY with Written
+#' |Feedback Provided by Day 70 or 5 Days Prior to Meeting)
+#' Performance Metric|FY 2023|FY 2024
+#' |FY 2025|FY 2026|FY 2027
+#' |90% / 75%|90% / 80%
+#' Performance Metric|90% Within|90% Within|90% Within
+#' |Within MDUFA Within MDUFA
+#' |MDUFA Goal|MDUFA Goal|MDUFA Goal
+#' |Goal 1|Goal 2
+#' }
+#'
+#' This function is called from get_table() when the table title indicates
+#' Table 9.2. The text_string at that point does NOT include the title line.
+#'
+#' @param text_string The table content string (without title) to process.
+#'
+#' @return The string with Table 9.2 header cleaned up.
+#' @export
+#'
+fix_table_9_2_header <- function(text_string) {
+  # Step 1: Remove the "MDUFA V Goal..." description lines
+  result <- stringr::str_replace(
+    text_string,
+    stringr::regex(
+      "[|]MDUFA V Goal[^\\n]*\\n[|]Feedback Provided[^\\n]*\\n"
+    ),
+    ""
+  )
+
+  # Step 2: Handle CBER variant where FY columns are split across two lines
+  # Merge "Performance Metric|FY 2023|FY 2024\n|FY 2025|FY 2026|FY 2027"
+  # into "Performance Metric|FY 2023|FY 2024|FY 2025|FY 2026|FY 2027"
+  result <- stringr::str_replace(
+    result,
+    stringr::regex(
+      "(Performance Metric[|]FY [0-9]{4}[|]FY [0-9]{4})\\n[|](FY [0-9]{4})"
+    ),
+    "\\1|\\2"
+  )
+
+  # Step 3: Remove all remaining junk header lines
+  # These start with | and contain goal-related text or "Performance Metric"
+  # Pattern: lines starting with | containing 90%, Within, Goal, or
+  # lines starting with "Performance Metric|90%"
+  junk_patterns <- c(
+    "\\n[|]90%[^\\n]*", # |90%...
+    "\\n[|][^\\n]*Within MDUFA[^\\n]*", # |Within MDUFA...
+    "\\n[|][^\\n]*MDUFA Goal[^\\n]*", # |MDUFA Goal...
+    "\\n[|]Goal [^\\n]*", # |Goal 1... or |Goal ¹...
+    "\\nPerformance Metric[|]90%[^\\n]*", # Performance Metric|90%...
+    "\\nPerformance Metric[|]Within MDUFA[^\\n]*" # Perf Metric|Within...
+  )
+
+  for (pattern in junk_patterns) {
+    result <- stringr::str_replace_all(result, stringr::regex(pattern), "")
+  }
+
+  result
+}
+
+#' Fix Breakthrough/STeP Multi-Line Metric
+#'
+#' In Table 9.1 (Pre-Sub Acceptance Review Decision), the metric "Interactions
+#' for Breakthrough Designated Products & Products Included in STeP" spans
+#' 3 lines in the PDF:
+#'
+#' \preformatted{
+#' Interactions for Breakthrough
+#' Designated Products & Products                    24
+#' Included in STeP
+#' }
+#'
+#' This function merges those lines into a single row.
+#'
+#' @param text_string The string to process.
+#'
+#' @return The string with the Breakthrough metric row properly combined.
+#' @export
+#'
+fix_breakthrough_metric <- function(text_string) {
+  # Pattern to match the 3-line metric name with value on middle line
+  # After delimiter insertion, it looks like:
+  #  Interactions for Breakthrough
+  #  Designated Products & Products|24
+  #  Included in STeP
+  # (lines start with space, not pipe)
+  #
+  # We need to merge into:
+  # Interactions for Breakthrough Designated Products & Products Included in
+  # STeP|24
+
+  pattern <- paste0(
+    "(\\s*Interactions for Breakthrough)", # Line 1 (may have leading space)
+    "\\v", # Line break
+    "\\s*Designated Products & Products", # Line 2 start
+    "\\|", # Delimiter before value
+    "([^\\v]+)", # Value (capture group 2)
+    "\\v", # Line break
+    "\\s*Included in STeP" # Line 3
+  )
+
+  if (stringr::str_detect(text_string, stringr::regex(pattern))) {
+    text_string <- stringr::str_replace_all(
+      string = text_string,
+      pattern = stringr::regex(pattern),
+      replacement = paste0(
+        "\nInteractions for Breakthrough ",
+        "Designated Products & Products ",
+        "Included in STeP|\\2"
+      )
+    )
+  }
+
+  text_string
+}
+
+#' Fix MDUFA III SI Goals Row
+#'
+#' This function fixes the Substantive Interaction Goals row in MDUFA III
+#' reports, where varying percentages (65%, 75%, 85%, 95%) span multiple lines.
+#'
+#' @param text_string The string to process.
+#'
+#' @return The string with SI Goals row properly combined.
+#' @export
+#'
+fix_m3_si_goal_row <- function(text_string) {
+  # MDUFA III has two different SI Goals patterns:
+  #
+  # Pattern A (page 20 - 5 lines with FY17 split differently):
+  # |65% SI|75% SI|85% SI|95% SI
+  # |95% SI within
+  # |Substantive Interaction (SI) Goals:|within 90|within 90|within 90|within 90
+  # |90 FDA days
+  # |FDA days|FDA days|FDA days|FDA days
+  #
+  # Pattern B (page 27 and others - 3 lines):
+  # |65% SI|75% SI|85% SI|95% SI|95% SI
+  # Substantive Interaction (SI) Goals:|within 90|within 90|within 90|...
+  # |FDA days|FDA days|FDA days|FDA days|FDA days
+
+  # First check if the base pattern exists
+  if (!stringr::str_detect(
+    string = text_string,
+    pattern = stringr::regex(
+      "\\|65% SI\\|75% SI\\|85% SI\\|95% SI",
+      ignore_case = FALSE
+    )
+  )) {
+    return(text_string)
+  }
+
+  # Build the replacement string (same for both patterns)
+  replacement <- paste0(
+    "\nSubstantive Interaction (SI) Goals:|",
+    "65% SI within 90 FDA days|",
+    "75% SI within 90 FDA days|",
+    "85% SI within 90 FDA days|",
+    "95% SI within 90 FDA days|",
+    "95% SI within 90 FDA days"
+  )
+
+  # Try Pattern A first (5-line pattern from page 20)
+  pattern_a <- paste0(
+    "(\\|65% SI\\|75% SI\\|85% SI\\|95% SI)", # Line 1: percentages
+    "\\v",
+    "(\\|95% SI within)", # Line 2: FY17 partial
+    "\\v",
+    "(\\|Substantive Interaction \\(SI\\) Goals:\\|", # Line 3: metric name
+    "within 90\\|within 90\\|within 90\\|within 90)", # and within values
+    "\\v",
+    "(\\|90 FDA days)", # Line 4: FY17 days
+    "\\v",
+    "(\\|FDA days\\|FDA days\\|FDA days\\|FDA days)" # Line 5: FDA days
+  )
+
+  if (stringr::str_detect(text_string, stringr::regex(pattern_a))) {
+    return(stringr::str_replace(
+      string = text_string,
+      pattern = stringr::regex(pattern_a),
+      replacement = replacement
+    ))
+  }
+
+  # Try Pattern B (3-line pattern from page 27, 33, etc.)
+  pattern_b <- paste0(
+    "(\\|65% SI\\|75% SI\\|85% SI\\|95% SI\\|95% SI)", # Line 1: percentages
+    "\\v",
+    "(\\s*Substantive Interaction \\(SI\\) Goals:\\|", # Line 2: metric
+    "within 90\\|within 90\\|within 90\\|within 90\\|within 90)", # within
+    "\\v",
+    "(\\|FDA days\\|FDA days\\|FDA days\\|FDA days\\|FDA days)" # Line 3
+  )
+
+  if (stringr::str_detect(text_string, stringr::regex(pattern_b))) {
+    return(stringr::str_replace(
+      string = text_string,
+      pattern = stringr::regex(pattern_b),
+      replacement = replacement
+    ))
+  }
+
+  text_string
 }
 
 #' Fix Substantive Interaction Rows
@@ -445,7 +669,7 @@ fix_goal_row <- function(text_string) {
 #'       )
 #'     ),
 #'   expected =
-#'     # This text does not have extraneous line breaks
+#'   # This text does not have extraneous line breaks
 #'     paste0(
 #'       "\nAverage number of FDA days to Substantive Interaction|",
 #'       "\nMaximum FDA days to Substantive Interaction|",
@@ -465,17 +689,17 @@ fix_si_row <- function(text_string) {
       stringr::str_extract_all(
         string = text_string,
         pattern = si_metric_pattern()
-      ) %>%
+      ) |>
       unlist()
     for (i in seq_along(to_replace)) {
       replacement_string <-
-        to_replace[[i]] %>%
-        collapse_line_breaks() %>%
+        to_replace[[i]] |>
+        collapse_line_breaks() |>
         # Replace all line breaks with spaces
         stringr::str_replace_all(
           pattern = stringr::regex("\\v{1,}"),
           replacement = " "
-        ) %>%
+        ) |>
         # Replace leading space with newline
         stringr::str_replace(
           pattern = stringr::regex("^\\s{1,}"),
@@ -504,7 +728,7 @@ fix_si_row <- function(text_string) {
 #' @export
 #'
 get_table <- function(text_string) {
-  text_string_element <- text_string[[1]] %>% collapse_line_breaks()
+  text_string_element <- text_string[[1]] |> collapse_line_breaks()
   additional_table_titles <-
     stringr::str_extract_all(
       string = text_string_element,
@@ -512,9 +736,8 @@ get_table <- function(text_string) {
       simplify = TRUE
     )
   text_string_element <-
-    text_string_element %>%
+    text_string_element |>
     stringr::str_split(
-      string = .,
       pattern = table_title_text_pattern(),
       simplify = TRUE
     )
@@ -522,11 +745,20 @@ get_table <- function(text_string) {
   # from the last section, and append a newline so the readr package will
   # recognize it as literal data rather than a file name.
   current_table <-
-    paste0(text_string_element[[1]], "\n") %>%
-    fix_goal_row() %>%
-    fix_si_row()
+    paste0(text_string_element[[1]], "\n") |>
+    fix_m3_si_goal_row() |>
+    fix_goal_row() |>
+    fix_si_row() |>
+    fix_breakthrough_metric()
+
+  # Apply Table 9.2 fix if this is that table (MDUFA V specific)
+  if (!is.null(text_string$title) &&
+    stringr::str_detect(text_string$title, "Table 9[.]2")) {
+    current_table <- fix_table_9_2_header(current_table)
+  }
+
   additional_tables <-
-    paste0(additional_table_titles, text_string_element[-1]) %>%
+    paste0(additional_table_titles, text_string_element[-1]) |>
     paste0(collapse = "\n")
 
   result_table <-
@@ -536,12 +768,12 @@ get_table <- function(text_string) {
       col_types = readr::cols(.default = readr::col_character()),
       col_names = TRUE,
       delim = "|"
-    ) %>%
-    make_clean_tibble() %>%
+    ) |>
+    make_clean_tibble() |>
     dplyr::mutate(
       source = text_string$title,
       page = text_string$page
-    ) %>%
+    ) |>
     dplyr::select(
       "source",
       "page",
@@ -566,13 +798,13 @@ get_table <- function(text_string) {
 #'
 process_page <- function(page_string) {
   page_data <-
-    page_string %>%
-    remove_unnecessary_text() %>%
-    collapse_line_breaks() %>%
-    add_missing_table_headers() %>%
-    insert_delim() %>%
+    page_string |>
+    remove_unnecessary_text() |>
+    collapse_line_breaks() |>
+    add_missing_table_headers() |>
+    insert_delim() |>
     # TODO: Why did I comment this? Is this function used at all?
-    # brute_force_row_fix() %>%
+    # brute_force_row_fix() |>
     get_page_number()
 
   # How many tables?
@@ -581,15 +813,15 @@ process_page <- function(page_string) {
       string = page_data$trimmed_string,
       pattern = table_title_text_pattern(),
       simplify = TRUE
-    ) %>%
+    ) |>
     seq_along()
 
   output <- vector(mode = "list", length = max(table_count))
 
   for (i in table_count) {
     page_data <-
-      page_data %>%
-      get_table_title() %>%
+      page_data |>
+      get_table_title() |>
       get_table()
     output[[i]] <- page_data$table
   }
@@ -608,17 +840,17 @@ process_page <- function(page_string) {
 #'
 process_page_m5 <- function(page_string, page_number) {
   page_data <-
-    page_string %>%
-    remove_unnecessary_text() %>%
-    collapse_line_breaks() %>%
-    add_missing_table_headers() %>%
-    insert_delim() %>%
+    page_string |>
+    remove_unnecessary_text() |>
+    collapse_line_breaks() |>
+    add_missing_table_headers() |>
+    insert_delim() |>
     # TODO: Why did I comment this? Is this function used at all?
-    # brute_force_row_fix() %>%
+    # brute_force_row_fix() |>
     get_page_number()
 
   if (is.na(page_data$page)) {
-    page_data$page <- page_number
+    page_data$page <- as.character(page_number)
   }
 
   # How many tables?
@@ -627,15 +859,15 @@ process_page_m5 <- function(page_string, page_number) {
       string = page_data$trimmed_string,
       pattern = table_title_text_pattern(),
       simplify = TRUE
-    ) %>%
+    ) |>
     seq_along()
 
   output <- vector(mode = "list", length = max(table_count))
 
   for (i in table_count) {
     page_data <-
-      page_data %>%
-      get_table_title() %>%
+      page_data |>
+      get_table_title() |>
       get_table()
     output[[i]] <- page_data$table
   }

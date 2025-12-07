@@ -37,8 +37,8 @@ get_m5 <- function(report_description, report_link, report_date) {
   }
 
   mdufa5 <- # nolint: object_usage_linter.
-    report_tables %>%
-    dplyr::bind_rows() %>%
+    report_tables |>
+    dplyr::bind_rows() |>
     # Table 9.2, which provides center-level metrics on the number of q-subs
     # with written feedback, is a hot mess, and, frankly, not that interesting.
     # Rather than fix it's crazy headers, let's just ignore it. Pull requests
@@ -49,17 +49,18 @@ get_m5 <- function(report_description, report_link, report_date) {
         pattern = stringr::fixed("Table 9.2"),
         negate = TRUE
       )
-    ) %>%
+    ) |>
     # We can remove the empty columns that resulted from Table 9.2
-    janitor::remove_empty(which = c("cols")) %>%
+    janitor::remove_empty(which = c("cols")) |>
     # Let's detect the table numbers
     dplyr::mutate(
       # Let's detect the table numbers, which are the digits right after the
       # word "Table" at the beginning of the string.
+      # Lookahead handles malformed headers like "Table 9.1DAGRID"
       table_number =
         stringr::str_extract(
           string = .data$source,
-          pattern = "(?<=^Table\\s)\\d*\\.\\d*\\b"
+          pattern = "(?<=^Table\\s)\\d+\\.\\d+(?=\\.|[A-Z]|\\s|-)"
         ),
       # And the organization, which is the word right before the hyphen
       organization =
@@ -81,12 +82,12 @@ get_m5 <- function(report_description, report_link, report_date) {
           string = .data$source,
           pattern = paste0("(?=", submission_types, ").*$")
         )
-    ) %>%
-    dplyr::filter(.data$performance_metric != "") %>%
+    ) |>
+    dplyr::filter(.data$performance_metric != "") |>
     dplyr::left_join(
       y = metric_types("MDUFA V"),
       by = c("performance_metric" = "performance_metric")
-    ) %>%
+    ) |>
     dplyr::select(
       "source",
       "page",
@@ -102,19 +103,19 @@ get_m5 <- function(report_description, report_link, report_date) {
       "fy_2026",
       "fy_2027",
       dplyr::everything()
-    ) %>%
+    ) |>
     # remove all NA
-    dplyr::select(tidyselect::where(~ !all(is.na(.)))) %>%
+    dplyr::select(tidyselect::where(~ !all(is.na(.)))) |>
     tidyr::pivot_longer(
       cols = tidyselect::contains("fy"),
       names_to = "fy",
       names_prefix = "fy\\_",
       values_to = "value"
-    ) %>%
+    ) |>
     dplyr::bind_cols(
       current_report,
       .
-    ) %>%
+    ) |>
     # Squish all character fields
     dplyr::mutate(
       dplyr::across(

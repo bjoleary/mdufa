@@ -29,9 +29,9 @@ test_that("remove uneccessary text works", {
         "8.1 include only De Novos received on or after November 8, 2019. All ",
         "other tables include De Novos received on or after October 1, 2017."
       )
-    ) %>%
+    ) |>
     # Add trailing vertical space
-    paste0(., "\v")
+    (\(x) paste0(x, "\v"))()
   expect_equal(
     remove_unnecessary_text(test_cases_remove_all),
     rep("", max(seq_along(test_cases_remove_all)))
@@ -43,9 +43,9 @@ test_that("remove uneccessary text works", {
         "ENT and Dental Device"
       ),
       "Table 2.1 CDRH - PMA 180-Day Supplements Substantive Interaction Goal"
-    ) %>%
+    ) |>
     # Add trailing vertical space
-    paste0(., "\v")
+    (\(x) paste0(x, "\v"))()
   expect_equal(
     remove_unnecessary_text(test_cases_do_not_remove),
     test_cases_do_not_remove
@@ -108,7 +108,6 @@ test_that("inserting delimiters works", {
     insert_delim(multiple_text_elements[[1]]),
     "Column 1|Column 2|Column 3|Column 4"
   )
-
 })
 
 test_that("collapsing line breaks works", {
@@ -149,7 +148,7 @@ test_that("extracting page numbers works", {
     this_result <- get_page_number(text_object)
     expect_equal(
       this_result$page,
-      pages[[i]] %>% as.character()
+      pages[[i]] |> as.character()
     )
     expect_equal(
       this_result$trimmed_string,
@@ -203,7 +202,6 @@ test_that("fix_goal_row() returns correct output", {
     fix_goal_row("\n | 2020 Industry Days| 2021 Industry Days| 2022 Industry Days| 2023 Industry Days| 2024 Industry Days\n"), # nolint: line_length_linter.
     "\n | 2020 Industry Days| 2021 Industry Days| 2022 Industry Days| 2023 Industry Days| 2024 Industry Days\n" # nolint: line_length_linter.
   )
-
 })
 
 test_that("fix_si_row() works", {
@@ -220,7 +218,7 @@ test_that("fix_si_row() works", {
         )
       ),
     expected =
-      # This text does not have extraneous line breaks
+    # This text does not have extraneous line breaks
       paste0(
         "\nAverage number of FDA days to Substantive Interaction|",
         "\nMaximum FDA days to Substantive Interaction|",

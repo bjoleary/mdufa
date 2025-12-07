@@ -25,8 +25,8 @@ test_that("export_excel errors work", {
     object =
       export_excel(
         data =
-          mdufa::mdufa4 %>%
-          dplyr::select(-"value"),
+          mdufa::mdufa4 |>
+            dplyr::select(-"value"),
         filepath = tempfile(fileext = ".xlsx")
       )
   )

@@ -16,10 +16,10 @@ metrics associated with Substantive Interactions in text.
 \details{
 This function returns a regular expression pattern that matches three
 different types of Substantive Interaction metrics: Average Number of
-FDA/Industry days to Substantive Interaction, Xth Percentile FDA/Industry days
-to Substantive Interaction, and Maximum FDA/Industry days to Substantive
-Interaction. The function ignores case and does not match across multiple
-lines.
+FDA/Industry days to Substantive Interaction, Xth Percentile FDA/Industry
+days to Substantive Interaction, and Maximum FDA/Industry days to
+Substantive Interaction. The function ignores case and does not match
+across multiple lines.
 
 The final word needs to be followed by a | for this expression to match.
 }

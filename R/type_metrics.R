@@ -12,18 +12,20 @@
 #' type_metrics(mdufa::mdufa4)
 type_metrics <- function(data) {
   metrics <-
-    data$metric_type %>%
+    data$metric_type |>
     unique()
-  metrics[!is.na(metrics)] %>%
+  metrics[!is.na(metrics)] |>
     purrr::map_dfr(
       .f =
-        ~ filter_metrics(data, .x) %>%
-        dplyr::mutate(value = as.list(.data$value))
-    ) %>%
-    dplyr::bind_rows(
-      .,
-      data %>%
-        dplyr::filter(is.na(.data$metric_type)) %>%
-        dplyr::mutate(value = as.list(.data$value))
-    )
+        ~ filter_metrics(data, .x) |>
+          dplyr::mutate(value = as.list(.data$value))
+    ) |>
+    (\(x) {
+      dplyr::bind_rows(
+        x,
+        data |>
+          dplyr::filter(is.na(.data$metric_type)) |>
+          dplyr::mutate(value = as.list(.data$value))
+      )
+    })()
 }

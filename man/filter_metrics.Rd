@@ -23,6 +23,6 @@ Filter a MDUFA metrics table to one metric type, such as all metrics that are
 a percent.
 }
 \examples{
-mdufa::mdufa4 \%>\%
+mdufa::mdufa4 |>
   filter_metrics(metric_type = "percent")
 }

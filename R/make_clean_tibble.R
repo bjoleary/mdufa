@@ -14,11 +14,8 @@ make_clean_tibble <- function(data) {
       replacement = "performance_metric"
     )
   }
-  data %>%
-    janitor::clean_names() %>%
-    dplyr::rename_with(name_replacer) %>%
-    fix_empty_rows(
-      data = .,
-      name_column = colnames(.) %>% magrittr::extract(1)
-    )
+  data |>
+    janitor::clean_names() |>
+    dplyr::rename_with(name_replacer) |>
+    (\(x) fix_empty_rows(x, name_column = colnames(x)[[1]]))()
 }

@@ -14,7 +14,7 @@
 #' @export
 #'
 #' @examples
-#' mdufa::mdufa4 %>%
+#' mdufa::mdufa4 |>
 #'   filter_metrics(metric_type = "percent")
 filter_metrics <- function(data, metric_type) {
   stopifnot(
@@ -26,13 +26,13 @@ filter_metrics <- function(data, metric_type) {
       stringr::str_remove_all(
         string = x,
         pattern = "[^0-9.]"
-      ) %>%
-      as.integer()
+      ) |>
+        as.integer()
     } else if (filter_to == "percent") {
       stringr::str_remove(
         string = x,
         pattern = "\\%$"
-      ) %>%
+      ) |>
         as.numeric() / 100
     } else if (filter_to == "double") {
       as.numeric(x)
@@ -40,7 +40,7 @@ filter_metrics <- function(data, metric_type) {
       x
     }
   }
-  data %>%
-    dplyr::filter(.data$metric_type == filter_to) %>%
+  data |>
+    dplyr::filter(.data$metric_type == filter_to) |>
     dplyr::mutate(value = convert_data(x = .data$value, filter_to = filter_to))
 }
