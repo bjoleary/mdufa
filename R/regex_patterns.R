@@ -11,7 +11,7 @@ unnecessary_text_pattern <- function() {
       "(Section\\s\\d*.*\\v|(?<=\\v)\\*.*\\v)",
       # An asterisk followed by a warning about RTA implementation
       "(\\*\\sRTA.*\\v)"
-    ) %>%
+    ) |>
     paste(collapse = "|")
   stringr::regex(
     pattern = patterns,
@@ -36,7 +36,7 @@ goal_percent_line_pattern <- function() {
         goal_percent_pattern(),
         ")(\\|{0,}|\\s{0,})){5}\\v"
       )
-    ) %>%
+    ) |>
     paste(collapse = "|")
   stringr::regex(
     pattern = patterns,
@@ -56,7 +56,7 @@ fy_start_line_pattern <- function() {
     c(
       # A line that includes 5 copies of FY XXXX, where X is a digit
       "((?<=\\v)\\s*(FY\\s\\d{4}\\s*){5}\\v)"
-    ) %>%
+    ) |>
     paste(collapse = "|")
   stringr::regex(
     pattern = patterns,
@@ -82,7 +82,7 @@ goal_percent_pattern <- function() {
       "(\\d{2}%(\\s[[:alpha:]]*\\b){1,}(\\d{2,}(?!%)))",
       # A percentage followed by 1 or more words
       "(\\d{2}%(\\s[[:alpha:]]*\\b){1,})"
-    ) %>%
+    ) |>
     paste(collapse = "|")
   stringr::regex(
     pattern = patterns,
@@ -107,7 +107,7 @@ goal_days_pattern <- function() {
       "(((\\d{2,})\\s){0,}(FDA|Industry)\\sDays\\b)",
       # Zero or more digits, followed by the word FDA or the word Industry
       "(((\\d{2,})\\s){0,}(FDA|Industry))"
-    ) %>%
+    ) |>
     paste(collapse = "|")
   stringr::regex(
     pattern = patterns,
@@ -129,7 +129,7 @@ within_days_pattern <- function() {
       "((Within)\\s{1,}(\\d{0,})\\b)",
       "\\d{2}\\s(SI\\b)",
       "\\d{2}\\s(SI within\\b)"
-    ) %>%
+    ) |>
     paste(collapse = "|")
   stringr::regex(
     pattern = patterns,
@@ -152,7 +152,7 @@ within_days_line_pattern <- function() {
       # A new line, white space, five repeats of the within days pattern,
       # followed by white space and a new line.
       paste0("\\v\\s{0,}(\\|(", within_days_pattern(), ")\\|*){5}\\v")
-    ) %>%
+    ) |>
     paste(collapse = "|")
   stringr::regex(
     pattern = patterns,
@@ -182,7 +182,7 @@ goal_days_line_pattern <- function() {
         goal_days_pattern(),
         ")\\|*){5}\\v"
       )
-    ) %>%
+    ) |>
     paste(collapse = "|")
   stringr::regex(
     pattern = patterns,

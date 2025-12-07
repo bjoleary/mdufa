@@ -41,7 +41,7 @@ export_excel <- function(data, filepath) {
   )
 
   data <-
-    data %>%
+    data |>
     dplyr::filter(!is.na(.data$metric_type))
   workbook <- openxlsx::createWorkbook()
   # Make a readme -----
@@ -85,8 +85,8 @@ export_excel <- function(data, filepath) {
         "available at ",
         "https://github.com/bjoleary/mdufa",
         ". "
-      ) %>%
-        stringr::str_wrap() %>%
+      ) |>
+        stringr::str_wrap() |>
         stringr::str_split(pattern = "\\n"),
       "",
       paste0(
@@ -101,8 +101,8 @@ export_excel <- function(data, filepath) {
         "be formatted as numbers that do not include decimal places in the ",
         "\"value_formatted\" field while other numeric metrics will be ",
         "formatted as numbers with decimal places."
-      ) %>%
-        stringr::str_wrap() %>%
+      ) |>
+        stringr::str_wrap() |>
         stringr::str_split(pattern = "\\n"),
       "",
       paste0(
@@ -110,8 +110,8 @@ export_excel <- function(data, filepath) {
         "by type (integer metrics, percentage metrics, etc.) and pivot ",
         "it by year. The values in these sheets are from the ",
         "\"value_formatted\" field in the \"data\" sheet."
-      ) %>%
-        stringr::str_wrap() %>%
+      ) |>
+        stringr::str_wrap() |>
         stringr::str_split(pattern = "\\n"),
       "",
       paste0(
@@ -122,8 +122,8 @@ export_excel <- function(data, filepath) {
         "to be incomplete or to be inaccurate. Similarly, some tables in the ",
         "reports have footnotes, and they are not included in this ",
         "dataset. "
-      ) %>%
-        stringr::str_wrap() %>%
+      ) |>
+        stringr::str_wrap() |>
         stringr::str_split(pattern = "\\n"),
       "",
       paste0(
@@ -134,25 +134,25 @@ export_excel <- function(data, filepath) {
         "To facilitate this, each data point provided includes information ",
         "about its source, including a link to the FDA report from which it ",
         "came, the relevant page number, and more. "
-      ) %>%
-        stringr::str_wrap() %>%
+      ) |>
+        stringr::str_wrap() |>
         stringr::str_split(pattern = "\\n"),
       "",
       paste0(
         "If you find a problem in this dataset, please report it here: ",
         "https://github.com/bjoleary/mdufa/issues. "
-      ) %>%
-        stringr::str_wrap() %>%
+      ) |>
+        stringr::str_wrap() |>
         stringr::str_split(pattern = "\\n"),
       "",
-      rep("*", 80) %>% paste0(collapse = ""),
+      rep("*", 80) |> paste0(collapse = ""),
       paste0(
         "Please carefully read the \"license\" tab for additional ",
         "important information."
-      ) %>%
-        stringr::str_wrap() %>%
+      ) |>
+        stringr::str_wrap() |>
         stringr::str_split(pattern = "\\n"),
-      rep("*", 80) %>% paste0(collapse = ""),
+      rep("*", 80) |> paste0(collapse = ""),
       "",
       "Session Info:",
       "",
@@ -166,7 +166,7 @@ export_excel <- function(data, filepath) {
         " version ",
         session$otherPkgs$mdufa$Version
       )
-    ) %>%
+    ) |>
     purrr::simplify()
   openxlsx::writeData(
     wb = workbook,
@@ -221,15 +221,15 @@ export_excel <- function(data, filepath) {
         "publish, distribute, sublicense, and/or sell copies of the Software, ",
         "and to permit persons to whom the Software is furnished to do so, ",
         "subject to the following conditions: "
-      ) %>%
-        stringr::str_wrap() %>%
+      ) |>
+        stringr::str_wrap() |>
         stringr::str_split(pattern = "\\n"),
       "",
       paste0(
         "The above copyright notice and this permission notice shall be ",
         "included in all copies or substantial portions of the Software."
-      ) %>%
-        stringr::str_wrap() %>%
+      ) |>
+        stringr::str_wrap() |>
         stringr::str_split(pattern = "\\n"),
       "",
       paste0(
@@ -241,10 +241,10 @@ export_excel <- function(data, filepath) {
         "ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN ",
         "CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE ",
         "SOFTWARE."
-      ) %>%
-        stringr::str_wrap() %>%
+      ) |>
+        stringr::str_wrap() |>
         stringr::str_split(pattern = "\\n")
-    ) %>%
+    ) |>
     purrr::simplify()
   openxlsx::writeData(
     wb = workbook,
@@ -288,7 +288,7 @@ export_excel <- function(data, filepath) {
 
   ## Format data -----
   data2 <-
-    data %>%
+    data |>
     # Create a temporary variable, fp, that is just the numeric characters
     # associated with percent metrics. In other words, strip the percent sign
     # out. But for good measure, in case the data is messier than we expect,
@@ -303,14 +303,14 @@ export_excel <- function(data, filepath) {
             ),
           TRUE ~ NA_character_
         )
-    ) %>%
+    ) |>
     # Create a second temporary variable, fp_two, that is fp converted to a
     # numeric and divided by 100, since excel expects percentages less than
     # 100% to be expressed as numbers less than 1.
     dplyr::mutate(
       fp_two =
         as.numeric(.data$fp) / 100
-    ) %>%
+    ) |>
     # Now create a new variable, value_formatted, which is just the value
     # for anything that is not a percent and is a character string from fp_two
     # for anything that is a percent.
@@ -320,7 +320,7 @@ export_excel <- function(data, filepath) {
           .data$metric_type == "percent" ~ as.character(.data$fp_two),
           TRUE ~ .data$value
         )
-    ) %>%
+    ) |>
     dplyr::select(
       -"fp",
       -"fp_two"
@@ -442,14 +442,14 @@ build_pivot <-
           "value_formatted"
         )
     )
-    data %>%
+    data |>
       dplyr::filter(
         .data$metric_type == metric_type_filter
-      ) %>%
+      ) |>
       dplyr::select(
         -"value"
-      ) %>%
-      dplyr::distinct() %>%
+      ) |>
+      dplyr::distinct() |>
       tidyr::pivot_wider(
         names_from = "fy",
         values_from = "value_formatted"

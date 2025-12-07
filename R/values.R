@@ -9,17 +9,14 @@ submission_types <-
     "Pre\\-Market Report Submissions",
     "IDE",
     "Pre\\-Sub"
-  ) %>%
+  ) |>
   # Wrap with word boundaries
-  paste0("\\b", ., "\\b") %>%
+  (\(x) paste0("\\b", x, "\\b"))() |>
   # Add all review tracks, which has a paren that should not be wrapped with
   # word boundaries
-  c(
-    .,
-    "PMAs \\(All Review Tracks\\)"
-  ) %>%
+  (\(x) c(x, "PMAs \\(All Review Tracks\\)"))() |>
   # Collapse with "OR":
-  paste(collapse = "|") %>%
+  paste(collapse = "|") |>
   stringr::regex()
 
 url_report_page <-

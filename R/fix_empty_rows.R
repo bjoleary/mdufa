@@ -14,27 +14,23 @@
 #' @export
 #'
 fix_empty_rows <- function(data, name_column) {
-  data %>%
+  data |>
     # Remove the name column
-    dplyr::select(-!!name_column) %>%
+    dplyr::select(-!!name_column) |>
     # Check if all columns other than the name column are na, return TRUE if
     # they are
     purrr::pmap(
       .f = ~ is.na(.x),
       .id = NULL
-    ) %>%
+    ) |>
     # Turn the resulting vector into a tibble with one field labeled "empty"
-    unlist() %>%
+    unlist() |>
     tibble::enframe(
-      x = .,
       name = NULL,
       value = "empty"
-    ) %>%
+    ) |>
     # Bind the original data back in
-    dplyr::bind_cols(
-      data,
-      .
-    ) %>%
+    (\(x) dplyr::bind_cols(data, x))() |>
     # Some rows are missing their names because of line breaks in the PDF. Let's
     # fix that.
     dplyr::mutate(
@@ -57,14 +53,14 @@ fix_empty_rows <- function(data, name_column) {
             dplyr::lag(.data$empty) == TRUE ~
             paste(
               dplyr::lag(.data[[name_column]]),
-              .data[[name_column]] %>% tidyr::replace_na("")
+              .data[[name_column]] |> tidyr::replace_na("")
             ),
           # Otherwise, just use what you've go.
           TRUE ~ .data[[name_column]]
         )
-    ) %>%
+    ) |>
     # Remove empty rows
-    dplyr::filter(.data$empty == FALSE) %>%
+    dplyr::filter(.data$empty == FALSE) |>
     # Remove helper "empty" column
     dplyr::select(-.data$empty)
 }
