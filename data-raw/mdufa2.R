@@ -1,7 +1,6 @@
 ## code to prepare `mdufa2` dataset goes here
 ## Build the dataset ---------------------------------------------------------
 # Load libraries
-library(magrittr)
 library(dplyr)
 library(readr)
 devtools::load_all()
@@ -33,7 +32,7 @@ mdufa2 <-
         fy = readr::col_character(),
         value = readr::col_character()
       )
-  ) %>%
+  ) |>
   dplyr::mutate(
     report_date = lubridate::mdy(.data$report_date)
   )
@@ -41,6 +40,30 @@ mdufa2 <-
 usethis::use_data(mdufa2, overwrite = TRUE)
 
 # Document the dataset ---------------------------------------------------------
+
+glimpse_output <- dplyr::glimpse(mdufa2, width = 76) |>
+  utils::capture.output(type = c("output"))
+glimpse_output <- glimpse_output[-c(1:2)]
+
+formatted_fields <- glimpse_output |>
+  (\(x) {
+    stringr::str_replace(
+      string = x,
+      pattern = "(^\\$\\s\\w*\\s*)",
+      replacement = paste0(
+        "  \\\\item{",
+        stringr::str_extract(string = x, pattern = "(?<=^\\$\\s)\\b\\w*\\b"),
+        "}{"
+      )
+    )
+  })() |>
+  (\(x) paste0(x, "}"))() |>
+  stringr::str_remove_all(pattern = "\\[|\\]|\\<|\\>") |>
+  stringr::str_remove_all(pattern = stringr::fixed("\0333m\03338;5;246m")) |>
+  stringr::str_remove_all(pattern = stringr::fixed("\03339m\03323m")) |>
+  (\(x) stringr::str_wrap(string = x, width = 76))() |>
+  (\(x) stringr::str_split(x, pattern = "\\n"))() |>
+  unlist()
 
 documentation_text <-
   c(
@@ -58,64 +81,31 @@ documentation_text <-
     ),
     "",
     "\\describe{",
-    dplyr::glimpse(mdufa2, width = 76) %>%
-      utils::capture.output(type = c("output")) %>%
-      magrittr::extract(-c(1:2)) %>%
-      stringr::str_replace(
-        string = .,
-        pattern = "(^\\$\\s\\w*\\s*)", # the column name
-        replacement =
-          paste0(
-            "  \\\\item{",
-            stringr::str_extract(
-              string = .,
-              pattern = "(?<=^\\$\\s)\\b\\w*\\b"
-            ),
-            "}{"
-          )
-      ) %>%
-      paste0(., "}") %>%
-      # Square brackets are a link in Roxygen. Replace:
-      stringr::str_remove_all(
-        string = .,
-        pattern = "\\[|\\]|\\<|\\>"
-      ) %>%
-      # Remove formatting strings
-      stringr::str_remove_all(
-        string = .,
-        pattern = stringr::fixed("\0333m\03338;5;246m")
-      ) %>%
-      stringr::str_remove_all(
-        string = .,
-        pattern = stringr::fixed("\03339m\03323m")
-      ) %>%
-      stringr::str_wrap(
-        string = .,
-        width = 76
-      ) %>%
-      stringr::str_split(pattern = "\\n") %>%
-      unlist(),
+    formatted_fields,
     "}",
     "",
     "@source ",
     paste0("[FDA MDUFA Reports](", url_report_page, ")", str_nolint),
     paste0("accessed 2023-01-21.")
-  ) %>%
-  paste0("#' ", .) %>%
-  c(
-    paste0(
-      "# Do not hand edit this file. Edit data-raw/mdufa2.R ",
-      "instead."
-    ),
-    .,
-    "\"mdufa2\""
-  ) %>%
-  stringr::str_squish() %T>%
-  readr::write_lines(
-    x = .,
-    file = "R/mdufa2.R",
-    append = FALSE
-  )
+  ) |>
+  (\(x) paste0("#' ", x))() |>
+  (\(x) {
+    c(
+      paste0(
+        "# Do not hand edit this file. Edit data-raw/mdufa2.R ",
+        "instead."
+      ),
+      x,
+      "\"mdufa2\""
+    )
+  })() |>
+  stringr::str_squish()
+
+readr::write_lines(
+  x = documentation_text,
+  file = "R/mdufa2.R",
+  append = FALSE
+)
 
 devtools::document()
 

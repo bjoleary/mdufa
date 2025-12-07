@@ -398,7 +398,7 @@ verify_row <- function(row, pdf_dir = "data-raw/pdf_reports", dpi = 150) {
 
     # Collect y-positions for all distinctive words
     # Find rows where multiple distinctive words co-occur
-    y_tolerance <- 5  # pixels tolerance for same row
+    y_tolerance <- 5 # pixels tolerance for same row
     word_y_positions <- list()
 
     for (word in distinctive) {

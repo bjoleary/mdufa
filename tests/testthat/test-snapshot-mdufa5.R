@@ -38,8 +38,8 @@ remove_coversheet_if_present <- function(pdf_path) {
   first_page <- pdftools::pdf_text(pdf_path)[1]
 
   if (grepl("508", first_page, ignore.case = TRUE) ||
-      grepl("accessibility", first_page, ignore.case = TRUE) ||
-      grepl("Section 508", first_page, ignore.case = TRUE)) {
+    grepl("accessibility", first_page, ignore.case = TRUE) ||
+    grepl("Section 508", first_page, ignore.case = TRUE)) {
     # Remove first page using qpdf
     if (!requireNamespace("qpdf", quietly = TRUE)) {
       skip("qpdf package required to handle 508 coversheet")
