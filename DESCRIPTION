@@ -25,11 +25,10 @@ Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
-Imports: 
+Imports:
     openxlsx,
     dplyr,
     janitor,
-    magrittr,
     purrr,
     readr,
     stringr,
@@ -37,5 +36,5 @@ Imports:
     tidyr,
     tidyselect,
     chk
-Depends: 
-    R (>= 3.5)
+Depends:
+    R (>= 4.1)
