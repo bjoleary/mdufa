@@ -281,26 +281,65 @@ verify_row <- function(row, pdf_dir = "data-raw/pdf_reports", dpi = 150) {
   page_width <- pdf_info$width[page]
   page_height <- pdf_info$height[page]
 
-  # Find the table title to get table boundaries
-  table_pattern <- paste0("^", gsub("\\.", "\\\\.", table_num), "$")
-  table_words <- page_data[grepl(table_pattern, page_data$text), ]
 
-  # Find the FY column header to get x-coordinate for the correct column
+  # Find the table title to establish table boundaries
+  # Look for "Table X.Y" pattern to find where our table starts
+ table_title_rows <- page_data[page_data$text == "Table", ]
+
+  # Find the specific table number after "Table" word
+  table_num_pattern <- paste0("^", gsub("\\.", "\\\\.", table_num), "$")
+  table_num_matches <- page_data[grepl(table_num_pattern, page_data$text), ]
+
+  # Establish table y-boundaries
+  table_start_y <- 0
+  table_end_y <- Inf
+
+  if (nrow(table_num_matches) > 0) {
+    # Table starts at the "Table X.Y" header
+    table_start_y <- min(table_num_matches$y) - 20 # Small buffer above
+
+    # Find next table header to establish end boundary
+    # Look for "Table" word positions, then find table numbers near them
+    table_words <- page_data[page_data$text == "Table", ]
+    if (nrow(table_words) > 0) {
+      # Find table headers that come after our table
+      min_y <- min(table_num_matches$y) + 20
+      tables_after_y <- table_words$y[table_words$y > min_y]
+      if (length(tables_after_y) > 0) {
+        table_end_y <- min(tables_after_y) - 10 # End before next table
+      }
+    }
+  }
+
+  # Find the FY column header within table boundaries
   fy_pattern <- paste0("^", fy, "$")
-  fy_header <- page_data[grepl(fy_pattern, page_data$text), ]
+  fy_header <- page_data[
+    grepl(fy_pattern, page_data$text) &
+      page_data$y >= table_start_y &
+      page_data$y <= table_end_y,
+  ]
 
-  # Find the value in the page data
+  # Find the value in the page data within table boundaries
   # Clean value for matching (handle percentages, parentheses, etc.)
   value_clean <- trimws(value)
-  value_matches <- page_data[page_data$text == value_clean, ]
+  value_matches <- page_data[
+    page_data$text == value_clean &
+      page_data$y >= table_start_y &
+      page_data$y <= table_end_y,
+  ]
 
   # If exact match fails, try first word of value
   if (nrow(value_matches) == 0 && !is.na(value)) {
     first_word <- strsplit(value_clean, "\\s+")[[1]][1]
-    value_matches <- page_data[page_data$text == first_word, ]
+    value_matches <- page_data[
+      page_data$text == first_word &
+        page_data$y >= table_start_y &
+        page_data$y <= table_end_y,
+    ]
   }
 
   # Find metric words for row identification - look for unique/distinctive words
+  # Constrain search to within table boundaries
   metric_y <- NULL
   if (!is.na(metric)) {
     metric_words <- strsplit(metric, "\\s+")[[1]]
@@ -316,7 +355,11 @@ verify_row <- function(row, pdf_dir = "data-raw/pdf_reports", dpi = 150) {
     word_order <- c(distinctive, metric_words[!metric_words %in% distinctive])
 
     for (word in word_order) {
-      matches <- page_data[page_data$text == word, ]
+      matches <- page_data[
+        page_data$text == word &
+          page_data$y >= table_start_y &
+          page_data$y <= table_end_y,
+      ]
       if (nrow(matches) > 0) {
         # If we have FY header, prefer metric matches that are below the header
         if (nrow(fy_header) > 0) {
