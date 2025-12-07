@@ -420,6 +420,85 @@ fix_goal_row <- function(text_string) {
   }
 }
 
+#' Fix Table 9.2 Header (MDUFA V)
+#'
+#' Table 9.2 in MDUFA V reports has a complex multi-line header with goal
+#' descriptions that confuses the parser. This function removes those extra
+#' header lines while preserving the FY columns and data rows.
+#'
+#' There are two variants of this table:
+#'
+#' CDRH variant (all FY columns on one line):
+#' \preformatted{
+#' |MDUFA V Goal (# of Submissions Received During FY with Written
+#' |Feedback Provided by Day 70 or 5 Days Prior to Meeting)
+#' Performance Metric|FY 2023|FY 2024|FY 2025|FY 2026|FY 2027
+#' |90% / 75%|90% / 80%|90% Within|90% Within|90% Within
+#' |Within MDUFA|Within MDUFA|MDUFA Goal|MDUFA Goal|MDUFA Goal
+#' |Goal 1|Goal 2
+#' }
+#'
+#' CBER variant (FY columns split across lines):
+#' \preformatted{
+#' |MDUFA V Goal (# of Submissions Received During FY with Written
+#' |Feedback Provided by Day 70 or 5 Days Prior to Meeting)
+#' Performance Metric|FY 2023|FY 2024
+#' |FY 2025|FY 2026|FY 2027
+#' |90% / 75%|90% / 80%
+#' Performance Metric|90% Within|90% Within|90% Within
+#' |Within MDUFA Within MDUFA
+#' |MDUFA Goal|MDUFA Goal|MDUFA Goal
+#' |Goal 1|Goal 2
+#' }
+#'
+#' This function is called from get_table() when the table title indicates
+#' Table 9.2. The text_string at that point does NOT include the title line.
+#'
+#' @param text_string The table content string (without title) to process.
+#'
+#' @return The string with Table 9.2 header cleaned up.
+#' @export
+#'
+fix_table_9_2_header <- function(text_string) {
+  # Step 1: Remove the "MDUFA V Goal..." description lines
+  result <- stringr::str_replace(
+    text_string,
+    stringr::regex(
+      "[|]MDUFA V Goal[^\\n]*\\n[|]Feedback Provided[^\\n]*\\n"
+    ),
+    ""
+  )
+
+  # Step 2: Handle CBER variant where FY columns are split across two lines
+  # Merge "Performance Metric|FY 2023|FY 2024\n|FY 2025|FY 2026|FY 2027"
+  # into "Performance Metric|FY 2023|FY 2024|FY 2025|FY 2026|FY 2027"
+  result <- stringr::str_replace(
+    result,
+    stringr::regex(
+      "(Performance Metric[|]FY [0-9]{4}[|]FY [0-9]{4})\\n[|](FY [0-9]{4})"
+    ),
+    "\\1|\\2"
+  )
+
+  # Step 3: Remove all remaining junk header lines
+  # These start with | and contain goal-related text or "Performance Metric"
+  # Pattern: lines starting with | containing 90%, Within, Goal, or
+  # lines starting with "Performance Metric|90%"
+  junk_patterns <- c(
+    "\\n[|]90%[^\\n]*",                            # |90%...
+    "\\n[|][^\\n]*Within MDUFA[^\\n]*",            # |Within MDUFA...
+    "\\n[|][^\\n]*MDUFA Goal[^\\n]*",              # |MDUFA Goal...
+    "\\n[|]Goal [^\\n]*",                          # |Goal 1... or |Goal ¹...
+    "\\nPerformance Metric[|]90%[^\\n]*"           # Performance Metric|90%...
+  )
+
+  for (pattern in junk_patterns) {
+    result <- stringr::str_replace_all(result, stringr::regex(pattern), "")
+  }
+
+  result
+}
+
 #' Fix MDUFA III SI Goals Row
 #'
 #' This function fixes the Substantive Interaction Goals row in MDUFA III
@@ -615,6 +694,13 @@ get_table <- function(text_string) {
     fix_m3_si_goal_row() %>%
     fix_goal_row() %>%
     fix_si_row()
+
+  # Apply Table 9.2 fix if this is that table (MDUFA V specific)
+  if (!is.null(text_string$title) &&
+    stringr::str_detect(text_string$title, "Table 9[.]2")) {
+    current_table <- fix_table_9_2_header(current_table)
+  }
+
   additional_tables <-
     paste0(additional_table_titles, text_string_element[-1]) %>%
     paste0(collapse = "\n")

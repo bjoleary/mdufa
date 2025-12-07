@@ -660,7 +660,16 @@ metric_types <- function(report_mdufa_period = "MDUFA IV") {
       "Rate of Submissions Not Accepted for Review on First RTA Cycle", "percent", # nolint: line_length_linter.
       "Rate of Submissions Not Accepted for Review or Failed TS on First Cycle", "percent", # nolint: line_length_linter.
       "Supplements Pending MDUFA Decision", "integer",
-      "Supplements Pending MDUFA Decision Past Goal", "integer"
+      "Supplements Pending MDUFA Decision Past Goal", "integer",
+      # Table 9.2 Pre-Sub Performance Goals metrics
+      "Number Accepted / Eligible for MDUFA Action", "integer",
+      "Number with Non-MDUFA Action \u00B3", "integer",
+      "Number with MDUFA Action", "integer",
+      "Written Feedback Provided Within Goal", "integer",
+      "Number Pending MDUFA Action", "integer",
+      "Pending MDUFA Action Past Goal", "integer",
+      "Number in MDUFA Cohort (up to max 4300)\u2074", "integer",
+      "Current Performance Percent Within Goal", "percent"
     )
   }
 }

@@ -130,9 +130,9 @@ extract_report <- function(pdf_path,
 
   # Clean and structure the data
   result <- combined |>
-    # Filter out problematic tables
+    # Filter out problematic tables for MDUFA III/IV
     dplyr::filter(
-      # Table 9.2 has unusual structure that causes parsing issues
+      # Table 9.2 has unusual structure - only parseable for MDUFA V
       !stringr::str_detect(
         string = .data$source,
         pattern = stringr::fixed("Table 9.2")
@@ -415,16 +415,17 @@ extract_report_m5 <- function(pdf_path,
     ) |>
     # Filter out problematic tables (consistent with get_m5)
     dplyr::filter(
-      # Table 9.2 has unusual structure that causes parsing issues
-      !stringr::str_detect(
-        string = .data$source,
-        pattern = stringr::fixed("Table 9.2")
-      ),
       # Table 13.x are TAP program tables - exclude for now
       !stringr::str_detect(
         string = .data$table_number,
         pattern = "^13\\."
       )
+    )
+
+  # Squish performance_metric before join (OHT tables may have leading spaces)
+  result <- result |>
+    dplyr::mutate(
+      performance_metric = stringr::str_squish(.data$performance_metric)
     )
 
   # Add metric types
