@@ -392,11 +392,16 @@ extract_report_m5 <- function(pdf_path,
         string = .data$source,
         pattern = "(?<=^Table\\s)\\d*\\.\\d*\\b"
       ),
-      organization = stringr::str_extract(
-        string = .data$source,
-        pattern = paste0(
-          "OHT1|OHT2|OHT3|OHT4|OHT5|OHT6|OHT7|OHT8|",
-          "CDRH|CBER"
+      # Extract organization - prefer OHT (more specific) over CDRH/CBER
+      # First try OHT, then fall back to CDRH/CBER if no OHT found
+      organization = dplyr::coalesce(
+        stringr::str_extract(
+          string = .data$source,
+          pattern = "OHT[1-8]"
+        ),
+        stringr::str_extract(
+          string = .data$source,
+          pattern = "CDRH|CBER"
         )
       ),
       program = stringr::str_extract(
@@ -406,6 +411,19 @@ extract_report_m5 <- function(pdf_path,
       table_title = stringr::str_extract(
         string = .data$source,
         pattern = paste0("(?=", submission_type, ").*$")
+      )
+    ) |>
+    # Filter out problematic tables (consistent with get_m5)
+    dplyr::filter(
+      # Table 9.2 has unusual structure that causes parsing issues
+      !stringr::str_detect(
+        string = .data$source,
+        pattern = stringr::fixed("Table 9.2")
+      ),
+      # Table 13.x are TAP program tables - exclude for now
+      !stringr::str_detect(
+        string = .data$table_number,
+        pattern = "^13\\."
       )
     )
 
@@ -438,6 +456,20 @@ extract_report_m5 <- function(pdf_path,
 
   # Remove duplicate rows
   result <- dplyr::distinct(result)
+
+
+  # Remove garbage rows where value contains header text (orphaned header lines)
+  # These occur when multi-line headers like "90% Within 180 / FDA Days" get
+
+  # split and the continuation line is parsed as data
+  result <- result |>
+    dplyr::filter(
+      !(is.na(.data$performance_metric) &
+        stringr::str_detect(
+          .data$value,
+          stringr::regex("^\\d*\\s*FDA Days", ignore_case = TRUE)
+        ))
+    )
 
   # Add report metadata
   if (!is.null(report_date)) {
