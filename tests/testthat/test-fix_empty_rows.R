@@ -60,8 +60,8 @@ test_that("empty rows are properly removed", {
       ),
       class = "data.frame",
       row.names = c(NA, -36L)
-    ) %>%
-    tibble::as_tibble() %>%
+    ) |>
+    tibble::as_tibble() |>
     janitor::clean_names()
   expected_output <-
     structure(

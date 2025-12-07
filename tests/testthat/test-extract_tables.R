@@ -29,9 +29,9 @@ test_that("remove uneccessary text works", {
         "8.1 include only De Novos received on or after November 8, 2019. All ",
         "other tables include De Novos received on or after October 1, 2017."
       )
-    ) %>%
+    ) |>
     # Add trailing vertical space
-    paste0(., "\v")
+    (\(x) paste0(x, "\v"))()
   expect_equal(
     remove_unnecessary_text(test_cases_remove_all),
     rep("", max(seq_along(test_cases_remove_all)))
@@ -43,9 +43,9 @@ test_that("remove uneccessary text works", {
         "ENT and Dental Device"
       ),
       "Table 2.1 CDRH - PMA 180-Day Supplements Substantive Interaction Goal"
-    ) %>%
+    ) |>
     # Add trailing vertical space
-    paste0(., "\v")
+    (\(x) paste0(x, "\v"))()
   expect_equal(
     remove_unnecessary_text(test_cases_do_not_remove),
     test_cases_do_not_remove
@@ -148,7 +148,7 @@ test_that("extracting page numbers works", {
     this_result <- get_page_number(text_object)
     expect_equal(
       this_result$page,
-      pages[[i]] %>% as.character()
+      pages[[i]] |> as.character()
     )
     expect_equal(
       this_result$trimmed_string,
