@@ -80,17 +80,12 @@ current_report <-
   dplyr::filter(.data$report_mdufa_period == "MDUFA III") |>
   dplyr::filter(.data$report_date == max(.data$report_date))
 
-# FDA uses page freezer for old content now. Hard-coding a download link.
-current_report$report_link <-
-  paste0(
-    "https://public4.pagefreezer.com/content/1701303066151/FDA/",
-    "20-05-2023T12:18/",
-    "https://www.fda.gov/media/120475/download"
-  )
+# Use local PDF copy (FDA archive URLs are broken)
+local_pdf <- "data-raw/pdf_reports/mdufa-3_2018-12-10_quarterly-report.pdf"
 
 # Extract data using extract_report()
 mdufa3 <- extract_report(
-  pdf_path = current_report$report_link,
+  pdf_path = local_pdf,
   mdufa_period = "MDUFA III",
   report_date = current_report$report_date,
   report_description = current_report$report_description,
