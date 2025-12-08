@@ -3,13 +3,22 @@
 # Load libraries
 library(rvest)
 str_nolint <- " # nolint: line_length_linter."
-devtools::load_all()
 
+# Capture installed package version BEFORE load_all() overrides it
 old_version <- mdufa::mdufa5
 
+devtools::load_all()
+
+url_report_page <- paste0(
+  "https://www.fda.gov/industry/",
+  "medical-device-user-fee-amendments-mdufa-fees/mdufa-reports"
+)
+
+## Scrape FDA website for latest MDUFA V report -----
+# Use httr to handle potential connection issues
+session <- rvest::session(url_report_page)
 report_page_links <-
-  rvest::read_html(url_report_page) |>
-  rvest::html_nodes("a")
+  rvest::html_nodes(session, "a")
 
 mdufa_reports <-
   tibble::enframe(
@@ -24,17 +33,14 @@ mdufa_reports <-
       value = "report_link"
     )
   ) |>
-  # We are only interested in the links that end in ".pdf" or include "download"
+  # Only interested in links ending in ".pdf" or "download"
   dplyr::filter(
     stringr::str_detect(
       string = .data$report_link,
-      pattern =
-        stringr::regex(
-          pattern = "(.*\\.pdf$)|(.*download)"
-        )
+      pattern = stringr::regex(pattern = "(.*\\.pdf$)|(.*download)")
     )
   ) |>
-  # If the link doesn't start with https, let's prepend the fda.gov url
+  # If link doesn't start with https, prepend the fda.gov url
   dplyr::mutate(
     report_link =
       dplyr::case_when(
@@ -48,39 +54,52 @@ mdufa_reports <-
     report_date =
       stringr::str_extract(
         string = .data$report_description,
-        pattern =
-          stringr::regex(
-            "^\\w*\\s\\d{1,2},\\s\\d{4}"
-          )
+        pattern = stringr::regex("^\\w*\\s\\d{1,2},\\s\\d{4}")
       ) |>
         lubridate::as_date(format = "%B %d, %Y"),
     report_mdufa_period =
       stringr::str_extract(
         string = .data$report_description,
-        pattern =
-          stringr::regex(
-            "\\bMDUFA\\s[IVXL]{1,}\\b"
-          )
+        pattern = stringr::regex("\\bMDUFA\\s[IVXL]{1,}\\b")
       ) |>
         tidyr::replace_na("MDUFA II")
   )
 
-# Get the most recent report
+# Get the most recent MDUFA V report
 current_report <-
   mdufa_reports |>
   dplyr::filter(.data$report_mdufa_period == "MDUFA V") |>
   dplyr::filter(.data$report_date == max(.data$report_date, na.rm = TRUE)) |>
-  head(1) |>
-  as.list()
+  head(1)
 
-mdufa5 <-
-  get_m5(
-    report_description = current_report$report_description,
-    report_link =
-      current_report$report_link |>
-        stringr::str_remove("\\?attachment$"),
-    report_date = current_report$report_date
-  )
+# Strip ?attachment suffix that breaks pdftools
+pdf_url <- current_report$report_link |>
+  stringr::str_remove("\\?attachment$")
+
+cat("Extracting:", current_report$report_description, "\n")
+cat("URL:", pdf_url, "\n\n")
+
+# Download PDF to temp file using httr (handles FDA bot detection better)
+temp_pdf <- tempfile(fileext = ".pdf")
+resp <- httr::GET(
+  pdf_url,
+  httr::user_agent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"),
+  httr::write_disk(temp_pdf, overwrite = TRUE)
+)
+if (httr::status_code(resp) != 200) {
+
+  stop("Failed to download PDF. Status: ", httr::status_code(resp),
+       "\nYou may need to connect to Mullvad VPN.")
+}
+cat("Downloaded to:", temp_pdf, "\n\n")
+
+mdufa5 <- extract_report(
+  pdf_path = temp_pdf,
+  mdufa_period = "MDUFA V",
+  report_date = current_report$report_date,
+  report_description = current_report$report_description,
+  report_link = current_report$report_link
+)
 
 usethis::use_data(mdufa5, overwrite = TRUE)
 
@@ -154,8 +173,30 @@ readr::write_lines(
 
 devtools::document()
 
-testthat::expect_equal(
-  object = mdufa5,
-  expected = old_version
+# Compare extraction results -----
+key_cols <- c(
+  "table_number", "organization", "performance_metric", "fy", "value"
 )
-waldo::compare(x = old_version, y = mdufa5, max_diffs = Inf)
+compare_cols <- key_cols
+
+old_compare <- old_version[, compare_cols] |>
+  dplyr::arrange(table_number, organization, performance_metric, fy)
+new_compare <- mdufa5[, compare_cols] |>
+  dplyr::arrange(table_number, organization, performance_metric, fy)
+
+new_rows <- dplyr::anti_join(new_compare, old_compare, by = key_cols)
+removed_rows <- dplyr::anti_join(old_compare, new_compare, by = key_cols)
+
+cat("\n=== MDUFA V Data Comparison ===\n")
+cat("Old version:", nrow(old_version), "rows\n")
+cat("New version:", nrow(mdufa5), "rows\n")
+cat("Net change: ", nrow(mdufa5) - nrow(old_version), " rows\n\n")
+cat("Rows added:", nrow(new_rows), "\n")
+cat("Rows removed:", nrow(removed_rows), "\n\n")
+
+# Export CSVs for diff viewing
+write.csv(old_compare, "/tmp/mdufa5_old.csv", row.names = FALSE)
+write.csv(new_compare, "/tmp/mdufa5_new.csv", row.names = FALSE)
+
+cat("To view differences:\n")
+cat("  ksdiff /tmp/mdufa5_old.csv /tmp/mdufa5_new.csv\n")

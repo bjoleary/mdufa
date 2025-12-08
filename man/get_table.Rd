@@ -4,11 +4,14 @@
 \alias{get_table}
 \title{Get Table}
 \usage{
-get_table(text_string)
+get_table(text_string, fix_wrapped_names = FALSE)
 }
 \arguments{
 \item{text_string}{The string to process. Only the first element is
 processed.}
+
+\item{fix_wrapped_names}{Logical. If TRUE, attempts to fix wrapped metric
+names that span multiple lines. Only use for MDUFA V reports.}
 }
 \value{
 a list including the current table as the first element followed by

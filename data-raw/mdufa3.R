@@ -1,100 +1,30 @@
 ## code to prepare `mdufa3` dataset goes here
 # Build the dataset ------------------------------------------------------------
 # Load libraries
-library(rvest)
 str_nolint <- " # nolint: line_length_linter."
-devtools::load_all()
 
-## Make a copy of the last version -----
+# Capture installed package version BEFORE load_all() overrides it
 old_version <- mdufa::mdufa3
 
-## Scrape the FDA.gov page -----
-url_report_page <-
-  paste0(
-    "https://www.fda.gov/industry/medical-device-user-fee-amendments-mdufa/",
-    "mdufa-reports"
-  )
+devtools::load_all()
 
-report_page_links <-
-  rvest::read_html(url_report_page) |>
-  rvest::html_nodes("a")
-print(report_page_links)
+## Use local PDF copy -----
+# MDUFA III ended September 30, 2017. The final report was published
+# December 10, 2018. FDA archive URLs for this report are broken.
+url_report_page <- paste0(
+  "https://www.fda.gov/industry/",
+  "medical-device-user-fee-amendments-mdufa-fees/mdufa-reports"
+)
 
-mdufa_reports <-
-  tibble::enframe(
-    x = report_page_links |> rvest::html_text(),
-    name = NULL,
-    value = "report_description"
-  ) |>
-  dplyr::bind_cols(
-    tibble::enframe(
-      x = report_page_links |> rvest::html_attr("href"),
-      name = NULL,
-      value = "report_link"
-    )
-  ) |>
-  # We are only interested in the links that end in ".pdf" or "download"
-  dplyr::filter(
-    stringr::str_detect(
-      string = .data$report_link,
-      pattern =
-        stringr::regex(
-          pattern = "(.*\\.pdf$)|(.*download$)"
-        )
-    )
-  ) |>
-  # If the link doesn't start with https, let's prepend the fda.gov url
-  dplyr::mutate(
-    report_link =
-      dplyr::case_when(
-        stringr::str_detect(
-          string = .data$report_link,
-          pattern = "^https\\:",
-          negate = TRUE
-        ) ~ paste0("https://www.fda.gov", .data$report_link),
-        TRUE ~ .data$report_link
-      ),
-    report_date =
-      stringr::str_extract(
-        string = .data$report_description,
-        pattern =
-          stringr::regex(
-            "^\\w*\\s\\d{1,2},\\s\\d{4}"
-          )
-      ) |>
-        lubridate::as_date(format = "%B %d, %Y"),
-    report_mdufa_period =
-      stringr::str_extract(
-        string = .data$report_description,
-        pattern =
-          stringr::regex(
-            "\\bMDUFA\\s[IVXL]{1,}\\b"
-          )
-      ) |>
-        tidyr::replace_na("MDUFA II")
-  )
-
-## Get the most recent report -----
-current_report <-
-  mdufa_reports |>
-  dplyr::filter(.data$report_mdufa_period == "MDUFA III") |>
-  dplyr::filter(.data$report_date == max(.data$report_date))
-
-# FDA uses page freezer for old content now. Hard-coding a download link.
-current_report$report_link <-
-  paste0(
-    "https://public4.pagefreezer.com/content/1701303066151/FDA/",
-    "20-05-2023T12:18/",
-    "https://www.fda.gov/media/120475/download"
-  )
+local_pdf <- "data-raw/pdf_reports/mdufa-3_2018-12-10_quarterly-report.pdf"
 
 # Extract data using extract_report()
 mdufa3 <- extract_report(
-  pdf_path = current_report$report_link,
+  pdf_path = local_pdf,
   mdufa_period = "MDUFA III",
-  report_date = current_report$report_date,
-  report_description = current_report$report_description,
-  report_link = current_report$report_link
+  report_date = as.Date("2018-12-10"),
+  report_description = "December 10, 2018 MDUFA III Performance Report",
+  report_link = "https://www.fda.gov/media/120475/download"
 )
 
 ## Write out the result -----
@@ -148,7 +78,7 @@ documentation_text <-
     "",
     "@source ",
     paste0("[FDA MDUFA Reports](", url_report_page, ")", str_nolint),
-    paste0("accessed ", lubridate::today(), ".")
+    "PDF downloaded 2024-12-06."
   ) |>
   (\(x) paste0("#' ", x))() |>
   (\(x) {
@@ -171,8 +101,30 @@ readr::write_lines(
 
 devtools::document()
 
-testthat::expect_equal(
-  object = mdufa3,
-  expected = old_version
+# Compare extraction results -----
+key_cols <- c(
+  "table_number", "organization", "performance_metric", "fy", "value"
 )
-waldo::compare(x = old_version, y = mdufa3, max_diffs = Inf)
+compare_cols <- key_cols
+
+old_compare <- old_version[, compare_cols] |>
+  dplyr::arrange(table_number, organization, performance_metric, fy)
+new_compare <- mdufa3[, compare_cols] |>
+  dplyr::arrange(table_number, organization, performance_metric, fy)
+
+new_rows <- dplyr::anti_join(new_compare, old_compare, by = key_cols)
+removed_rows <- dplyr::anti_join(old_compare, new_compare, by = key_cols)
+
+cat("\n=== MDUFA III Data Comparison ===\n")
+cat("Old version:", nrow(old_version), "rows\n")
+cat("New version:", nrow(mdufa3), "rows\n")
+cat("Net change: ", nrow(mdufa3) - nrow(old_version), " rows\n\n")
+cat("Rows added:", nrow(new_rows), "\n")
+cat("Rows removed:", nrow(removed_rows), "\n\n")
+
+# Export CSVs for diff viewing
+write.csv(old_compare, "/tmp/mdufa3_old.csv", row.names = FALSE)
+write.csv(new_compare, "/tmp/mdufa3_new.csv", row.names = FALSE)
+
+cat("To view differences:\n")
+cat("  ksdiff /tmp/mdufa3_old.csv /tmp/mdufa3_new.csv\n")

@@ -112,10 +112,7 @@ get_m5 <- function(report_description, report_link, report_date) {
       names_prefix = "fy\\_",
       values_to = "value"
     ) |>
-    dplyr::bind_cols(
-      current_report,
-      .
-    ) |>
+    (\(x) dplyr::bind_cols(current_report, x))() |>
     # Squish all character fields
     dplyr::mutate(
       dplyr::across(

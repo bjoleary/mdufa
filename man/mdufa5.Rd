@@ -5,17 +5,11 @@
 \alias{mdufa5}
 \title{MDUFA V}
 \format{
-A tibble with 14005 rows and 14 fields:
+A tibble with 16498 rows and 14 fields:
 
 \describe{
-\item{report_description}{chr "February 27, 2025 MDUFA V Performance
-Report"…}
-\item{report_link}{chr "https://www.fda.gov/media/185639/download", "…}
-\item{report_date}{date 2025-02-27, 2025-02-27, 2025-02-27, 2025-02-2…}
-\item{report_mdufa_period}{chr "MDUFA V", "MDUFA V", "MDUFA V", "MDUFA V",
-"M…}
 \item{source}{chr "Table 1.1 CDRH - PMA Original and Panel-Track…}
-\item{page}{int 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30…}
+\item{page}{chr "31", "31", "31", "31", "31", "31", "31", "31"…}
 \item{table_number}{chr "1.1", "1.1", "1.1", "1.1", "1.1", "1.1", "1.1…}
 \item{organization}{chr "CDRH", "CDRH", "CDRH", "CDRH", "CDRH", "CDRH"…}
 \item{program}{chr "PMA Original and Panel-Track Supplements", "P…}
@@ -24,12 +18,18 @@ Report"…}
 \item{performance_metric}{chr "Number Received", "Number Received", "Number
 …}
 \item{fy}{chr "2023", "2024", "2025", "2026", "2027", "2023"…}
-\item{value}{chr "73", "69", "22", NA, NA, "0", "0", "0", NA, N…}
+\item{value}{chr "73", "69", "60", NA, NA, "0", "0", "1", NA, N…}
+\item{report_date}{date 2025-08-27, 2025-08-27, 2025-08-27, 2025-08-2…}
+\item{report_description}{chr "August 27, 2025 MDUFA V Performance Report",
+…}
+\item{report_link}{chr "https://www.fda.gov/media/188841/download?att…}
+\item{report_mdufa_period}{chr "MDUFA V", "MDUFA V", "MDUFA V", "MDUFA V",
+"M…}
 }
 }
 \source{
-\href{https://www.fda.gov/industry/medical-device-user-fee-amendments-mdufa/mdufa-reports}{FDA MDUFA Reports} # nolint: line_length_linter.
-accessed 2025-03-01.
+\href{https://www.fda.gov/industry/medical-device-user-fee-amendments-mdufa-fees/mdufa-reports}{FDA MDUFA Reports} # nolint: line_length_linter.
+accessed 2025-12-07.
 }
 \usage{
 mdufa5

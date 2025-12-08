@@ -465,6 +465,23 @@ extract_report_m5 <- function(pdf_path,
   result <- result |>
     dplyr::filter(!is.na(.data$performance_metric))
 
+  # Remove footnote rows that were incorrectly captured as metrics
+
+  # Legitimate metrics start with uppercase letters; footnotes start with:
+
+  # - lowercase letters (e.g., "determine the total number...")
+  # - asterisks (e.g., "*Includes submission that went to panel")
+  # - numbered patterns (e.g., "1. Includes converted submissions...")
+  # Also remove single-character garbage values (e.g., "0" from parsing errors)
+  result <- result |>
+    dplyr::filter(
+      !stringr::str_detect(
+        .data$performance_metric,
+        "^[a-z*]|^[0-9]+[.)]"
+      ),
+      nchar(.data$performance_metric) > 1
+    )
+
   # Add report metadata
   if (!is.null(report_date)) {
     result$report_date <- report_date
