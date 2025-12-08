@@ -1,5 +1,24 @@
 # mdufa (development version)
 
+# mdufa 0.2.1
+
+## Bug Fixes
+
+* Fixed MDUFA V extraction to properly capture metrics with N/A values (e.g.,
+  "Mean FDA Days for Submissions that Missed the Goal" in Table 1.12). The
+  `fix_empty_rows()` function was incorrectly filtering these rows.
+
+* Added footnote filter to remove ~1,160 garbage rows from MDUFA V extraction
+  where PDF footnote text was incorrectly captured as performance metrics.
+
+## Data Updates
+
+* Updated `mdufa3` dataset with December 10, 2018 report (16,905 rows).
+
+* Updated `mdufa4` dataset with November 16, 2023 report (16,275 rows).
+
+* Updated `mdufa5` dataset with August 27, 2025 report (16,498 rows).
+
 # mdufa 0.2.0
 
 ## New Features

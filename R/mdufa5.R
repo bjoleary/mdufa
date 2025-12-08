@@ -4,7 +4,7 @@
 #' FDA's Quarterly Medical Device User Performance Metrics in a tidy data
 #' format.
 #'
-#' @format A tibble with 17658 rows and 14 fields:
+#' @format A tibble with 16498 rows and 14 fields:
 #'
 #' \describe{
 #' \item{source}{chr "Table 1.1 CDRH - PMA Original and Panel-Track…}
