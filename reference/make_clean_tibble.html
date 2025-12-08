@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">mdufa</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.1</span>
       </span>
     </div>
 
@@ -47,7 +47,7 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">make_clean_tibble</span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">make_clean_tibble</span><span class="op">(</span><span class="va">data</span>, skip_empty_row_fix <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -56,6 +56,13 @@
 
 <dl><dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
 <dd><p>A tibble</p></dd>
+
+
+<dt id="arg-skip-empty-row-fix">skip_empty_row_fix<a class="anchor" aria-label="anchor" href="#arg-skip-empty-row-fix"></a></dt>
+<dd><p>Logical. If TRUE, skips the fix_empty_rows step.
+Use when metric names have already been fixed by fix_wrapped_metric_names()
+and we want to preserve rows with all-NA data values (e.g., legitimate
+N/A values in MDUFA V table 1.12).</p></dd>
 
 </dl></div>
     <div id="value">

@@ -24,6 +24,7 @@
 <url><loc>/reference/fix_m3_si_goal_row.html</loc></url>
 <url><loc>/reference/fix_si_row.html</loc></url>
 <url><loc>/reference/fix_table_9_2_header.html</loc></url>
+<url><loc>/reference/fix_wrapped_metric_names.html</loc></url>
 <url><loc>/reference/fy_start_line_pattern.html</loc></url>
 <url><loc>/reference/get_m5.html</loc></url>
 <url><loc>/reference/get_page_number.html</loc></url>
@@ -45,6 +46,7 @@
 <url><loc>/reference/process_page_m5.html</loc></url>
 <url><loc>/reference/remove_unnecessary_text.html</loc></url>
 <url><loc>/reference/si_metric_pattern.html</loc></url>
+<url><loc>/reference/strip_page_footer.html</loc></url>
 <url><loc>/reference/table_title_text_pattern.html</loc></url>
 <url><loc>/reference/type_metrics.html</loc></url>
 <url><loc>/reference/unnecessary_text_pattern.html</loc></url>

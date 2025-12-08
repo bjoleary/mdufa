@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">mdufa</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.1</span>
       </span>
     </div>
 
@@ -43,6 +43,20 @@
 
     <div class="section level2">
 <h2 class="page-header" data-toc-text="development version" id="mdufa-development-version">mdufa (development version)<a class="anchor" aria-label="anchor" href="#mdufa-development-version"></a></h2>
+</div>
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="0.2.1" id="mdufa-021">mdufa 0.2.1<a class="anchor" aria-label="anchor" href="#mdufa-021"></a></h2>
+<div class="section level3">
+<h3 id="bug-fixes-0-2-1">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-2-1"></a></h3>
+<ul><li><p>Fixed MDUFA V extraction to properly capture metrics with N/A values (e.g., “Mean FDA Days for Submissions that Missed the Goal” in Table 1.12). The <code><a href="../reference/fix_empty_rows.html">fix_empty_rows()</a></code> function was incorrectly filtering these rows.</p></li>
+<li><p>Added footnote filter to remove ~1,160 garbage rows from MDUFA V extraction where PDF footnote text was incorrectly captured as performance metrics.</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="data-updates-0-2-1">Data Updates<a class="anchor" aria-label="anchor" href="#data-updates-0-2-1"></a></h3>
+<ul><li><p>Updated <code>mdufa3</code> dataset with December 10, 2018 report (16,905 rows).</p></li>
+<li><p>Updated <code>mdufa4</code> dataset with November 16, 2023 report (16,275 rows).</p></li>
+<li><p>Updated <code>mdufa5</code> dataset with August 27, 2025 report (16,498 rows).</p></li>
+</ul></div>
 </div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.2.0" id="mdufa-020">mdufa 0.2.0<a class="anchor" aria-label="anchor" href="#mdufa-020"></a></h2>
