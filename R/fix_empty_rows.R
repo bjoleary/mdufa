@@ -17,14 +17,11 @@ fix_empty_rows <- function(data, name_column) {
   data |>
     # Remove the name column
     dplyr::select(-!!name_column) |>
-    # Check if all columns other than the name column are na, return TRUE if
-    # they are
-    purrr::pmap(
-      .f = ~ is.na(.x),
-      .id = NULL
-    ) |>
+    # Check if ALL columns other than the name column are NA.
+    # pmap_lgl applies the function row-wise; c(...) collects all column values
+    # for that row, then all(is.na(...)) checks if they're all NA.
+    purrr::pmap_lgl(~ all(is.na(c(...)))) |>
     # Turn the resulting vector into a tibble with one field labeled "empty"
-    unlist() |>
     tibble::enframe(
       name = NULL,
       value = "empty"

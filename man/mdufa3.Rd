@@ -5,7 +5,7 @@
 \alias{mdufa3}
 \title{MDUFA III}
 \format{
-A tibble with 16660 rows and 14 fields:
+A tibble with 16905 rows and 14 fields:
 
 \describe{
 \item{source}{chr "Table 1.1. CDRH – PMA Original and Panel Trac…}
@@ -28,7 +28,7 @@ Repor…}
 }
 }
 \source{
-\href{https://www.fda.gov/industry/medical-device-user-fee-amendments-mdufa/mdufa-reports}{FDA MDUFA Reports} # nolint: line_length_linter.
+\href{https://www.fda.gov/industry/medical-device-user-fee-amendments-mdufa-fees/mdufa-reports}{FDA MDUFA Reports} # nolint: line_length_linter.
 PDF downloaded 2024-12-06.
 }
 \usage{

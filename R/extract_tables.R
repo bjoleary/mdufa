@@ -906,7 +906,10 @@ get_table <- function(text_string, fix_wrapped_names = FALSE) {
       col_names = TRUE,
       delim = "|"
     ) |>
-    make_clean_tibble() |>
+    # Skip empty row filtering when fix_wrapped_names was applied, since
+    # those rows now have complete metric names and may legitimately have
+    # all NA values (e.g., table 1.12 in MDUFA V)
+    make_clean_tibble(skip_empty_row_fix = fix_wrapped_names) |>
     dplyr::mutate(
       source = text_string$title,
       page = text_string$page

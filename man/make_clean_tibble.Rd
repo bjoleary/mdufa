@@ -4,10 +4,15 @@
 \alias{make_clean_tibble}
 \title{Make a Tibble with Correct Names}
 \usage{
-make_clean_tibble(data)
+make_clean_tibble(data, skip_empty_row_fix = FALSE)
 }
 \arguments{
 \item{data}{A tibble}
+
+\item{skip_empty_row_fix}{Logical. If TRUE, skips the fix_empty_rows step.
+Use when metric names have already been fixed by fix_wrapped_metric_names()
+and we want to preserve rows with all-NA data values (e.g., legitimate
+N/A values in MDUFA V table 1.12).}
 }
 \value{
 A tibble with names that are harmonized with other tables from the
