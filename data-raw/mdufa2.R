@@ -113,4 +113,4 @@ testthat::expect_equal(
   object = mdufa2,
   expected = old_version
 )
-waldo::compare(x = old_version, y = mdufa4, max_diffs = Inf)
+waldo::compare(x = old_version, y = mdufa2, max_diffs = Inf)

@@ -28,7 +28,7 @@ t…}
 }
 }
 \source{
-\href{https://www.fda.gov/industry/medical-device-user-fee-amendments-mdufa/mdufa-reports}{FDA MDUFA Reports} # nolint: line_length_linter.
+\href{https://www.fda.gov/industry/medical-device-user-fee-amendments-mdufa-fees/mdufa-reports}{FDA MDUFA Reports} # nolint: line_length_linter.
 accessed 2023-01-21.
 }
 \usage{

@@ -1,5 +1,6 @@
 ## Download all MDUFA reports from FDA website
 library(rvest)
+library(httr)
 library(dplyr)
 library(stringr)
 library(purrr)
@@ -13,13 +14,12 @@ if (!dir.exists(output_dir)) {
 # The FDA MDUFA reports page
 url_report_page <- paste0(
   "https://www.fda.gov/industry/",
-  "medical-device-user-fee-amendments-mdufa/mdufa-reports"
+  "medical-device-user-fee-amendments-mdufa-fees/mdufa-reports"
 )
 
-# Scrape all links from the page
-report_page_links <-
-  rvest::read_html(url_report_page) |>
-  rvest::html_nodes("a")
+# Scrape all links from the page (use session to handle redirects)
+session <- rvest::session(url_report_page)
+report_page_links <- rvest::html_nodes(session, "a")
 
 # Build a tibble of report info
 mdufa_reports <-
@@ -88,7 +88,7 @@ convert_to_wayback <- function(url) {
   url
 }
 
-# Download each report
+# Download each report using httr (handles FDA bot detection)
 download_report <- function(url, filename, output_dir) {
   filepath <- file.path(output_dir, filename)
 
@@ -114,12 +114,19 @@ download_report <- function(url, filename, output_dir) {
 
   tryCatch(
     {
-      download.file(clean_url, filepath, mode = "wb", quiet = TRUE)
+      # Use httr with user agent to avoid FDA bot detection
+      resp <- httr::GET(
+        clean_url,
+        httr::user_agent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"),
+        httr::write_disk(filepath, overwrite = TRUE)
+      )
       # Verify download succeeded
-      if (file.exists(filepath) && file.info(filepath)$size > 10000) {
+      if (httr::status_code(resp) == 200 &&
+          file.exists(filepath) &&
+          file.info(filepath)$size > 10000) {
         cat("Done\n")
       } else {
-        cat("FAILED (file too small)\n")
+        cat("FAILED (status:", httr::status_code(resp), ")\n")
       }
     },
     error = function(e) {

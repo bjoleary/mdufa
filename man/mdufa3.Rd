@@ -22,14 +22,14 @@ A tibble with 16660 rows and 14 fields:
 \item{report_date}{date 2018-12-10, 2018-12-10, 2018-12-10, 2018-12-1…}
 \item{report_description}{chr "December 10, 2018 MDUFA III Performance
 Repor…}
-\item{report_link}{chr "https://public4.pagefreezer.com/browse/FDA/20…}
+\item{report_link}{chr "https://www.fda.gov/media/120475/download", "…}
 \item{report_mdufa_period}{chr "MDUFA III", "MDUFA III", "MDUFA III", "MDUFA
 …}
 }
 }
 \source{
 \href{https://www.fda.gov/industry/medical-device-user-fee-amendments-mdufa/mdufa-reports}{FDA MDUFA Reports} # nolint: line_length_linter.
-accessed 2025-12-07.
+PDF downloaded 2024-12-06.
 }
 \usage{
 mdufa3

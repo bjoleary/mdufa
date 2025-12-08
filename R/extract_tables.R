@@ -11,9 +11,31 @@
 #' @export
 #'
 remove_unnecessary_text <- function(text_string) {
+
   stringr::str_remove_all(
     string = text_string,
     pattern = unnecessary_text_pattern()
+  )
+}
+
+#' Strip Page Footer
+#'
+#' Some MDUFA V reports (May 2025, Aug 2025) have bare page numbers as footers
+#' (e.g., just "35" right-aligned at the bottom of the page). These get parsed
+#' as data values by insert_delim(). This function detects and removes them.
+#'
+#' @param text_string The raw page text to clean
+#'
+#' @return The text with any bare page number footer removed
+#' @export
+#'
+strip_page_footer <- function(text_string) {
+  # Pattern: end of string, preceded by 20+ whitespace chars, then 1-3 digits
+
+  # This matches right-aligned bare page numbers like "                    35"
+  stringr::str_remove(
+    string = text_string,
+    pattern = "\\s{20,}\\d{1,3}\\s*$"
   )
 }
 
@@ -716,10 +738,119 @@ fix_si_row <- function(text_string) {
   text_string
 }
 
+#' Fix Wrapped Metric Names
+#'
+#' This function fixes metric names that wrap across multiple lines in PDF
+#' extraction. The pattern is:
+#' - Line 1: Metric name start (no pipe at end)
+#' - Line 2: Values (starts with |) OR metric continuation + values
+#' - Line 3 (optional): Metric name end (no pipes)
+#'
+#' @param text_string The string to process
+#'
+#' @return The string with wrapped metric names merged
+#' @export
+#'
+fix_wrapped_metric_names <- function(text_string) {
+  lines <- strsplit(text_string, "\n")[[1]]
+  result <- character(0)
+
+  i <- 1
+
+  while (i <= length(lines)) {
+    line <- lines[i]
+
+    # Check if this line is a metric name start (has text, NO pipes at all,
+    # and next line has values)
+    is_metric_start <- !stringr::str_detect(line, "\\|") &&
+      nchar(trimws(line)) > 0 &&
+      !stringr::str_detect(line, "^Table ") &&
+      !stringr::str_detect(line, "^Performance Metric")
+
+    if (is_metric_start && i < length(lines)) {
+      next_line <- lines[i + 1]
+      has_values <- stringr::str_detect(next_line, "\\|")
+
+      if (has_values) {
+        # Check if next line is values-only (starts with |)
+        values_only <- stringr::str_detect(next_line, "^\\|")
+
+        if (values_only) {
+          # MDUFA V pattern 1: metric_start / |values / metric_end (optional)
+          merged <- trimws(line)
+
+          # Check if there's a continuation line after values
+          if (i + 2 <= length(lines)) {
+            cont_line <- lines[i + 2]
+            # Continuation has no pipes and is short text
+            is_continuation <- !stringr::str_detect(cont_line, "\\|") &&
+              nchar(trimws(cont_line)) > 0 &&
+              nchar(trimws(cont_line)) < 80 &&
+              !stringr::str_detect(cont_line, "^Table ") &&
+              !stringr::str_detect(cont_line, "^\\*") &&
+              !stringr::str_detect(cont_line, "^\\d+\\.")
+
+            if (is_continuation) {
+              merged <- paste(merged, trimws(cont_line))
+              merged <- paste0(merged, next_line)
+              result <- c(result, merged)
+              i <- i + 3
+              next
+            }
+          }
+          # No continuation, just merge metric start with values
+          merged <- paste0(merged, next_line)
+          result <- c(result, merged)
+          i <- i + 2
+          next
+        } else {
+          # MDUFA V pattern 2: metric_start / metric_mid+values / metric_end
+          # Extract values from next_line
+          values <- stringr::str_extract(next_line, "\\|.*$")
+          metric_mid <- stringr::str_remove(next_line, "\\|.*$")
+
+          merged <- paste(trimws(line), trimws(metric_mid))
+
+          # Check for continuation after the values line
+          if (i + 2 <= length(lines)) {
+            cont_line <- lines[i + 2]
+            is_continuation <- !stringr::str_detect(cont_line, "\\|") &&
+              nchar(trimws(cont_line)) > 0 &&
+              nchar(trimws(cont_line)) < 80 &&
+              !stringr::str_detect(cont_line, "^Table ") &&
+              !stringr::str_detect(cont_line, "^\\*") &&
+              !stringr::str_detect(cont_line, "^\\d+\\.")
+
+            if (is_continuation) {
+              merged <- paste(merged, trimws(cont_line))
+              merged <- paste0(merged, values)
+              result <- c(result, merged)
+              i <- i + 3
+              next
+            }
+          }
+          merged <- paste0(merged, values)
+          result <- c(result, merged)
+          i <- i + 2
+          next
+        }
+      }
+    }
+
+    # Default: keep line as-is
+    result <- c(result, line)
+    i <- i + 1
+  }
+
+  paste(result, collapse = "\n")
+}
+
 #' Get Table
 #'
 #' @param text_string The string to process. Only the first element is
 #'   processed.
+#' @param fix_wrapped_names Logical. If TRUE, attempts to fix wrapped metric
+#'   names that span multiple lines. Only use for MDUFA V reports.
 #'
 #' @return a list including the current table as the first element followed by
 #'   all other elements that were part of the \code{text_string} passed to the
@@ -727,7 +858,7 @@ fix_si_row <- function(text_string) {
 #'
 #' @export
 #'
-get_table <- function(text_string) {
+get_table <- function(text_string, fix_wrapped_names = FALSE) {
   text_string_element <- text_string[[1]] |> collapse_line_breaks()
   additional_table_titles <-
     stringr::str_extract_all(
@@ -744,8 +875,14 @@ get_table <- function(text_string) {
   # Extract the current table, the first element in the split vector resulting
   # from the last section, and append a newline so the readr package will
   # recognize it as literal data rather than a file name.
-  current_table <-
-    paste0(text_string_element[[1]], "\n") |>
+  current_table <- paste0(text_string_element[[1]], "\n")
+
+  # Only apply wrapped metric name fix for MDUFA V
+  if (fix_wrapped_names) {
+    current_table <- fix_wrapped_metric_names(current_table)
+  }
+
+  current_table <- current_table |>
     fix_m3_si_goal_row() |>
     fix_goal_row() |>
     fix_si_row() |>
@@ -841,6 +978,7 @@ process_page <- function(page_string) {
 process_page_m5 <- function(page_string, page_number) {
   page_data <-
     page_string |>
+    strip_page_footer() |>
     remove_unnecessary_text() |>
     collapse_line_breaks() |>
     add_missing_table_headers() |>
@@ -853,23 +991,50 @@ process_page_m5 <- function(page_string, page_number) {
     page_data$page <- as.character(page_number)
   }
 
+
+  # Remove orphaned content before the first table title
+  # This handles pages that start with continuation data from previous page
+  first_table_match <- stringr::str_locate(
+    string = page_data$trimmed_string,
+    pattern = table_title_text_pattern()
+  )
+
+  first_match_start <- first_table_match[1, "start"]
+  if (!is.na(first_match_start) && first_match_start > 1) {
+    page_data$trimmed_string <- stringr::str_sub(
+      page_data$trimmed_string,
+      start = first_table_match[1, "start"]
+    )
+  }
+
   # How many tables?
-  table_count <-
+  table_titles <-
     stringr::str_extract_all(
       string = page_data$trimmed_string,
       pattern = table_title_text_pattern(),
       simplify = TRUE
-    ) |>
-    seq_along()
+    )
 
+  # If no table titles found, return NULL (page has no extractable tables)
+  if (length(table_titles) == 0 || all(table_titles == "")) {
+    return(NULL)
+  }
+
+  table_count <- seq_along(table_titles)
   output <- vector(mode = "list", length = max(table_count))
 
   for (i in table_count) {
-    page_data <-
-      page_data |>
-      get_table_title() |>
-      get_table()
-    output[[i]] <- page_data$table
+    tryCatch({
+      page_data <-
+        page_data |>
+        get_table_title() |>
+        get_table(fix_wrapped_names = TRUE)
+      output[[i]] <- page_data$table
+    }, error = function(e) {
+      # Skip tables that fail to parse (e.g., reference pages with no data)
+      output[[i]] <<- NULL
+    })
   }
-  output
+  # Remove NULL entries and return
+  output[!sapply(output, is.null)]
 }
