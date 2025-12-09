@@ -122,8 +122,8 @@ download_report <- function(url, filename, output_dir) {
       )
       # Verify download succeeded
       if (httr::status_code(resp) == 200 &&
-          file.exists(filepath) &&
-          file.info(filepath)$size > 10000) {
+        file.exists(filepath) &&
+        file.info(filepath)$size > 10000) {
         cat("Done\n")
       } else {
         cat("FAILED (status:", httr::status_code(resp), ")\n")

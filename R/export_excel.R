@@ -429,9 +429,8 @@ export_excel <- function(data, filepath) {
 #' @export
 #'
 build_pivot <-
-  function(
-      data,
-      metric_type_filter = c("integer", "double", "percent", "text")) {
+  function(data,
+           metric_type_filter = c("integer", "double", "percent", "text")) {
     chk::check_names(
       x = data,
       names =

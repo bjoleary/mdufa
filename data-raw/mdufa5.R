@@ -87,9 +87,10 @@ resp <- httr::GET(
   httr::write_disk(temp_pdf, overwrite = TRUE)
 )
 if (httr::status_code(resp) != 200) {
-
-  stop("Failed to download PDF. Status: ", httr::status_code(resp),
-       "\nYou may need to connect to Mullvad VPN.")
+  stop(
+    "Failed to download PDF. Status: ", httr::status_code(resp),
+    "\nYou may need to connect to Mullvad VPN."
+  )
 }
 cat("Downloaded to:", temp_pdf, "\n\n")
 
