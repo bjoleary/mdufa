@@ -136,7 +136,9 @@ verify_report <- function(pdf_path, mdufa_period, n = 35, seed = NULL) {
     # Extract date from pdf_path
     report_date <- stringr::str_extract(basename(pdf_path), "\\d{4}-\\d{2}-\\d{2}")
     mdufa_num <- switch(mdufa_period,
-      "MDUFA III" = "3", "MDUFA IV" = "4", "MDUFA V" = "5"
+      "MDUFA III" = "3",
+      "MDUFA IV" = "4",
+      "MDUFA V" = "5"
     )
 
     test_file <- paste0(
@@ -250,8 +252,10 @@ verify_from_csv <- function(csv_path,
     message("Detected simple format CSV (needs page lookup)")
     verify_from_csv_simple(csv_data, pdf_dir)
   } else {
-    stop("CSV format not recognized. Need either 'dataset' column or ",
-         "'report_mdufa_period' + 'page' columns.")
+    stop(
+      "CSV format not recognized. Need either 'dataset' column or ",
+      "'report_mdufa_period' + 'page' columns."
+    )
   }
 
   invisible(NULL)
@@ -330,7 +334,7 @@ verify_from_csv_full <- function(csv_data, pdf_dir) {
       "mdufa3" = "MDUFA III",
       "mdufa4" = "MDUFA IV",
       "mdufa5" = "MDUFA V",
-      mdufa_period_raw  # fallback to raw
+      mdufa_period_raw # fallback to raw
     )
 
     message("PDF: ", basename(pdf_path))
@@ -373,7 +377,7 @@ verify_from_csv_simple <- function(csv_data, pdf_dir) {
 
   # Map column names if needed
   if ("expected_metric" %in% names(csv_data) &&
-      !"performance_metric" %in% names(csv_data)) {
+    !"performance_metric" %in% names(csv_data)) {
     csv_data$performance_metric <- csv_data$expected_metric
   }
 
@@ -400,8 +404,10 @@ verify_from_csv_simple <- function(csv_data, pdf_dir) {
 
     # Get rows for this report
     report_rows <- csv_data |>
-      dplyr::filter(.data$dataset == !!dataset,
-                    .data$report_date == !!report_date)
+      dplyr::filter(
+        .data$dataset == !!dataset,
+        .data$report_date == !!report_date
+      )
 
     # Get bundled data for page lookup
     bundled <- switch(dataset,

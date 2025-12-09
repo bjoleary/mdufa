@@ -95,7 +95,7 @@ generate_row_image <- function(table_number,
     # Step 1: Try partial match - find row containing most metric words
     # (Metric text often wraps across rows, so exact match may fail)
     metric_words <- strsplit(tolower(performance_metric), "\\s+")[[1]]
-    metric_words <- metric_words[nchar(metric_words) > 2]  # Skip short words
+    metric_words <- metric_words[nchar(metric_words) > 2] # Skip short words
 
     # Get unique Y positions in table section
     data_rows <- page_data[
@@ -243,7 +243,7 @@ generate_row_image <- function(table_number,
         page_data$y >= table_start_y & page_data$y <= table_end_y
       ]
       unique_ys <- sort(unique(table_ys))
-      row_height <- 40  # default 2x original
+      row_height <- 40 # default 2x original
 
       # Try to estimate row height from spacing between lines
       if (length(unique_ys) > 2) {
@@ -270,7 +270,7 @@ generate_row_image <- function(table_number,
       row_left <- 50 * scale
       row_right <- 600 * scale
       row_top <- metric_y * scale - 5
-      row_bottom <- row_top + 40  # 2x original height
+      row_bottom <- row_top + 40 # 2x original height
 
       graphics::rect(
         row_left, row_top, row_right, row_bottom,
@@ -331,7 +331,9 @@ verify_metric <- function(table_number,
   if (is.null(pdf_path)) {
     stopifnot(!is.null(mdufa_period), !is.null(report_date))
     mdufa_num <- switch(mdufa_period,
-      "MDUFA III" = "3", "MDUFA IV" = "4", "MDUFA V" = "5"
+      "MDUFA III" = "3",
+      "MDUFA IV" = "4",
+      "MDUFA V" = "5"
     )
     pdf_pattern <- paste0("mdufa-", mdufa_num, "_", report_date)
     pdf_files <- list.files(pdf_dir, pattern = pdf_pattern, full.names = TRUE)
@@ -419,7 +421,9 @@ generate_verification_test <- function(row,
                                        pdf_page,
                                        verifier = "Brendan O'Leary") {
   mdufa_num <- switch(as.character(row$report_mdufa_period),
-    "MDUFA III" = "3", "MDUFA IV" = "4", "MDUFA V" = "5"
+    "MDUFA III" = "3",
+    "MDUFA IV" = "4",
+    "MDUFA V" = "5"
   )
   pdf_pattern <- paste0("mdufa-", mdufa_num, "_", row$report_date)
 
@@ -518,7 +522,9 @@ generate_test_file <- function(results,
                                output_file = NULL,
                                full_data = NULL) {
   mdufa_num <- switch(mdufa_period,
-    "MDUFA III" = "3", "MDUFA IV" = "4", "MDUFA V" = "5"
+    "MDUFA III" = "3",
+    "MDUFA IV" = "4",
+    "MDUFA V" = "5"
   )
 
   # Extract report date from pdf_path

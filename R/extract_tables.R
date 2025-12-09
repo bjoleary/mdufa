@@ -11,7 +11,6 @@
 #' @export
 #'
 remove_unnecessary_text <- function(text_string) {
-
   stringr::str_remove_all(
     string = text_string,
     pattern = unnecessary_text_pattern()
@@ -1027,16 +1026,19 @@ process_page_m5 <- function(page_string, page_number) {
   output <- vector(mode = "list", length = max(table_count))
 
   for (i in table_count) {
-    tryCatch({
-      page_data <-
-        page_data |>
-        get_table_title() |>
-        get_table(fix_wrapped_names = TRUE)
-      output[[i]] <- page_data$table
-    }, error = function(e) {
-      # Skip tables that fail to parse (e.g., reference pages with no data)
-      output[[i]] <<- NULL
-    })
+    tryCatch(
+      {
+        page_data <-
+          page_data |>
+          get_table_title() |>
+          get_table(fix_wrapped_names = TRUE)
+        output[[i]] <- page_data$table
+      },
+      error = function(e) {
+        # Skip tables that fail to parse (e.g., reference pages with no data)
+        output[[i]] <<- NULL
+      }
+    )
   }
   # Remove NULL entries and return
   output[!sapply(output, is.null)]

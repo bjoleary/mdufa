@@ -55,7 +55,6 @@ sample_stratified <- function(data, n) {
 #' @param seed Random seed for reproducibility
 #' @return Tibble of sampled rows (one per unique metric) with change_type column
 generate_verification_sample <- function(diff_result, n = 35, seed = NULL) {
-
   if (!is.null(seed)) {
     set.seed(seed)
   }

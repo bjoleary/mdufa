@@ -293,7 +293,6 @@ launch_verification_app <- function(sample,
         });
       });
     ")),
-
     shiny::sidebarLayout(
       shiny::sidebarPanel(
         width = 3,
@@ -302,11 +301,9 @@ launch_verification_app <- function(sample,
         shiny::textOutput("progress"),
         shiny::textOutput("ci_status"),
         shiny::hr(),
-
         shiny::h4("Current Row"),
         shiny::tableOutput("row_info"),
         shiny::hr(),
-
         shiny::fluidRow(
           shiny::column(
             3,
@@ -335,10 +332,8 @@ launch_verification_app <- function(sample,
           )
         ),
         shiny::hr(),
-
         shiny::textAreaInput("notes", "Notes (N)", rows = 2),
         shiny::hr(),
-
         shiny::fluidRow(
           shiny::column(
             6,
@@ -350,12 +345,10 @@ launch_verification_app <- function(sample,
           )
         ),
         shiny::hr(),
-
         shiny::actionButton("done", "Finish & Save (Q)", class = "btn-primary btn-block"),
         shiny::hr(),
         shiny::actionButton("add_rows", "+ Add 10 More Rows", class = "btn-info btn-block")
       ),
-
       shiny::mainPanel(
         width = 9,
         shiny::h4(shiny::textOutput("image_title")),
@@ -434,7 +427,7 @@ launch_verification_app <- function(sample,
       pass_count <- sum(r$status == "pass", na.rm = TRUE)
       fail_count <- sum(r$status == "fail", na.rm = TRUE)
       garbage_count <- sum(r$status == "garbage", na.rm = TRUE)
-      n <- pass_count + fail_count  # Garbage not included in agreement
+      n <- pass_count + fail_count # Garbage not included in agreement
 
       garbage_note <- if (garbage_count > 0) {
         paste0(" [", garbage_count, " garbage]")
@@ -466,7 +459,9 @@ launch_verification_app <- function(sample,
       # Iteratively add passes until Wilson LB exceeds 0.90
       calc_wilson_lb <- function(passes, fails) {
         total <- passes + fails
-        if (total == 0) return(0)
+        if (total == 0) {
+          return(0)
+        }
         p_hat <- passes / total
         denom <- 1 + z_sq / total
         center <- (p_hat + z_sq / (2 * total)) / denom
@@ -625,7 +620,7 @@ launch_verification_app <- function(sample,
         # Threshold: 280px (overlay is ~250px tall, need room above)
         if (highlight_y < 280) {
           # Put overlay below the highlight row
-          top_px <- highlight_y + 60  # Below the highlight box
+          top_px <- highlight_y + 60 # Below the highlight box
         } else {
           # Put overlay above the highlight row
           # Overlay is ~250px tall, plus ~20px margin
@@ -685,7 +680,9 @@ launch_verification_app <- function(sample,
 
     # Helper to add replacement sample when garbage is marked
     add_replacement_sample <- function() {
-      if (is.null(full_data)) return()
+      if (is.null(full_data)) {
+        return()
+      }
 
       r <- results()
       # Key columns that identify unique rows
@@ -719,12 +716,15 @@ launch_verification_app <- function(sample,
       # Pre-generate image for new row in background
       new_idx <- nrow(r)
       later::later(function() {
-        tryCatch({
-          generate_single_image(new_row, new_idx, pdf_path)
-          message("Generated image for replacement row ", new_idx)
-        }, error = function(e) {
-          message("Failed to generate image: ", e$message)
-        })
+        tryCatch(
+          {
+            generate_single_image(new_row, new_idx, pdf_path)
+            message("Generated image for replacement row ", new_idx)
+          },
+          error = function(e) {
+            message("Failed to generate image: ", e$message)
+          }
+        )
       }, delay = 0.1)
 
       message("Added replacement sample (row ", new_idx, ")")
@@ -813,17 +813,20 @@ launch_verification_app <- function(sample,
 
           # Auto-generate test file on completion
           message("\n=== Generating Verification Outputs ===")
-          tryCatch({
-            test_file <- generate_test_file(
-              results = r,
-              pdf_path = pdf_path,
-              mdufa_period = mdufa_period,
-              full_data = full_data
-            )
-            message("Test file: ", test_file)
-          }, error = function(e) {
-            message("Error generating test file: ", e$message)
-          })
+          tryCatch(
+            {
+              test_file <- generate_test_file(
+                results = r,
+                pdf_path = pdf_path,
+                mdufa_period = mdufa_period,
+                full_data = full_data
+              )
+              message("Test file: ", test_file)
+            },
+            error = function(e) {
+              message("Error generating test file: ", e$message)
+            }
+          )
 
           # Write garbage rows to known issues markdown file
           if (garbage_count > 0) {
@@ -835,7 +838,10 @@ launch_verification_app <- function(sample,
               basename(pdf_path), "\\d{4}-\\d{2}-\\d{2}"
             )
             mdufa_num <- switch(mdufa_period,
-              "MDUFA III" = "3", "MDUFA IV" = "4", "MDUFA V" = "5", "X"
+              "MDUFA III" = "3",
+              "MDUFA IV" = "4",
+              "MDUFA V" = "5",
+              "X"
             )
             issues_file <- file.path(
               "local",
@@ -848,9 +854,11 @@ launch_verification_app <- function(sample,
               "",
               paste0("Generated: ", Sys.Date()),
               "",
-              paste0("During verification, ", garbage_count,
-                     " rows were identified as garbage data. ",
-                     "These may need to be extracted better or removed."),
+              paste0(
+                "During verification, ", garbage_count,
+                " rows were identified as garbage data. ",
+                "These may need to be extracted better or removed."
+              ),
               "",
               "## Garbage Rows",
               ""
@@ -859,7 +867,8 @@ launch_verification_app <- function(sample,
             # Add each garbage row
             for (i in seq_len(nrow(garbage_rows))) {
               row <- garbage_rows[i, ]
-              md_lines <- c(md_lines,
+              md_lines <- c(
+                md_lines,
                 paste0("### Row ", i),
                 "",
                 paste0("- **Page**: ", row$page),
@@ -870,11 +879,15 @@ launch_verification_app <- function(sample,
                 paste0("- **FY**: ", row$fy),
                 if (!is.na(row$notes) && row$notes != "") {
                   paste0("- **Notes**: ", row$notes)
-                } else { NULL },
+                } else {
+                  NULL
+                },
                 ""
               )
-              message("  - Page ", row$page, " | Table ", row$table_number,
-                      " | ", row$performance_metric)
+              message(
+                "  - Page ", row$page, " | Table ", row$table_number,
+                " | ", row$performance_metric
+              )
             }
 
             writeLines(md_lines, issues_file)
