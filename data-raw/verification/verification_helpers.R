@@ -1,0 +1,645 @@
+# verification_helpers.R
+# Helper functions for MDUFA extraction verification
+# NOT part of the installed package - development use only
+
+#' Find Local PDF by Pattern
+#'
+#' Searches for a PDF in the local archive matching a pattern.
+#'
+#' @param pattern Pattern to match (e.g., "mdufa-4_2023-11-16")
+#' @param pdf_dir Directory to search
+#' @return Path to PDF or NULL if not found
+find_local_pdf <- function(pattern, pdf_dir = "data-raw/pdf_reports") {
+  files <- list.files(pdf_dir, pattern = pattern, full.names = TRUE)
+  if (length(files) == 0) {
+    return(NULL)
+  }
+  files[1]
+}
+
+#' Generate Row Image
+#'
+#' Renders a PDF page with the target row highlighted.
+#'
+#' @param table_number Table number
+#' @param organization Organization code
+#' @param performance_metric Metric name
+#' @param page PDF page number
+#' @param pdf_path Path to PDF
+#' @param output_path Where to save the image
+#' @param dpi Resolution
+#' @return Path to generated image
+generate_row_image <- function(table_number,
+                               organization,
+                               performance_metric,
+                               page,
+                               pdf_path,
+                               output_path,
+                               dpi = 150) {
+  # Render page
+  img <- magick::image_read_pdf(pdf_path, pages = page, density = dpi)
+
+  # Get word-level data for highlighting
+  page_data <- pdftools::pdf_data(pdf_path)[[page]]
+  scale <- dpi / 72
+
+  # Find table boundaries
+  table_num_escaped <- gsub("\\.", "\\\\.", table_number)
+  table_num_pattern <- paste0("^", table_num_escaped, "([^0-9]|$)")
+  table_num_matches <- page_data[grepl(table_num_pattern, page_data$text), ]
+
+  table_start_y <- 0
+  table_end_y <- Inf
+
+  if (nrow(table_num_matches) > 0) {
+    table_start_y <- min(table_num_matches$y) - 20
+    table_words <- page_data[page_data$text == "Table", ]
+    if (nrow(table_words) > 0) {
+      min_y <- min(table_num_matches$y) + 20
+      tables_after_y <- table_words$y[table_words$y > min_y]
+      if (length(tables_after_y) > 0) {
+        table_end_y <- min(tables_after_y) - 10
+      }
+    }
+  }
+
+  # Find FY header row FIRST (so we can exclude it from metric search)
+  fy_pattern <- "^\\d{4}$"
+  fy_headers <- page_data[
+    grepl(fy_pattern, page_data$text) &
+      page_data$y >= table_start_y &
+      page_data$y <= table_end_y,
+  ]
+
+  fy_header_y <- NULL
+  if (nrow(fy_headers) > 0) {
+    header_y_candidates <- fy_headers |>
+      dplyr::count(.data$y) |>
+      dplyr::filter(.data$n >= 3) |>
+      dplyr::slice_min(.data$y, n = 1) |>
+      dplyr::pull(.data$y)
+
+    if (length(header_y_candidates) > 0) {
+      fy_header_y <- header_y_candidates[1]
+    }
+  }
+
+  # Data rows start below the header row
+  data_start_y <- if (!is.null(fy_header_y)) fy_header_y + 5 else table_start_y
+
+  # Find metric row by searching for the metric text
+  metric_y <- NULL
+  if (!is.na(performance_metric)) {
+    y_tolerance <- 5
+
+    # Step 1: Try partial match - find row containing most metric words
+    # (Metric text often wraps across rows, so exact match may fail)
+    metric_words <- strsplit(tolower(performance_metric), "\\s+")[[1]]
+    metric_words <- metric_words[nchar(metric_words) > 2]  # Skip short words
+
+    # Get unique Y positions in table section
+    data_rows <- page_data[
+      page_data$y >= data_start_y & page_data$y <= table_end_y,
+    ]
+    unique_ys <- sort(unique(data_rows$y))
+
+    best_match_y <- NULL
+    best_match_count <- 0
+
+    for (y in unique_ys) {
+      # Get all words at this Y position (within tolerance), sorted by x
+      row_words <- data_rows[abs(data_rows$y - y) <= y_tolerance, ]
+      row_text <- tolower(paste(row_words$text, collapse = " "))
+
+      # Count how many metric words appear in this row
+      matches <- sum(sapply(metric_words, function(w) grepl(w, row_text, fixed = TRUE)))
+
+      # Require at least 60% of metric words to match
+      if (matches > best_match_count && matches >= length(metric_words) * 0.6) {
+        best_match_count <- matches
+        best_match_y <- y
+      }
+    }
+
+    if (!is.null(best_match_y)) {
+      metric_y <- best_match_y
+    }
+
+    # Step 2: Fallback to distinctive word matching if exact match failed
+    if (is.null(metric_y)) {
+      metric_words <- strsplit(performance_metric, "\\s+")[[1]]
+      # Only filter truly generic words - keep distinctive words like
+      # FDA, Industry, Total, Average, Days which differentiate metrics
+      common_words <- c(
+        "Number", "of", "the", "a", "an", "to", "for", "and", "or",
+        "with", "in", "on", "by", "Rate"
+      )
+      distinctive <- metric_words[
+        !metric_words %in% common_words & nchar(metric_words) > 2
+      ]
+
+      # Collect y-positions for distinctive words (only in table section)
+      word_y_positions <- list()
+      for (word in distinctive) {
+        matches <- page_data[
+          page_data$text == word &
+            page_data$y >= data_start_y &
+            page_data$y <= table_end_y,
+        ]
+        if (nrow(matches) > 0) {
+          word_y_positions[[word]] <- matches$y
+        }
+      }
+
+      # Find y-position where distinctive words co-occur
+      # Priority: prefer rows where ALL words match, then most matches
+      if (length(word_y_positions) > 0) {
+        all_ys <- unlist(word_y_positions)
+        unique_ys <- unique(all_ys)
+        best_y <- NULL
+        best_count <- 0
+
+        # Key differentiator words - these should be required if present
+        key_words <- c(
+          "FDA", "Industry", "Total", "Average", "Days", "Maximum", "Minimum"
+        )
+        required_words <- intersect(names(word_y_positions), key_words)
+
+        for (y in unique_ys) {
+          # Count how many distinctive words appear at this y
+          words_at_y <- names(word_y_positions)[sapply(
+            word_y_positions,
+            function(ys) any(abs(ys - y) <= y_tolerance)
+          )]
+          count <- length(words_at_y)
+
+          # Check if all required key words are present at this y
+          has_all_required <- all(required_words %in% words_at_y)
+
+          # Prefer: (1) rows with all required words, (2) highest count
+          if (has_all_required && count > best_count) {
+            best_count <- count
+            best_y <- y
+          } else if (is.null(best_y) && count > best_count) {
+            # Fallback if no row has all required words
+            best_count <- count
+            best_y <- y
+          }
+        }
+
+        # If we found a match but it doesn't have all required words,
+        # try again prioritizing required words
+        if (!is.null(best_y) && length(required_words) > 0) {
+          for (y in unique_ys) {
+            words_at_y <- names(word_y_positions)[sapply(
+              word_y_positions,
+              function(ys) any(abs(ys - y) <= y_tolerance)
+            )]
+            if (all(required_words %in% words_at_y)) {
+              best_y <- y
+              break
+            }
+          }
+        }
+
+        if (!is.null(best_y)) {
+          metric_y <- best_y
+        }
+      }
+
+      # Fallback: first distinctive word (in table section only)
+      if (is.null(metric_y) && length(distinctive) > 0) {
+        for (word in distinctive) {
+          matches <- page_data[
+            page_data$text == word &
+              page_data$y >= data_start_y &
+              page_data$y <= table_end_y,
+          ]
+          if (nrow(matches) > 0) {
+            metric_y <- matches$y[1]
+            break
+          }
+        }
+      }
+    }
+  }
+
+  # Get FY columns from the header row we already found
+  if (!is.null(fy_header_y) && nrow(fy_headers) > 0) {
+    fy_columns <- fy_headers[fy_headers$y == fy_header_y, ]
+  } else {
+    fy_columns <- data.frame()
+  }
+
+  # Draw highlight
+  if (!is.null(metric_y)) {
+    img <- magick::image_draw(img)
+
+    if (nrow(fy_columns) > 0) {
+      # Highlight full row across FY columns
+      # Estimate row height from table structure
+      # Get all y-positions in the table area to estimate row spacing
+      table_ys <- page_data$y[
+        page_data$y >= table_start_y & page_data$y <= table_end_y
+      ]
+      unique_ys <- sort(unique(table_ys))
+      row_height <- 40  # default 2x original
+
+      # Try to estimate row height from spacing between lines
+      if (length(unique_ys) > 2) {
+        diffs <- diff(unique_ys)
+        # Filter to reasonable row heights (8-30 points)
+        reasonable_diffs <- diffs[diffs >= 8 & diffs <= 30]
+        if (length(reasonable_diffs) > 0) {
+          row_height <- median(reasonable_diffs) * scale * 1.8
+        }
+      }
+
+      row_left <- min(fy_columns$x) * scale - 10
+      row_right <- max(fy_columns$x + fy_columns$width) * scale + 50
+      row_top <- metric_y * scale - 5
+      row_bottom <- row_top + max(row_height, 40)
+
+      graphics::rect(
+        row_left, row_top, row_right, row_bottom,
+        col = grDevices::adjustcolor("yellow", alpha.f = 0.3),
+        border = "red", lwd = 2
+      )
+    } else {
+      # Fallback: highlight just the metric text area
+      row_left <- 50 * scale
+      row_right <- 600 * scale
+      row_top <- metric_y * scale - 5
+      row_bottom <- row_top + 40  # 2x original height
+
+      graphics::rect(
+        row_left, row_top, row_right, row_bottom,
+        col = grDevices::adjustcolor("yellow", alpha.f = 0.3),
+        border = "red", lwd = 2
+      )
+    }
+
+    grDevices::dev.off()
+  }
+
+  # Add annotation
+  label <- paste0(
+    "Table ", table_number, " | ", organization, " | ",
+    substr(performance_metric, 1, 50)
+  )
+  img <- magick::image_annotate(img, label,
+    size = 14, color = "black", boxcolor = "white",
+    location = "+10+10"
+  )
+
+  magick::image_write(img, output_path)
+
+  # Return path and highlight position for dynamic overlay positioning
+  list(
+    path = output_path,
+    highlight_y = if (!is.null(metric_y)) metric_y * scale else NA
+  )
+}
+
+#' Verify Metric Row
+#'
+#' Highlights an entire row of values for a performance metric across
+#' all fiscal years. Uses key fields (table_number, organization, metric)
+#' rather than expected values for location.
+#'
+#' @param table_number Table number (e.g., "1.1")
+#' @param organization Organization code (e.g., "OHT8", "CDRH")
+#' @param performance_metric Metric name to highlight
+#' @param page PDF page number
+#' @param pdf_path Path to PDF
+#' @param mdufa_period MDUFA period (used if pdf_path is NULL)
+#' @param report_date Report date (used if pdf_path is NULL)
+#' @param pdf_dir Directory containing PDFs
+#' @param dpi Resolution for rendering
+#'
+#' @return Invisibly returns path to generated image
+verify_metric <- function(table_number,
+                          organization,
+                          performance_metric,
+                          page = NULL,
+                          pdf_path = NULL,
+                          mdufa_period = NULL,
+                          report_date = NULL,
+                          pdf_dir = "data-raw/pdf_reports",
+                          dpi = 150) {
+  # Resolve PDF path if not provided
+  if (is.null(pdf_path)) {
+    stopifnot(!is.null(mdufa_period), !is.null(report_date))
+    mdufa_num <- switch(mdufa_period,
+      "MDUFA III" = "3", "MDUFA IV" = "4", "MDUFA V" = "5"
+    )
+    pdf_pattern <- paste0("mdufa-", mdufa_num, "_", report_date)
+    pdf_files <- list.files(pdf_dir, pattern = pdf_pattern, full.names = TRUE)
+    if (length(pdf_files) == 0) {
+      stop("No PDF found matching: ", pdf_pattern)
+    }
+    pdf_path <- pdf_files[1]
+  }
+
+  # Find page if not provided
+  if (is.null(page)) {
+    page <- find_table_page(pdf_path, table_number)
+    if (is.na(page)) {
+      stop("Table ", table_number, " not found in PDF")
+    }
+  }
+
+  # Generate image to temp location
+  timestamp <- format(Sys.time(), "%H%M%S")
+  out_path <- file.path(
+    "/tmp",
+    paste0(
+      "verify_", table_number, "_",
+      gsub(" ", "_", substr(performance_metric, 1, 30)),
+      "_", timestamp, ".png"
+    )
+  )
+
+  generate_row_image(
+    table_number = table_number,
+    organization = organization,
+    performance_metric = performance_metric,
+    page = page,
+    pdf_path = pdf_path,
+    output_path = out_path,
+    dpi = dpi
+  )
+
+  # Open the image
+  message("Table: ", table_number, " | Org: ", organization)
+  message("Metric: ", performance_metric)
+  message("Page: ", page)
+  message("Opening: ", out_path)
+
+  system(paste("open", shQuote(out_path)), wait = FALSE)
+
+  invisible(out_path)
+}
+
+#' Verify Data Row (v2)
+#'
+#' Wrapper around verify_metric() that takes a data frame row.
+#' Highlights entire metric row, not just single cell.
+#'
+#' @param row Single row from mdufa dataset
+#' @param ... Additional arguments passed to verify_metric()
+#' @return Invisibly returns path to generated image
+verify_row_v2 <- function(row, ...) {
+  if (nrow(row) != 1) {
+    stop("row must be a single row")
+  }
+
+  verify_metric(
+    table_number = as.character(row$table_number),
+    organization = as.character(row$organization),
+    performance_metric = as.character(row$performance_metric),
+    page = as.integer(row$page),
+    mdufa_period = as.character(row$report_mdufa_period),
+    report_date = as.character(row$report_date),
+    ...
+  )
+}
+
+#' Generate Verification Test Code
+#'
+#' Creates testthat code for a verified data point that can be
+#' copied into a test file. Tests fresh extraction from PDF.
+#'
+#' @param row Single row from extracted data (with report_date)
+#' @param pdf_page Page number where value was verified
+#' @param verifier Name of person who verified
+#'
+#' @return Character string with test code (printed to console)
+generate_verification_test <- function(row,
+                                       pdf_page,
+                                       verifier = "Brendan O'Leary") {
+  mdufa_num <- switch(as.character(row$report_mdufa_period),
+    "MDUFA III" = "3", "MDUFA IV" = "4", "MDUFA V" = "5"
+  )
+  pdf_pattern <- paste0("mdufa-", mdufa_num, "_", row$report_date)
+
+  code <- glue::glue('
+test_that("{row$table_number} {row$organization} {substr(row$performance_metric, 1, 30)}...", {{
+  skip_if_not_installed("pdftools")
+  pdf_path <- find_local_pdf("{pdf_pattern}")
+  skip_if(is.null(pdf_path), "{row$report_mdufa_period} PDF not available")
+
+  # Verified {Sys.Date()} against PDF page {pdf_page}
+  # Verifier: {verifier}
+  data <- extract_report(pdf_path, mdufa_period = "{row$report_mdufa_period}") |>
+    dplyr::filter(
+      table_number == "{row$table_number}",
+      organization == "{row$organization}",
+      performance_metric == "{row$performance_metric}"
+    )
+
+  expect_equal(data$value[data$fy == "{row$fy}"], "{row$value}")
+}})
+')
+  cat(code)
+  invisible(code)
+}
+
+#' Check Verification Status
+#'
+#' Calculates the Wilson score lower bound and determines if verification
+#' is complete, failed, or needs more samples.
+#'
+#' @param pass_count Number of passed rows
+#' @param fail_count Number of failed rows
+#' @return List with status, message, and optionally samples_needed
+check_verification_status <- function(pass_count, fail_count) {
+  if (fail_count > 0) {
+    return(list(
+      status = "FAILED",
+      message = paste0(fail_count, " failure(s) - fix code and re-verify")
+    ))
+  }
+
+  if (pass_count == 0) {
+    return(list(
+      status = "CONTINUE",
+      message = "No samples verified yet",
+      samples_needed = 35
+    ))
+  }
+
+  # Calculate Wilson score lower bound
+  # Using formula: n / (n + z^2) where z = 1.96 for 95% CI
+  z_sq <- 3.84 # 1.96^2
+  lower_bound <- pass_count / (pass_count + z_sq)
+
+  if (lower_bound > 0.90) {
+    return(list(
+      status = "COMPLETE",
+      lower_bound = lower_bound,
+      message = paste0(
+        "LB = ", round(lower_bound * 100, 2),
+        "% > 90% with n=", pass_count
+      )
+    ))
+  } else {
+    # Estimate samples needed for LB > 90%
+    # Solve: n / (n + 3.84) > 0.90 => n > 0.90 * 3.84 / 0.10 = 34.56
+    samples_needed <- max(0, ceiling(0.90 * z_sq / 0.10) - pass_count)
+
+    return(list(
+      status = "CONTINUE",
+      lower_bound = lower_bound,
+      message = paste0(
+        "LB = ", round(lower_bound * 100, 2),
+        "% <= 90% - need ~", samples_needed, " more samples"
+      ),
+      samples_needed = samples_needed
+    ))
+  }
+}
+
+#' Generate Test File
+#'
+#' Automatically generates a testthat file from verification results.
+#'
+#' @param results Passed verification results (data frame with status == "pass")
+#' @param pdf_path Path to the PDF that was verified
+#' @param mdufa_period MDUFA period string
+#' @param output_file Path for the test file. If NULL (default), automatically
+#'   generates filename based on mdufa_period and report date from pdf_path.
+#' @param full_data Optional full extracted data to look up all FY values for
+#'   each verified metric. If NULL, only the single FY from results is tested.
+#' @return Path to generated file
+generate_test_file <- function(results,
+                               pdf_path,
+                               mdufa_period,
+                               output_file = NULL,
+                               full_data = NULL) {
+  mdufa_num <- switch(mdufa_period,
+    "MDUFA III" = "3", "MDUFA IV" = "4", "MDUFA V" = "5"
+  )
+
+  # Extract report date from pdf_path
+  report_date <- stringr::str_extract(basename(pdf_path), "\\d{4}-\\d{2}-\\d{2}")
+
+  # Auto-generate output_file if not provided
+  if (is.null(output_file)) {
+    output_file <- file.path(
+      "tests", "testthat",
+      paste0("test-verified-mdufa", mdufa_num, "-", report_date, ".R")
+    )
+  }
+
+  pdf_pattern <- paste0("mdufa-", mdufa_num, "_", report_date)
+
+  # If full_data provided, expand results to include all FY values for each
+  # verified metric (including NA values)
+  if (!is.null(full_data)) {
+    # Get unique metric keys from verified results
+    key_cols <- c("table_number", "organization", "performance_metric")
+    unique_metrics <- results |>
+      dplyr::distinct(dplyr::across(dplyr::all_of(key_cols)))
+
+    # Look up all FY values for each verified metric from full_data
+    # Keep NA values - they are important to verify
+    expanded_results <- full_data |>
+      dplyr::semi_join(unique_metrics, by = key_cols) |>
+      dplyr::select(
+        dplyr::all_of(key_cols),
+        "fy",
+        "value"
+      )
+
+    n_metrics <- nrow(unique_metrics)
+    n_values <- nrow(expanded_results)
+    n_na <- sum(is.na(expanded_results$value))
+    message(
+      "Expanded ", n_metrics, " verified metrics to ",
+      n_values, " FY/value pairs (", n_na, " NA values)"
+    )
+  } else {
+    expanded_results <- results |>
+      dplyr::select(
+        .data$table_number,
+        .data$organization,
+        .data$performance_metric,
+        .data$fy,
+        .data$value
+      )
+    n_metrics <- nrow(results)
+    n_values <- nrow(results)
+  }
+
+  # Generate header with helper function
+  # Build nolint directive separately to avoid lintr seeing it in this file
+  nolint_directive <- paste0("# nolint", " start")
+  header <- glue::glue('
+{nolint_directive}
+# Verified extraction tests for {mdufa_period} {report_date} report
+# Generated: {Sys.Date()}
+# Verifier: Brendan O\'Leary
+# Sample size: {n_metrics} metrics, {n_values} values
+# Statistical basis: LB of 95% CI > 90% (Wilson score)
+
+# Helper function to find local PDF (works from testthat directory)
+find_local_pdf <- function(pattern) {{
+  # testthat runs from tests/testthat, so go up two levels
+  pdf_dir <- testthat::test_path("..", "..", "data-raw", "pdf_reports")
+  files <- list.files(pdf_dir, pattern = pattern, full.names = TRUE)
+  if (length(files) == 0) return(NULL)
+  files[1]
+}}
+
+test_that("{mdufa_period} {report_date} extraction is accurate", {{
+  skip_if_not_installed("pdftools")
+  pdf_path <- find_local_pdf("{pdf_pattern}")
+  skip_if(is.null(pdf_path), "{mdufa_period} PDF not available locally")
+
+  data <- extract_report(pdf_path, mdufa_period = "{mdufa_period}")
+
+')
+
+  # Generate assertions for each row
+  # Use different assertions for NA vs non-NA values
+  assertions <- expanded_results |>
+    dplyr::rowwise() |>
+    dplyr::mutate(
+      assertion = if (is.na(value)) {
+        glue::glue(
+          '# Table {table_number} | {organization} | {substr(performance_metric, 1, 40)}... | FY {fy} = NA
+expect_true(is.na(
+  data$value[data$table_number == "{table_number}" &
+             data$organization == "{organization}" &
+             data$performance_metric == "{performance_metric}" &
+             data$fy == "{fy}"]
+))
+'
+        )
+      } else {
+        glue::glue(
+          '# Table {table_number} | {organization} | {substr(performance_metric, 1, 40)}... | FY {fy}
+expect_equal(
+  data$value[data$table_number == "{table_number}" &
+             data$organization == "{organization}" &
+             data$performance_metric == "{performance_metric}" &
+             data$fy == "{fy}"],
+  "{value}"
+)
+'
+        )
+      }
+    ) |>
+    dplyr::pull(.data$assertion) |>
+    paste(collapse = "\n")
+
+  # Build nolint end directive separately to avoid lintr seeing it in this file
+  nolint_end <- paste0("# nolint", " end")
+  footer <- paste0("})\n", nolint_end, "\n")
+
+  # Write file
+  writeLines(paste0(header, assertions, footer), output_file)
+  message("Generated test file: ", output_file)
+  output_file
+}

@@ -4,4 +4,7 @@ linters: linters_with_defaults(
     commented_code_linter = NULL,
     object_usage_linter = NULL
   )
+exclusions: list(
+    "data-raw/verification"
+  )
 encoding: "UTF-8"

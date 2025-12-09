@@ -16,6 +16,4 @@ scratchpad.R
 ^\.aider
 ^\.continue$
 ^\.codeium$
-^KNOWN_ISSUES\.md$
-^verification-process\.md$
-^historical-verification-plan\.md$
+^local$
