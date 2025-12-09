@@ -163,6 +163,7 @@ verify_report <- function(pdf_path, mdufa_period, n = 35, seed = NULL) {
     message("\nNeed ", status$samples_needed, " more samples for 90% LB.")
     message("Resume with:")
     message("  launch_verification_app(")
+    message("    sample = NULL,")
     message("    resume_from = '", results_path, "',")
     message("    pdf_path = '", pdf_path, "',")
     message("    mdufa_period = '", mdufa_period, "'")
