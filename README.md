@@ -21,27 +21,18 @@ on
 The package includes functions to scrape those PDFs to extract the data
 and includes the most recent dataset as of publication.
 
-Aside from some spot-checks, the data provided by the `mdufa` R package
-has had limited verification and may be inaccurate. Use this information
-at your own risk and verify information using the reports provided
-directly by FDA. To facilitate this, each data point provided includes
-information about its source, including a link to the FDA report from
-which it came, the relevant page number, and more.
+The extraction process has been verified using stratified random
+sampling with manual verification against the source PDFs. However, PDF
+text extraction is inherently imperfect and errors may exist. Use this
+information at your own risk and verify critical data points using the
+reports provided directly by FDA. To facilitate this, each data point
+includes source metadata: the FDA report link, page number, table
+number, and organization.
 
-“Text” metrics are typically descriptions of the MDUFA performance goals
-themselves (e.g. “90% Within 320 FDA Days”). Because of the way these
-values break across lines within table cells in the PDF reports, they
-are more difficult to retrieve and may be more likely to be incomplete
-or to be inaccurate. Similarly, some tables in the reports have
-footnotes, and they are not included in this dataset.
-
-Aside from some spot-checks, the data provided by the mdufa R package
-and included in this workbook has had limited verification and may be
-inaccurate. Use this information at your own risk and verify information
-using the reports provided directly by FDA. To facilitate this, each
-data point provided includes information about its source, including a
-link to the FDA report from which it came, the relevant page number, and
-more.
+“Text” metrics (typically performance goal descriptions like “90% Within
+320 FDA Days”) are more prone to extraction errors because they break
+across lines within table cells. Footnotes are intentionally excluded
+from the dataset.
 
 If you find a problem in this dataset, please report it
 [here](https://github.com/bjoleary/mdufa/issues).
@@ -91,11 +82,11 @@ mdufa::mdufa3 %>%
 #> # A tibble: 5 × 6
 #>   organization program metric_type performance_metric                fy    value
 #>   <chr>        <chr>   <chr>       <chr>                             <chr> <chr>
-#> 1 OIR          PMA     integer     Number of PMAs filed              2014  0    
-#> 2 DSD          510(k)  double      Mean FDA days for submissions th… 2017  0    
-#> 3 ODE          510(k)  integer     Number of Withdrawals             2014  175  
-#> 4 DCTD         510(k)  integer     80th Percentile Total days to MD… 2013  245  
-#> 5 CDRH         PMA     integer     Panel-Tracked Supplements (Panel… 2015  0
+#> 1 DSD          PMA     double      Mean industry days for submissio… 2017  0    
+#> 2 DCTD         510(k)  integer     510(k) pending MDUFA III Decisio… 2015  0    
+#> 3 OIR          510(k)  integer     Number Not Accepted               2016  92   
+#> 4 DMD          PMA     percent     Current SI Performance Percent G… 2014  100% 
+#> 5 DRGUD        PMA     integer     60th Percentile FDA days to MDUF… 2017  176
 ```
 
 Data from MDUFA 5 is available using `mdufa::mdufa5`. MDUFA 4 is also

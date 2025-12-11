@@ -1,5 +1,34 @@
 # mdufa (development version)
 
+# mdufa 0.2.3
+
+## Bug Fixes
+
+* Fixed CBER pattern matching bug in MDUFA V extraction that was incorrectly
+  dropping CDRH/OHT data from Tables 8.x and 9.x. The pattern `".*CBER.*"` was
+  matching a new "(CDRH+CBER)" metric name, causing pages 162-249 to be excluded.
+  Changed to `"Table.*CBER"` to match only actual CBER table pages.
+
+## Data Updates
+
+* Updated `mdufa5` dataset with November 20, 2025 annual report (17,598 rows).
+  Annual reports include additional CLIA Waiver tables (5.x, 7.x, 11.x, 12.x)
+  not present in quarterly reports.
+
+## Internal
+
+* Fixed stratified sampling bug in verification tooling where `n_groups()` was
+  referencing the wrong object, causing samples to be dominated by alphabetically
+  first organizations.
+
+* Added append functionality to verification test generation so new verifications
+  merge with existing tests rather than overwriting.
+
+* Fixed CSV column type handling to preserve table numbers like "1.10" (was being
+  read as numeric "1.1").
+
+* Added 450 verified extraction assertions (90 unique metrics across 5 fiscal years).
+
 # mdufa 0.2.1
 
 ## Bug Fixes

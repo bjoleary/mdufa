@@ -642,7 +642,7 @@ test_that("{mdufa_period} {report_date} extraction is accurate", {{
   pdf_path <- find_local_pdf("{pdf_pattern}")
   skip_if(is.null(pdf_path), "{mdufa_period} PDF not available locally")
 
-  data <- extract_report(pdf_path, mdufa_period = "{mdufa_period}")
+  data <- suppressWarnings(extract_report(pdf_path, mdufa_period = "{mdufa_period}"))
 
 ')
 
