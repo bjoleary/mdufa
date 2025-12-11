@@ -26,15 +26,15 @@ LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 Imports:
-    openxlsx,
+    chk,
     dplyr,
     janitor,
+    openxlsx,
     purrr,
     readr,
     stringr,
     tibble,
     tidyr,
-    tidyselect,
-    chk
+    tidyselect
 Depends:
     R (>= 4.1)
