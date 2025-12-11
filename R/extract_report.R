@@ -482,6 +482,14 @@ extract_report_m5 <- function(pdf_path,
       nchar(.data$performance_metric) > 1
     )
 
+  # Remove additional footnote text that starts with uppercase but is clearly
+
+  # explanatory text (these have NA values and specific text patterns)
+  result <- result |>
+    dplyr::filter(
+      !is_footnote_row(.data$performance_metric, .data$value)
+    )
+
   # Add report metadata
   if (!is.null(report_date)) {
     result$report_date <- report_date
