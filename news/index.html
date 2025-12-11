@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">mdufa</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.3</span>
       </span>
     </div>
 
@@ -43,6 +43,24 @@
 
     <div class="section level2">
 <h2 class="page-header" data-toc-text="development version" id="mdufa-development-version">mdufa (development version)<a class="anchor" aria-label="anchor" href="#mdufa-development-version"></a></h2>
+</div>
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="0.2.3" id="mdufa-023">mdufa 0.2.3<a class="anchor" aria-label="anchor" href="#mdufa-023"></a></h2>
+<div class="section level3">
+<h3 id="bug-fixes-0-2-3">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-2-3"></a></h3>
+<ul><li>Fixed CBER pattern matching bug in MDUFA V extraction that was incorrectly dropping CDRH/OHT data from Tables 8.x and 9.x. The pattern <code>".*CBER.*"</code> was matching a new “(CDRH+CBER)” metric name, causing pages 162-249 to be excluded. Changed to <code>"Table.*CBER"</code> to match only actual CBER table pages.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="data-updates-0-2-3">Data Updates<a class="anchor" aria-label="anchor" href="#data-updates-0-2-3"></a></h3>
+<ul><li>Updated <code>mdufa5</code> dataset with November 20, 2025 annual report (17,598 rows). Annual reports include additional CLIA Waiver tables (5.x, 7.x, 11.x, 12.x) not present in quarterly reports.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="internal-0-2-3">Internal<a class="anchor" aria-label="anchor" href="#internal-0-2-3"></a></h3>
+<ul><li><p>Fixed stratified sampling bug in verification tooling where <code><a href="https://dplyr.tidyverse.org/reference/group_data.html" class="external-link">n_groups()</a></code> was referencing the wrong object, causing samples to be dominated by alphabetically first organizations.</p></li>
+<li><p>Added append functionality to verification test generation so new verifications merge with existing tests rather than overwriting.</p></li>
+<li><p>Fixed CSV column type handling to preserve table numbers like “1.10” (was being read as numeric “1.1”).</p></li>
+<li><p>Added 450 verified extraction assertions (90 unique metrics across 5 fiscal years).</p></li>
+</ul></div>
 </div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.2.1" id="mdufa-021">mdufa 0.2.1<a class="anchor" aria-label="anchor" href="#mdufa-021"></a></h2>
