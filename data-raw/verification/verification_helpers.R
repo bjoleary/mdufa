@@ -558,12 +558,12 @@ generate_test_file <- function(results,
         "value"
       )
 
-    n_metrics <- nrow(unique_metrics)
-    n_values <- nrow(expanded_results)
+    n_new_metrics <- nrow(unique_metrics)
+    n_new_values <- nrow(expanded_results)
     n_na <- sum(is.na(expanded_results$value))
     message(
-      "Expanded ", n_metrics, " verified metrics to ",
-      n_values, " FY/value pairs (", n_na, " NA values)"
+      "Expanded ", n_new_metrics, " verified metrics to ",
+      n_new_values, " FY/value pairs (", n_na, " NA values)"
     )
   } else {
     expanded_results <- results |>
@@ -574,9 +574,48 @@ generate_test_file <- function(results,
         .data$fy,
         .data$value
       )
-    n_metrics <- nrow(results)
-    n_values <- nrow(results)
+    n_new_metrics <- nrow(results)
+    n_new_values <- nrow(results)
   }
+
+  # Check if test file already exists and parse existing assertions
+  existing_results <- NULL
+  if (file.exists(output_file)) {
+    message("Found existing test file, will append new tests...")
+    existing_results <- parse_existing_test_file(output_file)
+    if (!is.null(existing_results) && nrow(existing_results) > 0) {
+      message("  Parsed ", nrow(existing_results), " existing assertions")
+    }
+  }
+
+  # Merge new and existing results, preferring new values for duplicates
+  if (!is.null(existing_results) && nrow(existing_results) > 0) {
+    key_cols_full <- c("table_number", "organization", "performance_metric", "fy")
+
+    # Remove from existing any keys that are in new results
+    existing_deduped <- existing_results |>
+      dplyr::anti_join(expanded_results, by = key_cols_full)
+
+    # Combine: new results first, then existing (deduped)
+    combined_results <- dplyr::bind_rows(expanded_results, existing_deduped)
+
+    n_existing_kept <- nrow(existing_deduped)
+    n_replaced <- nrow(existing_results) - n_existing_kept
+    if (n_replaced > 0) {
+      message("  Replaced ", n_replaced, " existing assertions with new values")
+    }
+    message("  Kept ", n_existing_kept, " existing assertions")
+  } else {
+    combined_results <- expanded_results
+  }
+
+  # Count unique metrics for header
+  n_metrics <- combined_results |>
+    dplyr::distinct(table_number, organization, performance_metric) |>
+    nrow()
+  n_values <- nrow(combined_results)
+
+  message("Total: ", n_metrics, " metrics, ", n_values, " values")
 
   # Generate header with helper function
   # Build nolint directive separately to avoid lintr seeing it in this file
@@ -609,7 +648,7 @@ test_that("{mdufa_period} {report_date} extraction is accurate", {{
 
   # Generate assertions for each row
   # Use different assertions for NA vs non-NA values
-  assertions <- expanded_results |>
+  assertions <- combined_results |>
     dplyr::rowwise() |>
     dplyr::mutate(
       assertion = if (is.na(value)) {
@@ -648,4 +687,79 @@ expect_equal(
   writeLines(paste0(header, assertions, footer), output_file)
   message("Generated test file: ", output_file)
   output_file
+}
+
+#' Parse Existing Test File for Assertions
+#'
+#' Extracts table_number, organization, performance_metric, fy, and value
+#' from existing expect_equal and expect_true(is.na(...)) assertions.
+#'
+#' @param test_file Path to existing test file
+#' @return Data frame with parsed assertions, or NULL if parsing fails
+#' @keywords internal
+parse_existing_test_file <- function(test_file) {
+
+  tryCatch(
+    {
+      lines <- readLines(test_file)
+      content <- paste(lines, collapse = "\n")
+
+      # Pattern for expect_equal assertions
+      # Captures: table_number, organization, performance_metric, fy, value
+      equal_pattern <- paste0(
+        'data\\$value\\[data\\$table_number == "([^"]+)" &\\s*',
+        'data\\$organization == "([^"]+)" &\\s*',
+        'data\\$performance_metric == "([^"]+)" &\\s*',
+        'data\\$fy == "([^"]+)"\\]\\s*,\\s*',
+        '"([^"]*)"'
+      )
+
+      equal_matches <- stringr::str_match_all(content, equal_pattern)[[1]]
+
+      # Pattern for expect_true(is.na(...)) assertions
+      na_pattern <- paste0(
+        'expect_true\\(is\\.na\\(\\s*',
+        'data\\$value\\[data\\$table_number == "([^"]+)" &\\s*',
+        'data\\$organization == "([^"]+)" &\\s*',
+        'data\\$performance_metric == "([^"]+)" &\\s*',
+        'data\\$fy == "([^"]+)"\\]'
+      )
+
+      na_matches <- stringr::str_match_all(content, na_pattern)[[1]]
+
+      # Build data frames
+      results <- NULL
+
+
+      if (nrow(equal_matches) > 0) {
+        equal_df <- data.frame(
+          table_number = equal_matches[, 2],
+          organization = equal_matches[, 3],
+          performance_metric = equal_matches[, 4],
+          fy = equal_matches[, 5],
+          value = equal_matches[, 6],
+          stringsAsFactors = FALSE
+        )
+        results <- equal_df
+      }
+
+      if (nrow(na_matches) > 0) {
+        na_df <- data.frame(
+          table_number = na_matches[, 2],
+          organization = na_matches[, 3],
+          performance_metric = na_matches[, 4],
+          fy = na_matches[, 5],
+          value = NA_character_,
+          stringsAsFactors = FALSE
+        )
+        results <- if (is.null(results)) na_df else dplyr::bind_rows(results, na_df)
+      }
+
+      results
+    },
+    error = function(e) {
+      message("Warning: Could not parse existing test file: ", e$message)
+      NULL
+    }
+  )
 }

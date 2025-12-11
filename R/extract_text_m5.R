@@ -35,7 +35,8 @@ extract_text_m5 <- function(url_report) {
     start_of_cber <-
       stringr::str_which(
         string = raw_text$raw_text,
-        pattern = stringr::regex(".*CBER.*")
+        # Match actual CBER table pages, not "(CDRH+CBER)" metric names
+        pattern = stringr::regex("Table.*CBER")
       ) |>
       (\(x) x[[1]])()
 

@@ -27,20 +27,28 @@ get_unchanged_rows <- function(diff_result) {
 #' @param n Number of rows to sample
 #' @return Sampled tibble
 sample_stratified <- function(data, n) {
+
   if (nrow(data) <= n) {
     return(data)
   }
 
-  # Stratify by organization and table type
-  data |>
+  # Create strata by organization and table type
+
+  data_with_strata <- data |>
     dplyr::mutate(
       table_type = substr(.data$table_number, 1, 1),
       stratum = paste(.data$organization, .data$table_type, sep = "_")
-    ) |>
+    )
+
+  # Calculate samples per stratum BEFORE grouping
+  n_strata <- length(unique(data_with_strata$stratum))
+  per_stratum <- max(1, ceiling(n / n_strata))
+
+  data_with_strata |>
     dplyr::group_by(.data$stratum) |>
-    dplyr::slice_sample(n = max(1, ceiling(n / dplyr::n_groups(data)))) |>
+    dplyr::slice_sample(n = per_stratum) |>
     dplyr::ungroup() |>
-    dplyr::slice_head(n = n) |>
+    dplyr::slice_sample(n = n) |> # Shuffle and take exactly n
     dplyr::select(-"table_type", -"stratum")
 }
 

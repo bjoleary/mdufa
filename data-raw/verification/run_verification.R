@@ -122,7 +122,7 @@ verify_report <- function(pdf_path, mdufa_period, n = 35, seed = NULL) {
 
   # Step 5: Check results and generate test file
   message("\n=== Step 5: Processing results ===")
-  results <- read.csv(results_path, stringsAsFactors = FALSE)
+  results <- read.csv(results_path, stringsAsFactors = FALSE, colClasses = "character")
   passed <- results |> filter(status == "pass")
   failed <- results |> filter(status == "fail")
 
@@ -236,7 +236,7 @@ quick_check <- function(pdf_path, mdufa_period, n = 5, seed = NULL) {
 verify_from_csv <- function(csv_path,
                             pdf_dir = "data-raw/pdf_reports") {
   message("Loading CSV: ", csv_path)
-  csv_data <- utils::read.csv(csv_path, stringsAsFactors = FALSE)
+  csv_data <- utils::read.csv(csv_path, stringsAsFactors = FALSE, colClasses = "character")
   message("Loaded ", nrow(csv_data), " rows")
 
   # Detect CSV format
