@@ -21,7 +21,7 @@ test_that("MDUFA V 2025-08-27 extraction is accurate", {
   pdf_path <- find_local_pdf("mdufa-5_2025-08-27")
   skip_if(is.null(pdf_path), "MDUFA V PDF not available locally")
 
-  data <- extract_report(pdf_path, mdufa_period = "MDUFA V")
+  data <- suppressWarnings(extract_report(pdf_path, mdufa_period = "MDUFA V"))
   # Table 1.4 | CDRH | Maximum FDA Days to Substantive Interact... | FY 2023
   expect_equal(
     data$value[data$table_number == "1.4" &
