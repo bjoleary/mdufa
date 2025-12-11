@@ -698,7 +698,6 @@ expect_equal(
 #' @return Data frame with parsed assertions, or NULL if parsing fails
 #' @keywords internal
 parse_existing_test_file <- function(test_file) {
-
   tryCatch(
     {
       lines <- readLines(test_file)
@@ -718,7 +717,7 @@ parse_existing_test_file <- function(test_file) {
 
       # Pattern for expect_true(is.na(...)) assertions
       na_pattern <- paste0(
-        'expect_true\\(is\\.na\\(\\s*',
+        "expect_true\\(is\\.na\\(\\s*",
         'data\\$value\\[data\\$table_number == "([^"]+)" &\\s*',
         'data\\$organization == "([^"]+)" &\\s*',
         'data\\$performance_metric == "([^"]+)" &\\s*',
