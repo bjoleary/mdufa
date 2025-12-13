@@ -166,3 +166,96 @@ org_names <- c(
   "OHT7" = "OHT7: In Vitro Diagnostics",
   "OHT8" = "OHT8: Radiological Health"
 )
+
+# Column Name Constants --------------------------------------------------------
+
+#' Expected Columns for Individual MDUFA Datasets
+#'
+#' Column names in the expected order for mdufa2, mdufa3, mdufa4, and mdufa5
+#' datasets. Report metadata columns come first, followed by table location,
+#' then metric data.
+#'
+#' @format Character vector of 14 column names
+#' @export
+#'
+#' @examples
+#' # Check if a dataset has expected columns
+#' identical(names(mdufa4), mdufa_cols)
+#'
+#' # Reorder columns to standard order
+#' data[, mdufa_cols]
+mdufa_cols <- c(
+  # Report metadata
+  "report_description",
+  "report_link",
+  "report_date",
+  "report_mdufa_period",
+  # Table location
+  "source",
+  "page",
+  "table_number",
+  "organization",
+  "program",
+  "table_title",
+  # Metric data
+  "metric_type",
+  "performance_metric",
+  "fy",
+  "value"
+)
+
+#' Expected Columns for mdufa_combined Dataset
+#'
+#' Column names in the expected order for the mdufa_combined dataset.
+#' Builds on [mdufa_cols] with additional columns: `org` (full organization
+#' name), `metric_harmonized` (standardized metric names), and `derived`
+#' (flag for aggregated rows).
+#'
+#' @format Character vector of 17 column names
+#' @export
+#'
+#' @seealso [mdufa_cols] for base column definitions
+mdufa_combined_cols <- c(
+  mdufa_cols[1:8],
+  "org",
+  mdufa_cols[9:12],
+  "metric_harmonized",
+  mdufa_cols[13:14],
+  "derived"
+)
+
+#' Expected Columns for cohort_status Dataset
+#'
+#' Column names in the expected order for the cohort_status dataset.
+#' Follows [mdufa_cols] order where columns overlap, with cohort-specific
+#' columns (percent_closed, status) at the end.
+#'
+#' @format Character vector of 8 column names
+#' @export
+#'
+#' @seealso [mdufa_cols] for base column definitions
+cohort_status_cols <- c(
+  "report_date",
+  "report_mdufa_period",
+  "organization",
+  "org",
+  "program",
+  "fy",
+  "percent_closed",
+  "status"
+)
+
+#' Expected Columns for report_dates Dataset
+#'
+#' Column names in the expected order for the report_dates dataset.
+#' Contains report publication dates and their corresponding data cutoff dates.
+#'
+#' @format Character vector of 5 column names
+#' @export
+report_dates_cols <- c(
+  "report_date",
+  "report_cutoff_date",
+  "report_mdufa_period",
+  "report_description",
+  "report_link"
+)

@@ -102,6 +102,12 @@ mdufa5 <- extract_report(
   report_link = current_report$report_link
 )
 
+# Standardize column order (report metadata first)
+mdufa5 <- standardize_columns(mdufa5, mdufa_cols)
+
+# Validate column structure before saving
+validate_columns(mdufa5, mdufa_cols, "mdufa5")
+
 usethis::use_data(mdufa5, overwrite = TRUE)
 
 # Document the dataset ---------------------------------------------------------

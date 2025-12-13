@@ -104,6 +104,9 @@ mdufa_combined <- mdufa_combined |>
     .data$fy
   )
 
+# Validate column structure before saving
+validate_columns(mdufa_combined, mdufa_combined_cols, "mdufa_combined")
+
 # Report summary
 cat("mdufa_combined dataset created\n")
 cat("----------------------------\n")

@@ -41,7 +41,8 @@ combination in \link{mdufa_combined}. It uses:
 \item "Number Received" metrics for total submissions
 }
 
-When joining to metrics data for plotting, use \code{by = c("fy", "organization", "program")}
+When joining to metrics data for plotting, use
+\code{by = c("fy", "organization", "program")}
 or \code{by = c("fy", "organization")} if program is already filtered.
 }
 \examples{

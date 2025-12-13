@@ -27,6 +27,12 @@ mdufa3 <- extract_report(
   report_link = "https://www.fda.gov/media/120475/download"
 )
 
+# Standardize column order (report metadata first)
+mdufa3 <- standardize_columns(mdufa3, mdufa_cols)
+
+# Validate column structure before saving
+validate_columns(mdufa3, mdufa_cols, "mdufa3")
+
 ## Write out the result -----
 
 usethis::use_data(mdufa3, overwrite = TRUE)

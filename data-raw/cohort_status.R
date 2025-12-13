@@ -73,11 +73,16 @@ cohort_status <- dplyr::left_join(
       "Cohort Open"
     )
   ) |>
+  # Reorder columns to match cohort_status_cols (follows mdufa_cols order)
   dplyr::select(
-    "fy", "organization", "org", "program", "percent_closed",
-    "status", "report_date", "report_mdufa_period"
+    "report_date", "report_mdufa_period",
+    "organization", "org", "program", "fy",
+    "percent_closed", "status"
   ) |>
   dplyr::arrange(.data$program, .data$org, .data$fy)
+
+# Validate column structure before saving
+validate_columns(cohort_status, cohort_status_cols, "cohort_status")
 
 # Report summary
 cat("cohort_status dataset created\n")

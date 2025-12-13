@@ -296,6 +296,9 @@ if (nrow(missing_cutoffs) > 0) {
   print(missing_cutoffs |> dplyr::select(report_date, report_mdufa_period))
 }
 
+# Validate column structure before saving
+validate_columns(report_dates, report_dates_cols, "report_dates")
+
 # Save the dataset
 usethis::use_data(report_dates, overwrite = TRUE)
 
