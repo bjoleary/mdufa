@@ -12,8 +12,16 @@
 
 library(dplyr)
 library(stringr)
+library(readr)
+library(lubridate)
 
 devtools::load_all()
+
+str_nolint <- " # nolint: line_length_linter."
+url_report_page <- paste0(
+  "https://www.fda.gov/industry/",
+  "medical-device-user-fee-amendments-mdufa-fees/mdufa-reports"
+)
 
 # MDUFA II (add derived = FALSE)
 m2 <- mdufa2 |>
@@ -37,6 +45,17 @@ m5 <- mdufa5 |>
 
 # Combine all datasets (m3 and m3_oht both included)
 mdufa_combined <- dplyr::bind_rows(m2, m3, m3_oht, m4, m5)
+
+# Harmonize program names
+mdufa_combined <- mdufa_combined |>
+  dplyr::mutate(
+    program = dplyr::case_when(
+      # Detect DUAL CLIA Waiver from source column and fix program name
+      stringr::str_detect(.data$source, "DUAL.*510.*CLIA") ~
+        "Dual 510(k) and CLIA Waiver",
+      TRUE ~ .data$program
+    )
+  )
 
 # Remove footnote rows that were incorrectly parsed as metrics
 footnote_count <- sum(is_footnote_row(
@@ -112,4 +131,76 @@ mdufa_combined |>
 # Save the dataset
 usethis::use_data(mdufa_combined, overwrite = TRUE)
 
+# Document the dataset ---------------------------------------------------------
+
+glimpse_output <- dplyr::glimpse(mdufa_combined, width = 76) |>
+  utils::capture.output(type = c("output"))
+glimpse_output <- glimpse_output[-c(1:2)]
+
+formatted_fields <- glimpse_output |>
+  (\(x) {
+    stringr::str_replace(
+      string = x,
+      pattern = "(^\\$\\s\\w*\\s*)",
+      replacement = paste0(
+        "  \\\\item{",
+        stringr::str_extract(string = x, pattern = "(?<=^\\$\\s)\\b\\w*\\b"),
+        "}{"
+      )
+    )
+  })() |>
+  (\(x) paste0(x, "}"))() |>
+  stringr::str_remove_all(pattern = "\\[|\\]|\\<|\\>") |>
+  stringr::str_remove_all(pattern = stringr::fixed("\0333m\03338;5;246m")) |>
+  stringr::str_remove_all(pattern = stringr::fixed("\03339m\03323m")) |>
+  (\(x) stringr::str_wrap(string = x, width = 76))() |>
+  (\(x) stringr::str_split(x, pattern = "\\n"))() |>
+  unlist()
+
+documentation_text <-
+  c(
+    "Combined MDUFA Dataset",
+    "",
+    "A unified dataset combining FDA quarterly Medical Device User Fee",
+    "performance metrics from MDUFA II, III, IV, and V. Includes harmonized",
+    "organization names and metric names for cross-period comparison.",
+    "",
+    paste0(
+      "@format A tibble with ",
+      nrow(mdufa_combined),
+      " rows and ",
+      length(mdufa_combined),
+      " fields: "
+    ),
+    "",
+    "\\describe{",
+    formatted_fields,
+    "}",
+    "",
+    "@source ",
+    paste0("[FDA MDUFA Reports](", url_report_page, ")", str_nolint),
+    paste0("accessed ", lubridate::today(), ".")
+  ) |>
+  (\(x) paste0("#' ", x))() |>
+  (\(x) {
+    c(
+      paste0(
+        "# Do not hand edit this file. Edit data-raw/mdufa_combined.R ",
+        "instead."
+      ),
+      x,
+      "\"mdufa_combined\""
+    )
+  })() |>
+  stringr::str_squish()
+
+readr::write_lines(
+  x = documentation_text,
+  file = "R/mdufa_combined.R",
+  append = FALSE
+)
+
+devtools::document()
+
 cat("\nmdufa_combined saved to data/mdufa_combined.rda\n")
+cat("Documentation written to R/mdufa_combined.R\n")
