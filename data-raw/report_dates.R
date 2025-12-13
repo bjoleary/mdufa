@@ -36,10 +36,7 @@ is_valid_pdf <- function(file_path) {
   }
   # If no PDF magic bytes, only accept if file is large (could be misidentified)
   # Small files without PDF magic bytes are likely HTML error pages (~20KB)
-  if (file.info(file_path)$size > 100000) {
-    return(TRUE)
-  }
-  return(FALSE)
+  file.info(file_path)$size > 100000
 }
 
 #' Extract cutoff date from a PDF report
@@ -77,26 +74,30 @@ extract_cutoff_date <- function(pdf_path) {
       pattern1 <- paste0(
         "Action[s]?\\s+through\\s+",
         "(",
-        month_pattern, "\\s+\\d{1,2},?\\s+\\d{4}",  # Sept 30, 2025
+        month_pattern, "\\s+\\d{1,2},?\\s+\\d{4}", # Sept 30, 2025
         "|",
-        "\\d{1,2}\\s+", month_pattern, "\\s+\\d{4}",    # 31 December 2013
+        "\\d{1,2}\\s+", month_pattern, "\\s+\\d{4}", # 31 December 2013
         ")"
       )
-      match <- stringr::str_match(text, stringr::regex(pattern1, ignore_case = TRUE))
+      match <- stringr::str_match(
+        text, stringr::regex(pattern1, ignore_case = TRUE)
+      )
 
       # If not found, try just "through [date]" (less specific but catches more)
       if (is.na(match[1, 2])) {
-        # Try day-month-year format: "through 30 September 2012" or "through 30 Sep 2013"
+        # Try day-month-year format: "through 30 September 2012"
         pattern2 <- paste0(
           "through\\s+",
           "(",
           "\\d{1,2}\\s+", month_pattern, "\\s+\\d{4}",
           ")"
         )
-        match <- stringr::str_match(text, stringr::regex(pattern2, ignore_case = TRUE))
+        match <- stringr::str_match(
+          text, stringr::regex(pattern2, ignore_case = TRUE)
+        )
       }
 
-      # If still not found, try month-day-year format: "through Sept 30, 2012"
+      # If still not found, try month-day-year: "through Sept 30, 2012"
       if (is.na(match[1, 2])) {
         pattern3 <- paste0(
           "through\\s+",
@@ -104,7 +105,9 @@ extract_cutoff_date <- function(pdf_path) {
           month_pattern, "\\s+\\d{1,2},?\\s+\\d{4}",
           ")"
         )
-        match <- stringr::str_match(text, stringr::regex(pattern3, ignore_case = TRUE))
+        match <- stringr::str_match(
+          text, stringr::regex(pattern3, ignore_case = TRUE)
+        )
       }
 
       if (!is.na(match[1, 2])) {
@@ -121,11 +124,13 @@ extract_cutoff_date <- function(pdf_path) {
         }
         return(parsed)
       }
-      return(as.Date(NA))
+      as.Date(NA)
     },
     error = function(e) {
-      warning("Error extracting cutoff from ", basename(pdf_path), ": ", e$message)
-      return(as.Date(NA))
+      warning(
+        "Error extracting cutoff from ", basename(pdf_path), ": ", e$message
+      )
+      as.Date(NA)
     }
   )
 }
@@ -146,8 +151,9 @@ results <- lapply(pdfs, function(pdf) {
   report_date_str <- parts[1, 3]
 
   # Convert MDUFA number to period name
-  # Note: "2i" files are MDUFA III reports (content shows "MDUFA III (FY 2013-2017)")
-  # The "2i" naming was a local convention but they're listed as MDUFA III on FDA site
+  # Note: "2i" files are MDUFA III reports (content shows
+  # "MDUFA III (FY 2013-2017)"). The "2i" naming was a local convention
+  # but they're listed as MDUFA III on FDA site.
   mdufa_period <- dplyr::case_match(
     mdufa_num,
     "2" ~ "MDUFA II",
@@ -184,9 +190,8 @@ report_dates_raw <- dplyr::bind_rows(results) |>
 # Get report descriptions and links by scraping FDA website
 # (same approach as download_all_reports.R)
 url_report_page <- paste0(
-
-"https://www.fda.gov/industry/",
-"medical-device-user-fee-amendments-mdufa-fees/mdufa-reports"
+  "https://www.fda.gov/industry/",
+  "medical-device-user-fee-amendments-mdufa-fees/mdufa-reports"
 )
 
 session <- rvest::session(url_report_page)
@@ -267,8 +272,14 @@ cat("Total reports:", nrow(report_dates), "\n\n")
 cat("Reports by MDUFA period:\n")
 print(table(report_dates$report_mdufa_period))
 
-cat("\nReports with cutoff dates:", sum(!is.na(report_dates$report_cutoff_date)), "\n")
-cat("Reports missing cutoff dates:", sum(is.na(report_dates$report_cutoff_date)), "\n")
+cat(
+  "\nReports with cutoff dates:",
+  sum(!is.na(report_dates$report_cutoff_date)), "\n"
+)
+cat(
+  "Reports missing cutoff dates:",
+  sum(is.na(report_dates$report_cutoff_date)), "\n"
+)
 
 cat("\nSample data:\n")
 report_dates |>

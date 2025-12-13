@@ -54,7 +54,9 @@ data_received <- mdufa_combined |>
   dplyr::group_by(.data$fy, .data$org, .data$program) |>
   dplyr::slice_max(.data$report_date, n = 1, with_ties = FALSE) |>
   dplyr::ungroup() |>
-  dplyr::select("fy", "organization", "org", "program", number_received = "value")
+  dplyr::select(
+    "fy", "organization", "org", "program", number_received = "value"
+  )
 
 # Calculate percent closed
 cohort_status <- dplyr::left_join(
@@ -71,7 +73,10 @@ cohort_status <- dplyr::left_join(
       "Cohort Open"
     )
   ) |>
-  dplyr::select("fy", "organization", "org", "program", "percent_closed", "status", "report_date", "report_mdufa_period") |>
+  dplyr::select(
+    "fy", "organization", "org", "program", "percent_closed",
+    "status", "report_date", "report_mdufa_period"
+  ) |>
   dplyr::arrange(.data$program, .data$org, .data$fy)
 
 # Report summary
@@ -87,7 +92,7 @@ print(table(cohort_status$status))
 
 cat("\nSample data:\n")
 cohort_status |>
-dplyr::filter(.data$program == "510(k)") |>
+  dplyr::filter(.data$program == "510(k)") |>
   head(20) |>
   print()
 

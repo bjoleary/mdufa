@@ -102,10 +102,7 @@ is_valid_pdf <- function(filepath) {
   }
   # If no PDF magic bytes, only accept if file is large (could be misidentified)
   # Small files without PDF magic bytes are likely HTML error pages (~20KB)
-  if (file.info(filepath)$size > 100000) {
-    return(TRUE)
-  }
-  return(FALSE)
+  file.info(filepath)$size > 100000
 }
 
 # Download each report using httr (handles FDA bot detection)

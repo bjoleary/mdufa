@@ -33,7 +33,8 @@
 #'   \item "Number Received" metrics for total submissions
 #' }
 #'
-#' When joining to metrics data for plotting, use `by = c("fy", "organization", "program")`
+#' When joining to metrics data for plotting, use
+#' `by = c("fy", "organization", "program")`
 #' or `by = c("fy", "organization")` if program is already filtered.
 #'
 #' @seealso
