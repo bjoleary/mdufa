@@ -5,9 +5,15 @@
 \alias{mdufa5}
 \title{MDUFA V}
 \format{
-A tibble with 17598 rows and 14 fields:
+A tibble with 17513 rows and 14 fields:
 
 \describe{
+\item{report_description}{chr "November 20, 2025 MDUFA V Performance
+Report"…}
+\item{report_link}{chr "https://www.fda.gov/media/190104/download?att…}
+\item{report_date}{date 2025-11-20, 2025-11-20, 2025-11-20, 2025-11-2…}
+\item{report_mdufa_period}{chr "MDUFA V", "MDUFA V", "MDUFA V", "MDUFA V",
+"M…}
 \item{source}{chr "Table 1.1 CDRH - PMA Original and Panel-Track…}
 \item{page}{chr "31", "31", "31", "31", "31", "31", "31", "31"…}
 \item{table_number}{chr "1.1", "1.1", "1.1", "1.1", "1.1", "1.1", "1.1…}
@@ -19,17 +25,11 @@ A tibble with 17598 rows and 14 fields:
 …}
 \item{fy}{chr "2023", "2024", "2025", "2026", "2027", "2023"…}
 \item{value}{chr "73", "69", "89", NA, NA, "0", "0", "1", NA, N…}
-\item{report_date}{date 2025-11-20, 2025-11-20, 2025-11-20, 2025-11-2…}
-\item{report_description}{chr "November 20, 2025 MDUFA V Performance
-Report"…}
-\item{report_link}{chr "https://www.fda.gov/media/190104/download?att…}
-\item{report_mdufa_period}{chr "MDUFA V", "MDUFA V", "MDUFA V", "MDUFA V",
-"M…}
 }
 }
 \source{
 \href{https://www.fda.gov/industry/medical-device-user-fee-amendments-mdufa-fees/mdufa-reports}{FDA MDUFA Reports} # nolint: line_length_linter.
-accessed 2025-12-10.
+accessed 2025-12-13.
 }
 \usage{
 mdufa5

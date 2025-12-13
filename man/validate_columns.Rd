@@ -11,7 +11,7 @@ validate_columns(data, expected_cols, dataset_name = "dataset")
 
 \item{expected_cols}{Character vector of expected column names in order}
 
-\item{dataset_name}{Name of the dataset for error messages (default: "dataset")}
+\item{dataset_name}{Name of dataset for error messages (default: "dataset")}
 }
 \value{
 TRUE invisibly if validation passes

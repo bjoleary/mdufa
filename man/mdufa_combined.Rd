@@ -3,95 +3,44 @@
 \docType{data}
 \name{mdufa_combined}
 \alias{mdufa_combined}
-\title{Combined MDUFA Dataset Across All Periods}
+\title{Combined MDUFA Dataset}
 \format{
-A tibble with the following columns:
+A tibble with 55713 rows and 17 fields:
+
 \describe{
-\item{report_description}{Description of the source MDUFA report}
-\item{report_link}{URL to the source PDF report}
-\item{report_date}{Date the report was published}
-\item{report_mdufa_period}{MDUFA period (II, III, IV, or V)}
-\item{source}{Source table identifier from the PDF}
-\item{page}{Page number in the source PDF}
-\item{table_number}{Table number (e.g., "1.1", "2.3")}
-\item{organization}{Organization code (e.g., "CDRH", "DCD", "OHT7")}
-\item{org}{Full organization name for plotting (e.g.,
-"OHT7: In Vitro Diagnostics")}
-\item{program}{Submission program (e.g., "510(k)", "PMA")}
-\item{table_title}{Title of the source table}
-\item{metric_type}{Data type: "integer", "double", "percent", or "text"}
-\item{performance_metric}{Name of the performance metric}
-\item{metric_harmonized}{Standardized metric name for cross-period
-comparison (removes asterisks, normalizes MDUFA period references)}
-\item{fy}{Fiscal year}
-\item{value}{The metric value as character (use \code{\link[=filter_metrics]{filter_metrics()}} or
-conversion helpers to convert to appropriate type)}
-\item{derived}{Logical indicating if row is derived/aggregated (TRUE)
-or directly extracted from PDF (FALSE). Only TRUE for MDUFA III OHT
-rows from mdufa3_oht.}
+\item{report_description}{chr "January 29, 2014 FDA MDUFA II Performance
+Rep…}
+\item{report_link}{chr "https://www.fda.gov/media/88098/download", "h…}
+\item{report_date}{date 2014-01-29, 2014-01-29, 2014-01-29, 2014-01-2…}
+\item{report_mdufa_period}{chr "MDUFA II", "MDUFA II", "MDUFA II", "MDUFA
+II"…}
+\item{source}{chr "MDUFA II Quarterly (Non expedited PMA Orginal…}
+\item{page}{chr "1", "1", "1", "1", "1", "1", "1", "1", "1", "…}
+\item{table_number}{chr "1", "1", "1", "1", "1", "1", "1", "1", "1", "…}
+\item{organization}{chr "CDRH", "CDRH", "CDRH", "CDRH", "CDRH", "CDRH"…}
+\item{org}{chr "CDRH: Center for Devices and Radiological Hea…}
+\item{program}{chr "PMA Original and Panel-track Supplements", "P…}
+\item{table_title}{chr "Non expedited PMA Orginal and Panel-track Sup…}
+\item{metric_type}{chr "integer", "integer", "percent", "text", "perc…}
+\item{performance_metric}{chr "Workload (Filed to Date)", "Total FDA
+Decisio…}
+\item{metric_harmonized}{chr "Workload (Filed To Date)", "Total FDA
+Decisio…}
+\item{fy}{chr "2008", "2008", "2008", "2008", "2008", "2008"…}
+\item{value}{chr "33", "33", "60\%", "yes", "64\%", "64\%", "90\%",…}
+\item{derived}{lgl FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALS…}
 }
 }
 \source{
-FDA MDUFA Performance Reports:
-\itemize{
-\item MDUFA II: Final report (January 29, 2014)
-\item MDUFA III: Final report (December 10, 2018)
-\item MDUFA IV: Most recent quarterly report
-\item MDUFA V: Most recent quarterly report
-}
+\href{https://www.fda.gov/industry/medical-device-user-fee-amendments-mdufa-fees/mdufa-reports}{FDA MDUFA Reports} # nolint: line_length_linter.
+accessed 2025-12-13.
 }
 \usage{
 mdufa_combined
 }
 \description{
-A unified superset dataset combining data from MDUFA II, III, IV, and V
-with consistent organization naming. This dataset is designed for
-cross-period analysis and visualization.
-}
-\details{
-This dataset includes:
-\itemize{
-\item All original data from mdufa2, mdufa3, mdufa4, mdufa5
-\item Derived OHT-level data from mdufa3_oht (aggregated from divisions)
-}
-
-The \code{derived} column indicates which rows are aggregated/calculated (TRUE)
-vs. directly extracted from PDF reports (FALSE). Only MDUFA III OHT rows
-are derived.
-
-Note that MDUFA III uses division-level organizations (DCD, DNPMD, etc.)
-while MDUFA IV and V use OHT-level organizations. Filter by \code{derived} and
-\code{organization} to get the data you need for cross-period comparisons.
-}
-\examples{
-# Filter to CDRH-level 510(k) data across all periods
-library(dplyr)
-mdufa_combined |>
-  filter(organization == "CDRH", program == "510(k)") |>
-  select(report_mdufa_period, fy, performance_metric, value) |>
-  head()
-
-# Find available metrics
-find_metrics(mdufa_combined, "FDA days")
-
-# Plot submission volume over time
-library(dplyr)
-mdufa_combined |>
-  filter(
-    organization == "CDRH",
-    program == "510(k)",
-    metric_harmonized == "Number Received"
-  ) |>
-  convert_integers()
-}
-\seealso{
-\itemize{
-\item \link{mdufa3_oht} for MDUFA III data reorganized at OHT level
-\item \link{org_names} for organization name lookup
-\item \link{division_to_oht} for division to OHT mapping
-\item \code{\link[=filter_metrics]{filter_metrics()}} for filtering and type conversion
-\item \code{\link[=convert_integers]{convert_integers()}}, \code{\link[=convert_doubles]{convert_doubles()}}, \code{\link[=convert_percents]{convert_percents()}}
-for value conversion
-}
+A unified dataset combining FDA quarterly Medical Device User Fee
+performance metrics from MDUFA II, III, IV, and V. Includes harmonized
+organization names and metric names for cross-period comparison.
 }
 \keyword{datasets}
