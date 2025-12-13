@@ -342,7 +342,12 @@ build_submission_type_regex <- function(mdufa_period) {
 
   types <- unique(types)
   types <- paste0("\\b", types, "\\b")
-  types <- c(types, "PMAs \\(All Review Tracks\\)")
+  # Add patterns with parentheses that don't work well with word boundaries
+  types <- c(
+    "DUAL \\(510\\(k\\) and CLIA Waiver\\)",
+    types,
+    "PMAs \\(All Review Tracks\\)"
+  )
   paste(types, collapse = "|") |>
     stringr::regex()
 }

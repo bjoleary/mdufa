@@ -2530,41 +2530,6 @@ test_that("MDUFA V 2025-08-27 extraction is accurate", {
       data$performance_metric == "Average Days to Scheduling for Meetings Scheduled After Day 30" &
       data$fy == "2027"]
   ))
-  # Table 9.2 | OHT5 | FYs 2025, 2026, and 2027. If the Pre-Sub... | FY 2023 = NA
-  expect_true(is.na(
-    data$value[data$table_number == "9.2" &
-      data$organization == "OHT5" &
-      data$performance_metric == "FYs 2025, 2026, and 2027. If the Pre-Sub MDUFA goal is met for FY 2024, the maximum number of submissions subject to the goal will" &
-      data$fy == "2023"]
-  ))
-  # Table 9.2 | OHT5 | FYs 2025, 2026, and 2027. If the Pre-Sub... | FY 2024 = NA
-  expect_true(is.na(
-    data$value[data$table_number == "9.2" &
-      data$organization == "OHT5" &
-      data$performance_metric == "FYs 2025, 2026, and 2027. If the Pre-Sub MDUFA goal is met for FY 2024, the maximum number of submissions subject to the goal will" &
-      data$fy == "2024"]
-  ))
-  # Table 9.2 | OHT5 | FYs 2025, 2026, and 2027. If the Pre-Sub... | FY 2025 = NA
-  expect_true(is.na(
-    data$value[data$table_number == "9.2" &
-      data$organization == "OHT5" &
-      data$performance_metric == "FYs 2025, 2026, and 2027. If the Pre-Sub MDUFA goal is met for FY 2024, the maximum number of submissions subject to the goal will" &
-      data$fy == "2025"]
-  ))
-  # Table 9.2 | OHT5 | FYs 2025, 2026, and 2027. If the Pre-Sub... | FY 2026 = NA
-  expect_true(is.na(
-    data$value[data$table_number == "9.2" &
-      data$organization == "OHT5" &
-      data$performance_metric == "FYs 2025, 2026, and 2027. If the Pre-Sub MDUFA goal is met for FY 2024, the maximum number of submissions subject to the goal will" &
-      data$fy == "2026"]
-  ))
-  # Table 9.2 | OHT5 | FYs 2025, 2026, and 2027. If the Pre-Sub... | FY 2027 = NA
-  expect_true(is.na(
-    data$value[data$table_number == "9.2" &
-      data$organization == "OHT5" &
-      data$performance_metric == "FYs 2025, 2026, and 2027. If the Pre-Sub MDUFA goal is met for FY 2024, the maximum number of submissions subject to the goal will" &
-      data$fy == "2027"]
-  ))
   # Table 10.1 | OHT1 | Number of IDEs Received... | FY 2023
   expect_equal(
     data$value[data$table_number == "10.1" &
