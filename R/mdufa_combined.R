@@ -5,7 +5,7 @@
 #' performance metrics from MDUFA II, III, IV, and V. Includes harmonized
 #' organization names and metric names for cross-period comparison.
 #'
-#' @format A tibble with 55713 rows and 17 fields:
+#' @format A tibble with 55710 rows and 17 fields:
 #'
 #' \describe{
 #' \item{report_description}{chr "January 29, 2014 FDA MDUFA II Performance

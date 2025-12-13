@@ -27,6 +27,6 @@ submission_types <-
 
 url_report_page <-
   paste0(
-    "https://www.fda.gov/industry/medical-device-user-fee-amendments-mdufa/",
-    "mdufa-reports"
+    "https://www.fda.gov/industry/",
+    "medical-device-user-fee-amendments-mdufa-fees/mdufa-reports"
   )

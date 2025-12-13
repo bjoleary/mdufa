@@ -275,6 +275,19 @@ extract_report <- function(pdf_path,
   # Remove duplicate rows
   result <- dplyr::distinct(result)
 
+  # Remove NA-value duplicates where a non-NA row exists for the same key
+  # This handles PDF rendering artifacts where a metric line is duplicated
+  # with one row having a value and one having NA
+  key_cols <- c("table_number", "organization", "program",
+                "performance_metric", "fy")
+  result <- result |>
+    dplyr::group_by(dplyr::across(dplyr::all_of(key_cols))) |>
+    dplyr::filter(
+      # Keep row if: value is not NA, OR no other row in this group has a value
+      !is.na(.data$value) | all(is.na(.data$value))
+    ) |>
+    dplyr::ungroup()
+
   # Remove garbage rows where performance_metric, value, AND organization
   # are all NA (stray headers from definitions pages)
   result <- result |>
@@ -465,6 +478,20 @@ extract_report_m5 <- function(pdf_path,
   # Remove duplicate rows
   result <- dplyr::distinct(result)
 
+  # Remove NA-value duplicates where a non-NA row exists for the same key
+
+  # This handles PDF rendering artifacts where a metric line is duplicated
+  # (once with values, once empty) - e.g., page 210 "Maximum FDA Days..."
+  # Also handles tables appearing on multiple pages (e.g., 2023-11-16 Table 8.8)
+  key_cols <- c("table_number", "organization", "program",
+                "performance_metric", "fy")
+  result <- result |>
+    dplyr::group_by(dplyr::across(dplyr::all_of(key_cols))) |>
+    dplyr::filter(
+      # Keep row if: value is not NA, OR no other row in this group has a value
+      !is.na(.data$value) | all(is.na(.data$value))
+    ) |>
+    dplyr::ungroup()
 
   # Remove garbage rows (orphaned header lines with NA performance_metric)
   result <- result |>

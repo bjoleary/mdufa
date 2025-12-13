@@ -21,5 +21,5 @@ order than the package standard.
 }
 \examples{
 # Reorder columns to standard order
-standardized <- standardize_columns(extracted_data, mdufa_cols)
+standardized <- standardize_columns(mdufa4, mdufa_cols)
 }

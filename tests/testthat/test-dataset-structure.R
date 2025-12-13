@@ -70,3 +70,56 @@ test_that("standardize_columns errors on missing columns", {
     "missing columns: c"
   )
 })
+
+# Test uniqueness of metrics in bundled datasets
+
+test_that("mdufa2 has unique metrics", {
+  expect_true(validate_unique_metrics(mdufa2, "mdufa2"))
+})
+
+test_that("mdufa3 has unique metrics", {
+  expect_true(validate_unique_metrics(mdufa3, "mdufa3"))
+})
+
+test_that("mdufa4 has unique metrics", {
+  expect_true(validate_unique_metrics(mdufa4, "mdufa4"))
+})
+
+test_that("mdufa5 has unique metrics", {
+  expect_true(validate_unique_metrics(mdufa5, "mdufa5"))
+})
+
+test_that("mdufa_combined has unique metrics", {
+  # mdufa_combined includes derived rows, so key includes derived flag
+  key_cols <- c("table_number", "organization", "program",
+                "performance_metric", "fy", "derived")
+  expect_true(validate_unique_metrics(mdufa_combined, "mdufa_combined",
+                                      key_cols = key_cols))
+})
+
+test_that("validate_unique_metrics catches duplicates", {
+  test_data <- tibble::tibble(
+    table_number = c("1.1", "1.1"),
+    organization = c("CDRH", "CDRH"),
+    program = c("510(k)", "510(k)"),
+    performance_metric = c("Count", "Count"),
+    fy = c("2023", "2023"),
+    value = c("100", "100")
+  )
+  expect_error(
+    validate_unique_metrics(test_data, "test"),
+    "duplicate key combinations"
+  )
+})
+
+test_that("validate_unique_metrics passes for unique data", {
+  test_data <- tibble::tibble(
+    table_number = c("1.1", "1.1"),
+    organization = c("CDRH", "CDRH"),
+    program = c("510(k)", "510(k)"),
+    performance_metric = c("Count", "Count"),
+    fy = c("2023", "2024"),  # Different FY makes it unique
+    value = c("100", "110")
+  )
+  expect_true(validate_unique_metrics(test_data, "test"))
+})

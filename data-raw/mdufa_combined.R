@@ -107,6 +107,14 @@ mdufa_combined <- mdufa_combined |>
 # Validate column structure before saving
 validate_columns(mdufa_combined, mdufa_combined_cols, "mdufa_combined")
 
+# Validate unique metrics (no duplicates)
+# Key includes `derived` to distinguish original vs aggregated rows
+validate_unique_metrics(
+  mdufa_combined, "mdufa_combined",
+  key_cols = c("table_number", "organization", "program",
+               "performance_metric", "fy", "derived")
+)
+
 # Report summary
 cat("mdufa_combined dataset created\n")
 cat("----------------------------\n")

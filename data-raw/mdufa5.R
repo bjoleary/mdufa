@@ -108,6 +108,9 @@ mdufa5 <- standardize_columns(mdufa5, mdufa_cols)
 # Validate column structure before saving
 validate_columns(mdufa5, mdufa_cols, "mdufa5")
 
+# Validate unique metrics (no duplicates)
+validate_unique_metrics(mdufa5, "mdufa5")
+
 usethis::use_data(mdufa5, overwrite = TRUE)
 
 # Document the dataset ---------------------------------------------------------

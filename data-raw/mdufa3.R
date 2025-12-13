@@ -33,6 +33,9 @@ mdufa3 <- standardize_columns(mdufa3, mdufa_cols)
 # Validate column structure before saving
 validate_columns(mdufa3, mdufa_cols, "mdufa3")
 
+# Validate unique metrics (no duplicates)
+validate_unique_metrics(mdufa3, "mdufa3")
+
 ## Write out the result -----
 
 usethis::use_data(mdufa3, overwrite = TRUE)

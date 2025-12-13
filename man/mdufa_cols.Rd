@@ -20,6 +20,6 @@ then metric data.
 identical(names(mdufa4), mdufa_cols)
 
 # Reorder columns to standard order
-data[, mdufa_cols]
+mdufa4[, mdufa_cols]
 }
 \keyword{datasets}
