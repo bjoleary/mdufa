@@ -451,17 +451,20 @@ test_that("{row$table_number} {row$organization} {substr(row$performance_metric,
 
 #' Check Verification Status
 #'
-#' Calculates the Wilson score lower bound and determines if verification
-#' is complete, failed, or needs more samples.
+#' Uses dxr::agreement() to calculate the Wilson score confidence interval
+#' and determines if verification is complete, failed, or needs more samples.
 #'
-#' @param pass_count Number of passed rows
-#' @param fail_count Number of failed rows
-#' @return List with status, message, and optionally samples_needed
+#' @param pass_count Number of passed metrics
+#' @param fail_count Number of failed metrics
+#' @return List with status, message, agreement result, and optionally
+#'   samples_needed
 check_verification_status <- function(pass_count, fail_count) {
   if (fail_count > 0) {
+    agr <- dxr::agreement(pass_count, fail_count)
     return(list(
       status = "FAILED",
-      message = paste0(fail_count, " failure(s) - fix code and re-verify")
+      message = paste0(fail_count, " failure(s) - fix code and re-verify"),
+      agreement = agr
     ))
   }
 
@@ -473,10 +476,10 @@ check_verification_status <- function(pass_count, fail_count) {
     ))
   }
 
-  # Calculate Wilson score lower bound
-  # Using formula: n / (n + z^2) where z = 1.96 for 95% CI
-  z_sq <- 3.84 # 1.96^2
-  lower_bound <- pass_count / (pass_count + z_sq)
+  # Calculate Wilson score CI using dxr::agreement
+
+  agr <- dxr::agreement(pass_count, fail_count)
+  lower_bound <- agr$lower
 
   if (lower_bound > 0.90) {
     return(list(
@@ -485,21 +488,28 @@ check_verification_status <- function(pass_count, fail_count) {
       message = paste0(
         "LB = ", round(lower_bound * 100, 2),
         "% > 90% with n=", pass_count
-      )
+      ),
+      agreement = agr
     ))
   } else {
     # Estimate samples needed for LB > 90%
-    # Solve: n / (n + 3.84) > 0.90 => n > 0.90 * 3.84 / 0.10 = 34.56
-    samples_needed <- max(0, ceiling(0.90 * z_sq / 0.10) - pass_count)
+    # Iteratively find minimum n where agreement(n, 0)$lower > 0.90
+    samples_needed <- pass_count
+    while (dxr::agreement(samples_needed, 0)$lower <= 0.90 &&
+           samples_needed < 500) {
+      samples_needed <- samples_needed + 1
+    }
+    samples_needed <- samples_needed - pass_count
 
     return(list(
       status = "CONTINUE",
       lower_bound = lower_bound,
       message = paste0(
         "LB = ", round(lower_bound * 100, 2),
-        "% <= 90% - need ~", samples_needed, " more samples"
+        "% <= 90% - need ~", samples_needed, " more metrics"
       ),
-      samples_needed = samples_needed
+      samples_needed = samples_needed,
+      agreement = agr
     ))
   }
 }
@@ -655,10 +665,10 @@ test_that("{mdufa_period} {report_date} extraction is accurate", {{
         glue::glue(
           '# Table {table_number} | {organization} | {substr(performance_metric, 1, 40)}... | FY {fy} = NA
 expect_true(is.na(
-  data$value[data$table_number == "{table_number}" &
-             data$organization == "{organization}" &
-             data$performance_metric == "{performance_metric}" &
-             data$fy == "{fy}"]
+  data$value[which(data$table_number == "{table_number}" &
+                   data$organization == "{organization}" &
+                   data$performance_metric == "{performance_metric}" &
+                   data$fy == "{fy}")]
 ))
 '
         )
@@ -666,10 +676,10 @@ expect_true(is.na(
         glue::glue(
           '# Table {table_number} | {organization} | {substr(performance_metric, 1, 40)}... | FY {fy}
 expect_equal(
-  data$value[data$table_number == "{table_number}" &
-             data$organization == "{organization}" &
-             data$performance_metric == "{performance_metric}" &
-             data$fy == "{fy}"],
+  data$value[which(data$table_number == "{table_number}" &
+                   data$organization == "{organization}" &
+                   data$performance_metric == "{performance_metric}" &
+                   data$fy == "{fy}")],
   "{value}"
 )
 '

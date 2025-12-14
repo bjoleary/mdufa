@@ -420,14 +420,13 @@ launch_verification_app <- function(sample,
       paste0("Row ", current_idx(), " of ", nrow(r), " | ", done, " completed")
     })
 
-    # CI status display - show agreement rate with full Wilson CI
+    # CI status display - show agreement rate with Wilson CI via dxr::agreement()
     # Garbage rows are excluded from agreement calculation
     output$ci_status <- shiny::renderText({
       r <- results()
       pass_count <- sum(r$status == "pass", na.rm = TRUE)
       fail_count <- sum(r$status == "fail", na.rm = TRUE)
       garbage_count <- sum(r$status == "garbage", na.rm = TRUE)
-      n <- pass_count + fail_count # Garbage not included in agreement
 
       garbage_note <- if (garbage_count > 0) {
         paste0(" [", garbage_count, " garbage]")
@@ -435,43 +434,18 @@ launch_verification_app <- function(sample,
         ""
       }
 
-      if (n == 0) {
+      if (pass_count + fail_count == 0) {
         return(paste0("Agreement: -- (no results yet)", garbage_note))
       }
 
-      # Calculate Wilson score CI
-      z <- 1.96
-      z_sq <- z^2
-      p <- pass_count / n
-
-      denom <- 1 + z_sq / n
-      center <- (p + z_sq / (2 * n)) / denom
-      margin <- z * sqrt(p * (1 - p) / n + z_sq / (4 * n^2)) / denom
-
-      lb <- center - margin
-      ub <- center + margin
-
-      lb_pct <- round(lb * 100, 1)
-      ub_pct <- round(ub * 100, 1)
-      rate_pct <- round(p * 100, 1)
+      # Calculate Wilson score CI using dxr::agreement()
+      agr <- dxr::agreement(pass_count, fail_count)
 
       # Calculate how many more passes needed for LB > 90%
-      # Iteratively add passes until Wilson LB exceeds 0.90
-      calc_wilson_lb <- function(passes, fails) {
-        total <- passes + fails
-        if (total == 0) {
-          return(0)
-        }
-        p_hat <- passes / total
-        denom <- 1 + z_sq / total
-        center <- (p_hat + z_sq / (2 * total)) / denom
-        margin <- z * sqrt(p_hat * (1 - p_hat) / total + z_sq / (4 * total^2)) / denom
-        center - margin
-      }
-
       needed <- 0
       test_passes <- pass_count
-      while (calc_wilson_lb(test_passes, fail_count) <= 0.90 && needed < 500) {
+      while (dxr::agreement(test_passes, fail_count)$lower <= 0.90 &&
+             needed < 500) {
         test_passes <- test_passes + 1
         needed <- needed + 1
       }
@@ -483,12 +457,12 @@ launch_verification_app <- function(sample,
         ""
       }
 
-      if (lb > 0.90 && fail_count == 0) {
-        paste0(status_prefix, "Agreement: ", rate_pct, "% (", lb_pct, "-", ub_pct, "%) COMPLETE!", garbage_note)
+      if (agr$lower > 0.90 && fail_count == 0) {
+        paste0(status_prefix, agr$string, " COMPLETE!", garbage_note)
       } else if (needed >= 500) {
-        paste0(status_prefix, "Agreement: ", rate_pct, "% (", lb_pct, "-", ub_pct, "%) - too many failures", garbage_note)
+        paste0(status_prefix, agr$string, " - too many failures", garbage_note)
       } else {
-        paste0(status_prefix, "Agreement: ", rate_pct, "% (", lb_pct, "-", ub_pct, "%) need ~", needed, " more", garbage_note)
+        paste0(status_prefix, agr$string, " need ~", needed, " more", garbage_note)
       }
     })
 
@@ -685,13 +659,14 @@ launch_verification_app <- function(sample,
       }
 
       r <- results()
-      # Key columns that identify unique rows
-      key_cols <- c("table_number", "organization", "performance_metric", "fy")
+      # Use metric-level keys (no FY) to avoid sampling same metric twice
+      # Test expansion adds all FYs for each verified metric
+      metric_cols <- c("table_number", "organization", "performance_metric")
 
-      # Find rows in full_data not already in results
-      existing_keys <- r[, key_cols, drop = FALSE]
+      # Find rows in full_data where metric is not already in results
+      existing_metrics <- r[, metric_cols, drop = FALSE]
       candidates <- full_data |>
-        dplyr::anti_join(existing_keys, by = key_cols) |>
+        dplyr::anti_join(existing_metrics, by = metric_cols) |>
         dplyr::filter(!is.na(page), !is.na(value))
 
       if (nrow(candidates) == 0) {
@@ -746,12 +721,14 @@ launch_verification_app <- function(sample,
       }
 
       r <- results()
-      key_cols <- c("table_number", "organization", "performance_metric", "fy")
+      # Use metric-level keys (no FY) to avoid sampling same metric twice
+      # Test expansion adds all FYs for each verified metric
+      metric_cols <- c("table_number", "organization", "performance_metric")
 
-      # Find rows in full_data not already in results
-      existing_keys <- r[, key_cols, drop = FALSE]
+      # Find rows in full_data where metric is not already in results
+      existing_metrics <- r[, metric_cols, drop = FALSE]
       candidates <- full_data |>
-        dplyr::anti_join(existing_keys, by = key_cols) |>
+        dplyr::anti_join(existing_metrics, by = metric_cols) |>
         dplyr::filter(!is.na(page), !is.na(value))
 
       if (nrow(candidates) == 0) {
