@@ -19,7 +19,9 @@ test_that("MDUFA IV 2023-11-16 extraction is accurate", {
   pdf_path <- find_local_pdf("mdufa-4_2023-11-16")
   skip_if(is.null(pdf_path), "MDUFA IV PDF not available locally")
 
-  data <- suppressWarnings(extract_report(pdf_path, mdufa_period = "MDUFA IV"))
+  data <- suppressMessages(suppressWarnings(
+    extract_report(pdf_path, mdufa_period = "MDUFA IV")
+  ))
 # Table 1.5 | CDRH | MDUFA IV Decision Goal Met... | FY 2018
 expect_equal(
   data$value[which(data$table_number == "1.5" &
