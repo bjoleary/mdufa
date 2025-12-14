@@ -314,6 +314,25 @@ extract_report <- function(pdf_path,
             paste0(.data$value, " days"),
           TRUE ~ .data$value
         )
+      ) |>
+      # Fix Table 1.4 CDRH truncated "to Substantive" metrics
+      # The word "Interaction" wraps to a new line without values
+      dplyr::mutate(
+        performance_metric = dplyr::case_when(
+          .data$table_number == "1.4" &
+            .data$organization == "CDRH" &
+            stringr::str_detect(
+              .data$performance_metric,
+              "to Substantive$"
+            ) ~ paste0(.data$performance_metric, " Interaction"),
+          # Fix "Interaction Maximum..." prefix (same table/org)
+          .data$table_number == "1.4" &
+            .data$organization == "CDRH" &
+            .data$performance_metric ==
+            "Interaction Maximum FDA days to Substantive Interaction" ~
+            "Maximum FDA days to Substantive Interaction",
+          TRUE ~ .data$performance_metric
+        )
       )
   }
 
