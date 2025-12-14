@@ -135,13 +135,11 @@ The following reports have been verified with test files in `tests/testthat/`:
 
 | Report | Metrics | Agreement (95% CI) | Verified |
 |--------|---------|-------------------|----------|
-| MDUFA III 2018-12-10 | 54* | 98.2% (90.4%; 99.7%) | 2025-12-14 |
+| MDUFA III 2018-12-10 | 54 | 98.2% (90.4%; 99.7%) | 2025-12-14 |
 | MDUFA IV 2023-11-16 | 74 | 100% (95.1%; 100%) | 2025-12-14 |
 | MDUFA V 2025-02-27 | 36 | 100% (90.4%; 100%) | 2025-12-08 |
 | MDUFA V 2025-08-27 | 75 | 100% (95.1%; 100%) | 2025-12-08 |
 | MDUFA V 2025-11-20 | 90 | 100% (95.9%; 100%) | 2025-12-10 |
-
-\* 1 failure identified a known extraction bug (line-wrapped metric name in Table 3.1 CBER).
 
 All verifications performed by Brendan O'Leary.
 

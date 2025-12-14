@@ -106,6 +106,15 @@ extract_report <- function(pdf_path,
           ignore_case = FALSE
         ),
         replacement = "\\1  "
+      ) |>
+      # Fix "Current Performance Percent within X FDA Days" rows where the
+      # metric name is split across lines (common in CBER tables)
+      stringr::str_replace_all(
+        pattern = stringr::regex(
+          "(Current Performance Percent within \\d+ FDA)\\s*\\n(\\s*Days)",
+          ignore_case = FALSE
+        ),
+        replacement = "\\1 \\2"
       )
   }
 

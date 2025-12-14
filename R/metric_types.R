@@ -327,6 +327,8 @@ metric_types <- function(report_mdufa_period = "MDUFA IV") {
       "510(k)s pending MDUFA III Decision", "integer",
       "510(k) pending MDUFA III Decision over 90 FDA days", "integer",
       "Current Performance Percent within 90 FDA Days", "percent",
+      "Current Performance Percent within 180 FDA Days", "percent",
+      "Current Performance Percent within 320 FDA Days", "percent",
       "Average review cycles", "double",
       "20th Percentile FDA days to MDUFA III", "integer",
       "40th Percentile FDA days to MDUFA III", "integer",
