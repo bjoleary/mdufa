@@ -92,40 +92,68 @@ generate_row_image <- function(table_number,
   if (!is.na(performance_metric)) {
     y_tolerance <- 5
 
-    # Step 1: Try partial match - find row containing most metric words
-    # (Metric text often wraps across rows, so exact match may fail)
-    metric_words <- strsplit(tolower(performance_metric), "\\s+")[[1]]
-    metric_words <- metric_words[nchar(metric_words) > 2] # Skip short words
-
     # Get unique Y positions in table section
     data_rows <- page_data[
       page_data$y >= data_start_y & page_data$y <= table_end_y,
     ]
     unique_ys <- sort(unique(data_rows$y))
 
-    best_match_y <- NULL
-    best_match_count <- 0
+    # Normalize metric text for matching
+    metric_normalized <- tolower(gsub("\\s+", " ", trimws(performance_metric)))
+    metric_words <- strsplit(metric_normalized, " ")[[1]]
+    metric_words <- metric_words[nchar(metric_words) > 2] # Skip short words
 
+    # Step 1: Try EXACT match first (row text equals metric text)
     for (y in unique_ys) {
-      # Get all words at this Y position (within tolerance), sorted by x
       row_words <- data_rows[abs(data_rows$y - y) <= y_tolerance, ]
+      row_words <- row_words[order(row_words$x), ] # Sort left-to-right
       row_text <- tolower(paste(row_words$text, collapse = " "))
+      row_text <- gsub("\\s+", " ", trimws(row_text))
 
-      # Count how many metric words appear in this row
-      matches <- sum(sapply(metric_words, function(w) grepl(w, row_text, fixed = TRUE)))
-
-      # Require at least 60% of metric words to match
-      if (matches > best_match_count && matches >= length(metric_words) * 0.6) {
-        best_match_count <- matches
-        best_match_y <- y
+      if (row_text == metric_normalized) {
+        metric_y <- y
+        break
       }
     }
 
-    if (!is.null(best_match_y)) {
-      metric_y <- best_match_y
+    # Step 2: Try partial match - prefer rows with fewest EXTRA words
+    # This prevents "MDUFA IV Decisions" matching "Eligible for MDUFA IV Decisions"
+    if (is.null(metric_y)) {
+      best_match_y <- NULL
+      best_match_score <- -Inf # Higher is better
+
+      for (y in unique_ys) {
+        row_words_df <- data_rows[abs(data_rows$y - y) <= y_tolerance, ]
+        row_text <- tolower(paste(row_words_df$text, collapse = " "))
+
+        # Count how many metric words appear in this row
+        matches <- sum(sapply(metric_words, function(w) {
+          grepl(w, row_text, fixed = TRUE)
+        }))
+
+        # Skip if less than 60% of metric words match
+        if (matches < length(metric_words) * 0.6) next
+
+        # Count extra words in row not in metric (penalty)
+        row_word_list <- strsplit(row_text, "\\s+")[[1]]
+        row_word_list <- row_word_list[nchar(row_word_list) > 2]
+        extra_words <- sum(!row_word_list %in% metric_words)
+
+        # Score = matches - extra_words (prefer fewer extra words)
+        score <- matches - (extra_words * 0.5)
+
+        if (score > best_match_score) {
+          best_match_score <- score
+          best_match_y <- y
+        }
+      }
+
+      if (!is.null(best_match_y)) {
+        metric_y <- best_match_y
+      }
     }
 
-    # Step 2: Fallback to distinctive word matching if exact match failed
+    # Step 3: Fallback to distinctive word matching if partial match failed
     if (is.null(metric_y)) {
       metric_words <- strsplit(performance_metric, "\\s+")[[1]]
       # Only filter truly generic words - keep distinctive words like
@@ -235,49 +263,51 @@ generate_row_image <- function(table_number,
   if (!is.null(metric_y)) {
     img <- magick::image_draw(img)
 
-    if (nrow(fy_columns) > 0) {
-      # Highlight full row across FY columns
-      # Estimate row height from table structure
-      # Get all y-positions in the table area to estimate row spacing
-      table_ys <- page_data$y[
-        page_data$y >= table_start_y & page_data$y <= table_end_y
-      ]
-      unique_ys <- sort(unique(table_ys))
-      row_height <- 40 # default 2x original
+    # MDUFA tables have consistent layout:
+    # - Metric names start around x=52
+    # - FY value columns end around x=565
+    # Use fixed positions that work across all tables
+    row_left <- 52 * scale
+    row_right <- 565 * scale
 
-      # Try to estimate row height from spacing between lines
-      if (length(unique_ys) > 2) {
-        diffs <- diff(unique_ys)
-        # Filter to reasonable row heights (8-30 points)
-        reasonable_diffs <- diffs[diffs >= 8 & diffs <= 30]
-        if (length(reasonable_diffs) > 0) {
-          row_height <- median(reasonable_diffs) * scale * 1.8
-        }
+    # Estimate row height from table structure
+    table_ys <- page_data$y[
+      page_data$y >= table_start_y & page_data$y <= table_end_y
+    ]
+    unique_ys <- sort(unique(table_ys))
+    base_row_height <- 24  # Default row height in scaled pixels
+
+    # Try to estimate row height from spacing between lines
+    if (length(unique_ys) > 2) {
+      diffs <- diff(unique_ys)
+      # Filter to reasonable row heights (8-30 points)
+      reasonable_diffs <- diffs[diffs >= 8 & diffs <= 30]
+      if (length(reasonable_diffs) > 0) {
+        base_row_height <- median(reasonable_diffs) * scale
       }
-
-      row_left <- min(fy_columns$x) * scale - 10
-      row_right <- max(fy_columns$x + fy_columns$width) * scale + 50
-      row_top <- metric_y * scale - 5
-      row_bottom <- row_top + max(row_height, 40)
-
-      graphics::rect(
-        row_left, row_top, row_right, row_bottom,
-        col = grDevices::adjustcolor("yellow", alpha.f = 0.3),
-        border = "red", lwd = 2
-      )
-    } else {
-      # Fallback: highlight just the metric text area
-      row_left <- 50 * scale
-      row_right <- 600 * scale
-      row_top <- metric_y * scale - 5
-      row_bottom <- row_top + 40 # 2x original height
-
-      graphics::rect(
-        row_left, row_top, row_right, row_bottom,
-        col = grDevices::adjustcolor("yellow", alpha.f = 0.3),
-        border = "red", lwd = 2
-      )
     }
+
+    # Adjust row height based on metric name length
+    # Longer metrics are more likely to wrap to multiple lines
+    metric_len <- nchar(performance_metric)
+    if (metric_len > 60) {
+      # Very long metrics often wrap to 3 lines
+      row_height <- base_row_height * 2.5
+    } else if (metric_len > 40) {
+      # Medium-long metrics often wrap to 2 lines
+      row_height <- base_row_height * 1.8
+    } else {
+      row_height <- base_row_height
+    }
+
+    row_top <- metric_y * scale - 3
+    row_bottom <- row_top + max(row_height, 24)
+
+    graphics::rect(
+      row_left, row_top, row_right, row_bottom,
+      col = grDevices::adjustcolor("orange", alpha.f = 0.4),
+      border = "darkorange", lwd = 2
+    )
 
     grDevices::dev.off()
   }

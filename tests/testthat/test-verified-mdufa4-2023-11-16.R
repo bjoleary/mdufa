@@ -2978,4 +2978,3 @@ expect_equal(
   "69"
 )})
 # nolint end
-
