@@ -5,7 +5,7 @@
 \alias{mdufa3}
 \title{MDUFA III}
 \format{
-A tibble with 16910 rows and 14 fields:
+A tibble with 16905 rows and 14 fields:
 
 \describe{
 \item{report_description}{chr "December 10, 2018 MDUFA III Performance

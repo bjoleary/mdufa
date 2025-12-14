@@ -115,6 +115,28 @@ extract_report <- function(pdf_path,
           ignore_case = FALSE
         ),
         replacement = "\\1 \\2"
+      ) |>
+      # Fix "Performance Metric" header rows where goal percentages run together
+      # (e.g., "91% within 90 93% within 90" should have column spacing)
+      stringr::str_replace_all(
+        pattern = "(\\d+% within \\d+) (\\d+% within \\d+)",
+        replacement = "\\1       \\2"
+      ) |>
+      # Fix calendar day goals that run together (Pre-Submission tables)
+      # (e.g., "135 calendar 135 calendar" should have column spacing)
+      stringr::str_replace_all(
+        pattern = "(\\d+ calendar) (\\d+ calendar)",
+        replacement = "\\1       \\2"
+      ) |>
+      # Remove standalone "FDA days" and "days" continuation lines
+      # (These are split from their header values and would become garbage rows)
+      stringr::str_replace_all(
+        pattern = "^\\s+FDA days(\\s+FDA days)+\\s*$",
+        replacement = ""
+      ) |>
+      stringr::str_replace_all(
+        pattern = "^\\s+days(\\s+days)+\\s*$",
+        replacement = ""
       )
   }
 
@@ -270,6 +292,28 @@ extract_report <- function(pdf_path,
             .data$value,
             stringr::regex("within|days|SI|substantive", ignore_case = TRUE)
           ))
+      ) |>
+      # Filter out "Performance Metric" rows where value is just "FY YYYY"
+      # (These are column header artifacts, not actual data)
+      dplyr::filter(
+        !(.data$performance_metric == "Performance Metric" &
+            stringr::str_detect(.data$value, "^FY \\d{4}$"))
+      ) |>
+      # Fix "Performance Metric" goal values missing their unit suffix
+      # Table 6.4: "X% within Y" should be "X% within Y FDA days"
+      # Table 7.2: "X calendar" should be "X calendar days"
+      dplyr::mutate(
+        value = dplyr::case_when(
+          .data$performance_metric == "Performance Metric" &
+            .data$table_number == "6.4" &
+            stringr::str_detect(.data$value, "^\\d+% within \\d+$") ~
+            paste0(.data$value, " FDA days"),
+          .data$performance_metric == "Performance Metric" &
+            .data$table_number == "7.2" &
+            stringr::str_detect(.data$value, "^\\d+ calendar$") ~
+            paste0(.data$value, " days"),
+          TRUE ~ .data$value
+        )
       )
   }
 
