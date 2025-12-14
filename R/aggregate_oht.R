@@ -35,8 +35,8 @@ rename_divisions_to_oht <- function(data) {
 #' Identify Metric Aggregation Type
 #'
 #' Determines how a metric should be aggregated based on its name
-#' and metric_type. Returns one of: "sum", "weighted_avg",
-#' "recalc_percent", "percentile", or "exclude".
+#' and metric_type. Returns one of: "sum", "max", "weighted_avg",
+#' "recalc_percent", or "exclude".
 #'
 #' @param performance_metric The metric name
 #' @param metric_type The metric type (integer, double, percent, text)
@@ -46,6 +46,7 @@ rename_divisions_to_oht <- function(data) {
 #' @examples
 #' identify_aggregation_type("Number Received", "integer")
 #' identify_aggregation_type("Average FDA days to MDUFA III decision", "double")
+#' identify_aggregation_type("Maximum FDA days to decision", "integer")
 #' identify_aggregation_type("20th Percentile FDA days", "integer")
 identify_aggregation_type <- function(performance_metric, metric_type) {
   # Text metrics are excluded
@@ -53,14 +54,15 @@ identify_aggregation_type <- function(performance_metric, metric_type) {
     return("exclude")
   }
 
-  # Percentile metrics cannot be aggregated
+  # Percentile metrics cannot be aggregated without raw data
   if (grepl("Percentile", performance_metric, ignore.case = TRUE)) {
-    return("percentile")
+    return("exclude")
   }
 
-  # Maximum values cannot be aggregated
+  # Maximum values: take max across orgs
+
   if (grepl("^Maximum", performance_metric, ignore.case = TRUE)) {
-    return("exclude")
+    return("max")
   }
 
   # Average/Mean metrics need weighted averaging
@@ -147,6 +149,18 @@ aggregate_ivd_to_oht7 <- function(data) {
       .groups = "drop"
     )
 
+  # Aggregate max metrics (take max across orgs)
+  maxed <- ivd_data |>
+    dplyr::filter(.data$agg_type == "max", !is.na(.data$numeric_value)) |>
+    dplyr::group_by(
+      .data$table_number, .data$performance_metric, .data$fy
+    ) |>
+    dplyr::summarise(
+      value = as.character(max(.data$numeric_value, na.rm = TRUE)),
+      agg_type = "max",
+      .groups = "drop"
+    )
+
   # Aggregate weighted average metrics
   # First, get the weight values (decision counts)
   weight_lookup <- ivd_data |>
@@ -210,6 +224,9 @@ aggregate_ivd_to_oht7 <- function(data) {
     dplyr::select(-"total_weight", -"weighted_sum")
 
   # Recalculate percent metrics from summed counts
+  # TODO: This section requires manual review and verification.
+  # Is number of MDUFA III decisions the right denominator for all of these, or
+  # should it sometimes be number received? Careful review is required.
   pct_definitions <- ivd_data |>
     dplyr::filter(.data$agg_type == "recalc_percent") |>
     dplyr::select("table_number", "performance_metric", "fy") |>
@@ -293,7 +310,7 @@ aggregate_ivd_to_oht7 <- function(data) {
     )
 
   # Combine all aggregated values
-  all_values <- dplyr::bind_rows(summed, weighted, percents)
+  all_values <- dplyr::bind_rows(summed, maxed, weighted, percents)
 
   # Join with metadata to get full row structure
   result <- all_values |>
