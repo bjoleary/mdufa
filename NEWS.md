@@ -1,5 +1,47 @@
 # mdufa (development version)
 
+# mdufa 0.3.0
+
+## New Features
+
+* New `mdufa_combined` dataset provides unified data spanning all MDUFA periods
+  (II through V) with harmonized metric names for cross-period analysis.
+
+* New `mdufa3_oht` dataset (experimental) reorganizes MDUFA III data by Office
+  of Health Technology (OHT) to enable comparison with MDUFA IV/V reporting
+  structure. Division-level data is mapped to OHTs with intelligent aggregation.
+
+* New helper functions for MDUFA data analysis:
+  - `filter_metrics()` enhanced with additional filtering options
+  - `harmonize_metric_names()` for case-normalized cross-period comparisons
+  - `identify_aggregation_type()` determines appropriate aggregation method
+
+* New `cohort_status` and `report_dates` reference datasets for programmatic
+  access to MDUFA reporting metadata.
+
+## Bug Fixes
+
+* Fixed MDUFA III extraction for "Performance Metric" goal value patterns.
+
+* Fixed wrapped "Current Performance Percent within X FDA Days" metric extraction
+  where text broke across lines.
+
+* Fixed MDUFA III Table 1.4 CDRH truncated "to Substantive" metrics.
+
+## Internal
+
+* Added S3 bucket integration for PDF reports, enabling CI/CD tests to download
+  PDFs from public S3 bucket when not available locally.
+
+* Fixed MDUFA III filename bug where Roman numeral replacement order caused
+  "MDUFA III" to be mislabeled as "mdufa-2i". Renamed 23 affected files.
+
+* Regenerated test-coverage workflow from r-lib/actions template to fix Codecov
+  upload issues.
+
+* Added verification test infrastructure with `verify_row()` for PDF-to-data
+  validation using annotated page images.
+
 # mdufa 0.2.3
 
 ## Bug Fixes

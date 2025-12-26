@@ -8,6 +8,12 @@
 A tibble with 16275 rows and 14 fields:
 
 \describe{
+\item{report_description}{chr "November 16, 2023 MDUFA IV Performance
+Report…}
+\item{report_link}{chr "https://www.fda.gov/media/174193/download", "…}
+\item{report_date}{date 2023-11-16, 2023-11-16, 2023-11-16, 2023-11-1…}
+\item{report_mdufa_period}{chr "MDUFA IV", "MDUFA IV", "MDUFA IV", "MDUFA
+IV"…}
 \item{source}{chr "Table 1.1 CDRH - PMA Original and Panel-Track…}
 \item{page}{chr "17", "17", "17", "17", "17", "17", "17", "17"…}
 \item{table_number}{chr "1.1", "1.1", "1.1", "1.1", "1.1", "1.1", "1.1…}
@@ -19,12 +25,6 @@ A tibble with 16275 rows and 14 fields:
 …}
 \item{fy}{chr "2018", "2019", "2020", "2021", "2022", "2018"…}
 \item{value}{chr "74", "56", "77", "78", "45", "0", "0", "0", "…}
-\item{report_date}{date 2023-11-16, 2023-11-16, 2023-11-16, 2023-11-1…}
-\item{report_description}{chr "November 16, 2023 MDUFA IV Performance
-Report…}
-\item{report_link}{chr "https://www.fda.gov/media/174193/download", "…}
-\item{report_mdufa_period}{chr "MDUFA IV", "MDUFA IV", "MDUFA IV", "MDUFA
-IV"…}
 }
 }
 \source{

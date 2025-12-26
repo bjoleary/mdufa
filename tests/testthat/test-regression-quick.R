@@ -50,21 +50,6 @@ extract_with_cache <- function(pdf_path, mdufa_period) {
   get(cache_key, envir = cache)
 }
 
-#' Find local PDF file
-find_local_pdf <- function(pattern) {
-  pdf_dir <- file.path(
-    testthat::test_path(), "..", "..", "data-raw", "pdf_reports"
-  )
-  if (!dir.exists(pdf_dir)) {
-    return(NULL)
-  }
-  files <- list.files(pdf_dir, pattern = pattern, full.names = TRUE)
-  if (length(files) == 0) {
-    return(NULL)
-  }
-  files[1]
-}
-
 #' Map fixture metric to extraction metric pattern
 map_metric_pattern <- function(fixture_name, fixture_metric, mdufa_period) {
   period_suffix <- switch(mdufa_period,
@@ -133,7 +118,10 @@ run_fixture_diff <- function(fixture_name, mdufa_period, fixture_period,
   select_cols <- c("organization", "performance_metric", "fy", "value")
   expected <- expected |>
     dplyr::select(dplyr::any_of(select_cols)) |>
-    dplyr::mutate(fy = as.character(fy), value = as.numeric(value))
+    dplyr::mutate(
+      fy = as.character(fy),
+      value = suppressWarnings(as.numeric(value))
+    )
 
   extracted <- extract_with_cache(pdf_path, mdufa_period)
 
@@ -158,7 +146,7 @@ run_fixture_diff <- function(fixture_name, mdufa_period, fixture_period,
       )
 
     if (nrow(actual) > 0) {
-      actual_val <- as.numeric(actual$value[1])
+      actual_val <- suppressWarnings(as.numeric(actual$value[1]))
       exp_val <- expected$value[i]
       if (!is.na(exp_val) && !is.na(actual_val)) {
         if (abs(actual_val - exp_val) > 0.5) {

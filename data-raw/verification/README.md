@@ -9,6 +9,8 @@ Install development dependencies:
 
 ```r
 install.packages(c("shiny", "glue", "stringr"))
+# dxr for Wilson score CI calculation
+remotes::install_github("bjoleary/dxr")
 ```
 
 Ensure local PDF copies exist in `data-raw/pdf_reports/`.
@@ -87,26 +89,59 @@ if (status$status == "COMPLETE") {
 | `Escape` | Exit notes field |
 | `Q` | Finish & Save |
 
+## Sampling Approach
+
+Sampling operates at the **metric level**, not the individual value level.
+
+**What's a metric?**
+A unique combination of (table_number, organization, performance_metric). For example:
+"Table 6.5, CDRH, Average FDA Days to Decision" is one metric.
+
+Each metric has 5 values in the data—one for each fiscal year (FY 2018-2022).
+
+**Verification process:**
+1. Sample 35 unique metrics
+2. For each metric, verify all 5 FY values against the PDF
+3. "Add 10 more rows" adds 10 new metrics (50 more values to check)
+
+**Why metric-level sampling?**
+- Each metric corresponds to one row in the PDF table
+- Verifying all 5 FY values checks the entire row extraction
+- Better coverage: 35 metrics across many tables/orgs vs. 35 random values that might cluster
+
+**Test generation:**
+When verification passes, each verified metric expands to 5 test assertions (one per FY).
+So 74 verified metrics → 370 test assertions.
+
 ## Statistical Basis
 
 - **Goal:** Lower bound of 95% CI for accuracy > 90%
-- **Method:** Wilson score interval
-- **Minimum sample:** 35 rows (with 100% pass rate)
+- **Method:** Wilson score interval via `dxr::agreement()`
+- **Minimum sample:** 35 unique metrics (with 100% pass rate)
 
-The Wilson score lower bound is calculated as:
+The Wilson score confidence interval is calculated using `dxr::agreement(pass_count, fail_count)`,
+which returns the full CI including lower bound, upper bound, and formatted strings.
 
-```
-LB = n / (n + z²)
-```
-
-Where z = 1.96 for 95% CI, so z² ≈ 3.84.
-
-| Sample Size | Pass Rate | Lower Bound |
-|-------------|-----------|-------------|
+| Metrics Verified | Pass Rate | Lower Bound |
+|------------------|-----------|-------------|
 | 34 | 100% | 89.85% |
 | 35 | 100% | 90.11% |
 | 40 | 100% | 91.24% |
 | 50 | 100% | 92.88% |
+
+## Completed Verifications
+
+The following reports have been verified with test files in `tests/testthat/`:
+
+| Report | Metrics | Agreement (95% CI) | Verified |
+|--------|---------|-------------------|----------|
+| MDUFA III 2018-12-10 | 54 | 98.2% (90.4%; 99.7%) | 2025-12-14 |
+| MDUFA IV 2023-11-16 | 74 | 100% (95.1%; 100%) | 2025-12-14 |
+| MDUFA V 2025-02-27 | 36 | 100% (90.4%; 100%) | 2025-12-08 |
+| MDUFA V 2025-08-27 | 75 | 100% (95.1%; 100%) | 2025-12-08 |
+| MDUFA V 2025-11-20 | 90 | 100% (95.9%; 100%) | 2025-12-10 |
+
+All verifications performed by Brendan O'Leary.
 
 ## Resuming Interrupted Sessions
 

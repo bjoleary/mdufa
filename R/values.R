@@ -12,15 +12,21 @@ submission_types <-
   ) |>
   # Wrap with word boundaries
   (\(x) paste0("\\b", x, "\\b"))() |>
-  # Add all review tracks, which has a paren that should not be wrapped with
-  # word boundaries
-  (\(x) c(x, "PMAs \\(All Review Tracks\\)"))() |>
+  # Add patterns with parentheses that don't work well with word boundaries
+  # DUAL CLIA pattern must come before 510(k) to match first
+  (\(x) {
+    c(
+      "DUAL \\(510\\(k\\) and CLIA Waiver\\)",
+      x,
+      "PMAs \\(All Review Tracks\\)"
+    )
+  })() |>
   # Collapse with "OR":
   paste(collapse = "|") |>
   stringr::regex()
 
 url_report_page <-
   paste0(
-    "https://www.fda.gov/industry/medical-device-user-fee-amendments-mdufa/",
-    "mdufa-reports"
+    "https://www.fda.gov/industry/",
+    "medical-device-user-fee-amendments-mdufa-fees/mdufa-reports"
   )

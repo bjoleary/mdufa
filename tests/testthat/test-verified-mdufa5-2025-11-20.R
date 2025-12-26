@@ -5,15 +5,6 @@
 # Sample size: 90 metrics, 450 values
 # Statistical basis: LB of 95% CI > 90% (Wilson score)
 
-# Helper function to find local PDF (works from testthat directory)
-find_local_pdf <- function(pattern) {
-  # testthat runs from tests/testthat, so go up two levels
-  pdf_dir <- testthat::test_path("..", "..", "data-raw", "pdf_reports")
-  files <- list.files(pdf_dir, pattern = pattern, full.names = TRUE)
-  if (length(files) == 0) return(NULL)
-  files[1]
-}
-
 test_that("MDUFA V 2025-11-20 extraction is accurate", {
   skip_if_not_installed("pdftools")
   pdf_path <- find_local_pdf("mdufa-5_2025-11-20")
@@ -2722,41 +2713,6 @@ expect_true(is.na(
   data$value[data$table_number == "9.5" &
              data$organization == "OHT5" &
              data$performance_metric == "Meeting Minutes Past 15 Days of Meeting" &
-             data$fy == "2027"]
-))
-# Table 9.2 | OHT6 | FYs 2025, 2026, and 2027. If the Pre-Sub... | FY 2023 = NA
-expect_true(is.na(
-  data$value[data$table_number == "9.2" &
-             data$organization == "OHT6" &
-             data$performance_metric == "FYs 2025, 2026, and 2027. If the Pre-Sub MDUFA goal is met for FY 2024, the maximum number of submissions subject to the goal will" &
-             data$fy == "2023"]
-))
-# Table 9.2 | OHT6 | FYs 2025, 2026, and 2027. If the Pre-Sub... | FY 2024 = NA
-expect_true(is.na(
-  data$value[data$table_number == "9.2" &
-             data$organization == "OHT6" &
-             data$performance_metric == "FYs 2025, 2026, and 2027. If the Pre-Sub MDUFA goal is met for FY 2024, the maximum number of submissions subject to the goal will" &
-             data$fy == "2024"]
-))
-# Table 9.2 | OHT6 | FYs 2025, 2026, and 2027. If the Pre-Sub... | FY 2025 = NA
-expect_true(is.na(
-  data$value[data$table_number == "9.2" &
-             data$organization == "OHT6" &
-             data$performance_metric == "FYs 2025, 2026, and 2027. If the Pre-Sub MDUFA goal is met for FY 2024, the maximum number of submissions subject to the goal will" &
-             data$fy == "2025"]
-))
-# Table 9.2 | OHT6 | FYs 2025, 2026, and 2027. If the Pre-Sub... | FY 2026 = NA
-expect_true(is.na(
-  data$value[data$table_number == "9.2" &
-             data$organization == "OHT6" &
-             data$performance_metric == "FYs 2025, 2026, and 2027. If the Pre-Sub MDUFA goal is met for FY 2024, the maximum number of submissions subject to the goal will" &
-             data$fy == "2026"]
-))
-# Table 9.2 | OHT6 | FYs 2025, 2026, and 2027. If the Pre-Sub... | FY 2027 = NA
-expect_true(is.na(
-  data$value[data$table_number == "9.2" &
-             data$organization == "OHT6" &
-             data$performance_metric == "FYs 2025, 2026, and 2027. If the Pre-Sub MDUFA goal is met for FY 2024, the maximum number of submissions subject to the goal will" &
              data$fy == "2027"]
 ))
 # Table 9.5 | OHT6 | Meeting Minutes Submitted Within 15 Days... | FY 2026 = NA

@@ -27,7 +27,6 @@ get_unchanged_rows <- function(diff_result) {
 #' @param n Number of rows to sample
 #' @return Sampled tibble
 sample_stratified <- function(data, n) {
-
   if (nrow(data) <= n) {
     return(data)
   }

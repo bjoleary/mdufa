@@ -92,40 +92,68 @@ generate_row_image <- function(table_number,
   if (!is.na(performance_metric)) {
     y_tolerance <- 5
 
-    # Step 1: Try partial match - find row containing most metric words
-    # (Metric text often wraps across rows, so exact match may fail)
-    metric_words <- strsplit(tolower(performance_metric), "\\s+")[[1]]
-    metric_words <- metric_words[nchar(metric_words) > 2] # Skip short words
-
     # Get unique Y positions in table section
     data_rows <- page_data[
       page_data$y >= data_start_y & page_data$y <= table_end_y,
     ]
     unique_ys <- sort(unique(data_rows$y))
 
-    best_match_y <- NULL
-    best_match_count <- 0
+    # Normalize metric text for matching
+    metric_normalized <- tolower(gsub("\\s+", " ", trimws(performance_metric)))
+    metric_words <- strsplit(metric_normalized, " ")[[1]]
+    metric_words <- metric_words[nchar(metric_words) > 2] # Skip short words
 
+    # Step 1: Try EXACT match first (row text equals metric text)
     for (y in unique_ys) {
-      # Get all words at this Y position (within tolerance), sorted by x
       row_words <- data_rows[abs(data_rows$y - y) <= y_tolerance, ]
+      row_words <- row_words[order(row_words$x), ] # Sort left-to-right
       row_text <- tolower(paste(row_words$text, collapse = " "))
+      row_text <- gsub("\\s+", " ", trimws(row_text))
 
-      # Count how many metric words appear in this row
-      matches <- sum(sapply(metric_words, function(w) grepl(w, row_text, fixed = TRUE)))
-
-      # Require at least 60% of metric words to match
-      if (matches > best_match_count && matches >= length(metric_words) * 0.6) {
-        best_match_count <- matches
-        best_match_y <- y
+      if (row_text == metric_normalized) {
+        metric_y <- y
+        break
       }
     }
 
-    if (!is.null(best_match_y)) {
-      metric_y <- best_match_y
+    # Step 2: Try partial match - prefer rows with fewest EXTRA words
+    # This prevents "MDUFA IV Decisions" matching "Eligible for MDUFA IV Decisions"
+    if (is.null(metric_y)) {
+      best_match_y <- NULL
+      best_match_score <- -Inf # Higher is better
+
+      for (y in unique_ys) {
+        row_words_df <- data_rows[abs(data_rows$y - y) <= y_tolerance, ]
+        row_text <- tolower(paste(row_words_df$text, collapse = " "))
+
+        # Count how many metric words appear in this row
+        matches <- sum(sapply(metric_words, function(w) {
+          grepl(w, row_text, fixed = TRUE)
+        }))
+
+        # Skip if less than 60% of metric words match
+        if (matches < length(metric_words) * 0.6) next
+
+        # Count extra words in row not in metric (penalty)
+        row_word_list <- strsplit(row_text, "\\s+")[[1]]
+        row_word_list <- row_word_list[nchar(row_word_list) > 2]
+        extra_words <- sum(!row_word_list %in% metric_words)
+
+        # Score = matches - extra_words (prefer fewer extra words)
+        score <- matches - (extra_words * 0.5)
+
+        if (score > best_match_score) {
+          best_match_score <- score
+          best_match_y <- y
+        }
+      }
+
+      if (!is.null(best_match_y)) {
+        metric_y <- best_match_y
+      }
     }
 
-    # Step 2: Fallback to distinctive word matching if exact match failed
+    # Step 3: Fallback to distinctive word matching if partial match failed
     if (is.null(metric_y)) {
       metric_words <- strsplit(performance_metric, "\\s+")[[1]]
       # Only filter truly generic words - keep distinctive words like
@@ -235,49 +263,51 @@ generate_row_image <- function(table_number,
   if (!is.null(metric_y)) {
     img <- magick::image_draw(img)
 
-    if (nrow(fy_columns) > 0) {
-      # Highlight full row across FY columns
-      # Estimate row height from table structure
-      # Get all y-positions in the table area to estimate row spacing
-      table_ys <- page_data$y[
-        page_data$y >= table_start_y & page_data$y <= table_end_y
-      ]
-      unique_ys <- sort(unique(table_ys))
-      row_height <- 40 # default 2x original
+    # MDUFA tables have consistent layout:
+    # - Metric names start around x=52
+    # - FY value columns end around x=565
+    # Use fixed positions that work across all tables
+    row_left <- 52 * scale
+    row_right <- 565 * scale
 
-      # Try to estimate row height from spacing between lines
-      if (length(unique_ys) > 2) {
-        diffs <- diff(unique_ys)
-        # Filter to reasonable row heights (8-30 points)
-        reasonable_diffs <- diffs[diffs >= 8 & diffs <= 30]
-        if (length(reasonable_diffs) > 0) {
-          row_height <- median(reasonable_diffs) * scale * 1.8
-        }
+    # Estimate row height from table structure
+    table_ys <- page_data$y[
+      page_data$y >= table_start_y & page_data$y <= table_end_y
+    ]
+    unique_ys <- sort(unique(table_ys))
+    base_row_height <- 24  # Default row height in scaled pixels
+
+    # Try to estimate row height from spacing between lines
+    if (length(unique_ys) > 2) {
+      diffs <- diff(unique_ys)
+      # Filter to reasonable row heights (8-30 points)
+      reasonable_diffs <- diffs[diffs >= 8 & diffs <= 30]
+      if (length(reasonable_diffs) > 0) {
+        base_row_height <- median(reasonable_diffs) * scale
       }
-
-      row_left <- min(fy_columns$x) * scale - 10
-      row_right <- max(fy_columns$x + fy_columns$width) * scale + 50
-      row_top <- metric_y * scale - 5
-      row_bottom <- row_top + max(row_height, 40)
-
-      graphics::rect(
-        row_left, row_top, row_right, row_bottom,
-        col = grDevices::adjustcolor("yellow", alpha.f = 0.3),
-        border = "red", lwd = 2
-      )
-    } else {
-      # Fallback: highlight just the metric text area
-      row_left <- 50 * scale
-      row_right <- 600 * scale
-      row_top <- metric_y * scale - 5
-      row_bottom <- row_top + 40 # 2x original height
-
-      graphics::rect(
-        row_left, row_top, row_right, row_bottom,
-        col = grDevices::adjustcolor("yellow", alpha.f = 0.3),
-        border = "red", lwd = 2
-      )
     }
+
+    # Adjust row height based on metric name length
+    # Longer metrics are more likely to wrap to multiple lines
+    metric_len <- nchar(performance_metric)
+    if (metric_len > 60) {
+      # Very long metrics often wrap to 3 lines
+      row_height <- base_row_height * 2.5
+    } else if (metric_len > 40) {
+      # Medium-long metrics often wrap to 2 lines
+      row_height <- base_row_height * 1.8
+    } else {
+      row_height <- base_row_height
+    }
+
+    row_top <- metric_y * scale - 3
+    row_bottom <- row_top + max(row_height, 24)
+
+    graphics::rect(
+      row_left, row_top, row_right, row_bottom,
+      col = grDevices::adjustcolor("orange", alpha.f = 0.4),
+      border = "darkorange", lwd = 2
+    )
 
     grDevices::dev.off()
   }
@@ -451,17 +481,20 @@ test_that("{row$table_number} {row$organization} {substr(row$performance_metric,
 
 #' Check Verification Status
 #'
-#' Calculates the Wilson score lower bound and determines if verification
-#' is complete, failed, or needs more samples.
+#' Uses dxr::agreement() to calculate the Wilson score confidence interval
+#' and determines if verification is complete, failed, or needs more samples.
 #'
-#' @param pass_count Number of passed rows
-#' @param fail_count Number of failed rows
-#' @return List with status, message, and optionally samples_needed
+#' @param pass_count Number of passed metrics
+#' @param fail_count Number of failed metrics
+#' @return List with status, message, agreement result, and optionally
+#'   samples_needed
 check_verification_status <- function(pass_count, fail_count) {
   if (fail_count > 0) {
+    agr <- dxr::agreement(pass_count, fail_count)
     return(list(
       status = "FAILED",
-      message = paste0(fail_count, " failure(s) - fix code and re-verify")
+      message = paste0(fail_count, " failure(s) - fix code and re-verify"),
+      agreement = agr
     ))
   }
 
@@ -473,10 +506,10 @@ check_verification_status <- function(pass_count, fail_count) {
     ))
   }
 
-  # Calculate Wilson score lower bound
-  # Using formula: n / (n + z^2) where z = 1.96 for 95% CI
-  z_sq <- 3.84 # 1.96^2
-  lower_bound <- pass_count / (pass_count + z_sq)
+  # Calculate Wilson score CI using dxr::agreement
+
+  agr <- dxr::agreement(pass_count, fail_count)
+  lower_bound <- agr$lower
 
   if (lower_bound > 0.90) {
     return(list(
@@ -485,21 +518,28 @@ check_verification_status <- function(pass_count, fail_count) {
       message = paste0(
         "LB = ", round(lower_bound * 100, 2),
         "% > 90% with n=", pass_count
-      )
+      ),
+      agreement = agr
     ))
   } else {
     # Estimate samples needed for LB > 90%
-    # Solve: n / (n + 3.84) > 0.90 => n > 0.90 * 3.84 / 0.10 = 34.56
-    samples_needed <- max(0, ceiling(0.90 * z_sq / 0.10) - pass_count)
+    # Iteratively find minimum n where agreement(n, 0)$lower > 0.90
+    samples_needed <- pass_count
+    while (dxr::agreement(samples_needed, 0)$lower <= 0.90 &&
+           samples_needed < 500) {
+      samples_needed <- samples_needed + 1
+    }
+    samples_needed <- samples_needed - pass_count
 
     return(list(
       status = "CONTINUE",
       lower_bound = lower_bound,
       message = paste0(
         "LB = ", round(lower_bound * 100, 2),
-        "% <= 90% - need ~", samples_needed, " more samples"
+        "% <= 90% - need ~", samples_needed, " more metrics"
       ),
-      samples_needed = samples_needed
+      samples_needed = samples_needed,
+      agreement = agr
     ))
   }
 }
@@ -655,10 +695,10 @@ test_that("{mdufa_period} {report_date} extraction is accurate", {{
         glue::glue(
           '# Table {table_number} | {organization} | {substr(performance_metric, 1, 40)}... | FY {fy} = NA
 expect_true(is.na(
-  data$value[data$table_number == "{table_number}" &
-             data$organization == "{organization}" &
-             data$performance_metric == "{performance_metric}" &
-             data$fy == "{fy}"]
+  data$value[which(data$table_number == "{table_number}" &
+                   data$organization == "{organization}" &
+                   data$performance_metric == "{performance_metric}" &
+                   data$fy == "{fy}")]
 ))
 '
         )
@@ -666,10 +706,10 @@ expect_true(is.na(
         glue::glue(
           '# Table {table_number} | {organization} | {substr(performance_metric, 1, 40)}... | FY {fy}
 expect_equal(
-  data$value[data$table_number == "{table_number}" &
-             data$organization == "{organization}" &
-             data$performance_metric == "{performance_metric}" &
-             data$fy == "{fy}"],
+  data$value[which(data$table_number == "{table_number}" &
+                   data$organization == "{organization}" &
+                   data$performance_metric == "{performance_metric}" &
+                   data$fy == "{fy}")],
   "{value}"
 )
 '
@@ -698,7 +738,6 @@ expect_equal(
 #' @return Data frame with parsed assertions, or NULL if parsing fails
 #' @keywords internal
 parse_existing_test_file <- function(test_file) {
-
   tryCatch(
     {
       lines <- readLines(test_file)
@@ -718,7 +757,7 @@ parse_existing_test_file <- function(test_file) {
 
       # Pattern for expect_true(is.na(...)) assertions
       na_pattern <- paste0(
-        'expect_true\\(is\\.na\\(\\s*',
+        "expect_true\\(is\\.na\\(\\s*",
         'data\\$value\\[data\\$table_number == "([^"]+)" &\\s*',
         'data\\$organization == "([^"]+)" &\\s*',
         'data\\$performance_metric == "([^"]+)" &\\s*',

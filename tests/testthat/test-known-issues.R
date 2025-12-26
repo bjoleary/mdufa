@@ -16,8 +16,6 @@ test_that("MDUFA V page footers are not extracted as data", {
   #
   # See: local/known_issues_mdufa5_2025-08-27.md
 
-  skip("Known issue: Page footer text occasionally extracted as garbage rows")
-
   skip_if_not_installed("pdftools")
   pdf_path <- find_local_pdf("mdufa-5_2025-08-27")
   skip_if(is.null(pdf_path), "MDUFA V PDF not available locally")
@@ -55,11 +53,11 @@ test_that("All MDUFA III reports can be verified", {
   # - mdufa-3_2015-07-30_quarterly-report.pdf
   # - mdufa-3_2015-02-02_quarterly-report.pdf
   #
-  # These files are documented as missing in CLAUDE.md.
+  # UPDATE: These files are now available after renaming mdufa-2i to mdufa-3
+  # Skip on CI to avoid downloading 7 PDFs just to verify they exist
+  skip_on_ci()
 
-  skip("Known limitation: Some historical MDUFA III PDFs are unavailable")
-
-  missing_reports <- c(
+  previously_missing_reports <- c(
     "2017-03-06",
     "2016-09-07",
     "2016-05-02",
@@ -69,15 +67,11 @@ test_that("All MDUFA III reports can be verified", {
     "2015-02-02"
   )
 
-  pdf_dir <- "data-raw/pdf_reports"
-  skip_if(!dir.exists(pdf_dir), "PDF directory not available")
-
-  # Check each missing report
-  for (date in missing_reports) {
+  # Check each previously missing report (now available via S3 or locally)
+  for (date in previously_missing_reports) {
     pattern <- paste0("mdufa-3_", date)
     pdf_path <- find_local_pdf(pattern)
 
-    # This test will pass when PDFs become available
     expect_false(
       is.null(pdf_path),
       label = paste("MDUFA III", date, "PDF exists")

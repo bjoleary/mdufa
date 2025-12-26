@@ -106,6 +106,37 @@ extract_report <- function(pdf_path,
           ignore_case = FALSE
         ),
         replacement = "\\1  "
+      ) |>
+      # Fix "Current Performance Percent within X FDA Days" rows where the
+      # metric name is split across lines (common in CBER tables)
+      stringr::str_replace_all(
+        pattern = stringr::regex(
+          "(Current Performance Percent within \\d+ FDA)\\s*\\n(\\s*Days)",
+          ignore_case = FALSE
+        ),
+        replacement = "\\1 \\2"
+      ) |>
+      # Fix "Performance Metric" header rows where goal percentages run together
+      # (e.g., "91% within 90 93% within 90" should have column spacing)
+      stringr::str_replace_all(
+        pattern = "(\\d+% within \\d+) (\\d+% within \\d+)",
+        replacement = "\\1       \\2"
+      ) |>
+      # Fix calendar day goals that run together (Pre-Submission tables)
+      # (e.g., "135 calendar 135 calendar" should have column spacing)
+      stringr::str_replace_all(
+        pattern = "(\\d+ calendar) (\\d+ calendar)",
+        replacement = "\\1       \\2"
+      ) |>
+      # Remove standalone "FDA days" and "days" continuation lines
+      # (These are split from their header values and would become garbage rows)
+      stringr::str_replace_all(
+        pattern = "^\\s+FDA days(\\s+FDA days)+\\s*$",
+        replacement = ""
+      ) |>
+      stringr::str_replace_all(
+        pattern = "^\\s+days(\\s+days)+\\s*$",
+        replacement = ""
       )
   }
 
@@ -261,6 +292,47 @@ extract_report <- function(pdf_path,
             .data$value,
             stringr::regex("within|days|SI|substantive", ignore_case = TRUE)
           ))
+      ) |>
+      # Filter out "Performance Metric" rows where value is just "FY YYYY"
+      # (These are column header artifacts, not actual data)
+      dplyr::filter(
+        !(.data$performance_metric == "Performance Metric" &
+            stringr::str_detect(.data$value, "^FY \\d{4}$"))
+      ) |>
+      # Fix "Performance Metric" goal values missing their unit suffix
+      # Table 6.4: "X% within Y" should be "X% within Y FDA days"
+      # Table 7.2: "X calendar" should be "X calendar days"
+      dplyr::mutate(
+        value = dplyr::case_when(
+          .data$performance_metric == "Performance Metric" &
+            .data$table_number == "6.4" &
+            stringr::str_detect(.data$value, "^\\d+% within \\d+$") ~
+            paste0(.data$value, " FDA days"),
+          .data$performance_metric == "Performance Metric" &
+            .data$table_number == "7.2" &
+            stringr::str_detect(.data$value, "^\\d+ calendar$") ~
+            paste0(.data$value, " days"),
+          TRUE ~ .data$value
+        )
+      ) |>
+      # Fix Table 1.4 CDRH truncated "to Substantive" metrics
+      # The word "Interaction" wraps to a new line without values
+      dplyr::mutate(
+        performance_metric = dplyr::case_when(
+          .data$table_number == "1.4" &
+            .data$organization == "CDRH" &
+            stringr::str_detect(
+              .data$performance_metric,
+              "to Substantive$"
+            ) ~ paste0(.data$performance_metric, " Interaction"),
+          # Fix "Interaction Maximum..." prefix (same table/org)
+          .data$table_number == "1.4" &
+            .data$organization == "CDRH" &
+            .data$performance_metric ==
+            "Interaction Maximum FDA days to Substantive Interaction" ~
+            "Maximum FDA days to Substantive Interaction",
+          TRUE ~ .data$performance_metric
+        )
       )
   }
 
@@ -274,6 +346,19 @@ extract_report <- function(pdf_path,
 
   # Remove duplicate rows
   result <- dplyr::distinct(result)
+
+  # Remove NA-value duplicates where a non-NA row exists for the same key
+  # This handles PDF rendering artifacts where a metric line is duplicated
+  # with one row having a value and one having NA
+  key_cols <- c("table_number", "organization", "program",
+                "performance_metric", "fy")
+  result <- result |>
+    dplyr::group_by(dplyr::across(dplyr::all_of(key_cols))) |>
+    dplyr::filter(
+      # Keep row if: value is not NA, OR no other row in this group has a value
+      !is.na(.data$value) | all(is.na(.data$value))
+    ) |>
+    dplyr::ungroup()
 
   # Remove garbage rows where performance_metric, value, AND organization
   # are all NA (stray headers from definitions pages)
@@ -342,7 +427,12 @@ build_submission_type_regex <- function(mdufa_period) {
 
   types <- unique(types)
   types <- paste0("\\b", types, "\\b")
-  types <- c(types, "PMAs \\(All Review Tracks\\)")
+  # Add patterns with parentheses that don't work well with word boundaries
+  types <- c(
+    "DUAL \\(510\\(k\\) and CLIA Waiver\\)",
+    types,
+    "PMAs \\(All Review Tracks\\)"
+  )
   paste(types, collapse = "|") |>
     stringr::regex()
 }
@@ -460,6 +550,20 @@ extract_report_m5 <- function(pdf_path,
   # Remove duplicate rows
   result <- dplyr::distinct(result)
 
+  # Remove NA-value duplicates where a non-NA row exists for the same key
+
+  # This handles PDF rendering artifacts where a metric line is duplicated
+  # (once with values, once empty) - e.g., page 210 "Maximum FDA Days..."
+  # Also handles tables appearing on multiple pages (e.g., 2023-11-16 Table 8.8)
+  key_cols <- c("table_number", "organization", "program",
+                "performance_metric", "fy")
+  result <- result |>
+    dplyr::group_by(dplyr::across(dplyr::all_of(key_cols))) |>
+    dplyr::filter(
+      # Keep row if: value is not NA, OR no other row in this group has a value
+      !is.na(.data$value) | all(is.na(.data$value))
+    ) |>
+    dplyr::ungroup()
 
   # Remove garbage rows (orphaned header lines with NA performance_metric)
   result <- result |>
@@ -480,6 +584,14 @@ extract_report_m5 <- function(pdf_path,
         "^[a-z*]|^[0-9]+[.)]"
       ),
       nchar(.data$performance_metric) > 1
+    )
+
+  # Remove additional footnote text that starts with uppercase but is clearly
+
+  # explanatory text (these have NA values and specific text patterns)
+  result <- result |>
+    dplyr::filter(
+      !is_footnote_row(.data$performance_metric, .data$value)
     )
 
   # Add report metadata

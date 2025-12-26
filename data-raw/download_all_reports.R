@@ -54,8 +54,8 @@ mdufa_reports <-
       pattern = "MDUFA\\s[IVXL]+"
     ) |>
       tidyr::replace_na("MDUFA II") |>
-      stringr::str_replace("II", "2") |>
       stringr::str_replace("III", "3") |>
+      stringr::str_replace("II", "2") |>
       stringr::str_replace("IV", "4") |>
       stringr::str_replace("V", "5"),
     # Create a clean filename
@@ -88,14 +88,30 @@ convert_to_wayback <- function(url) {
   url
 }
 
+# Check if a file is a valid PDF
+is_valid_pdf <- function(filepath) {
+  if (!file.exists(filepath)) {
+    return(FALSE)
+  }
+  # Check magic bytes (PDF files start with %PDF)
+  con <- file(filepath, "rb")
+  on.exit(close(con))
+  header <- rawToChar(readBin(con, raw(), n = 5))
+  if (grepl("^%PDF", header)) {
+    return(TRUE)
+  }
+  # If no PDF magic bytes, only accept if file is large (could be misidentified)
+  # Small files without PDF magic bytes are likely HTML error pages (~20KB)
+  file.info(filepath)$size > 100000
+}
+
 # Download each report using httr (handles FDA bot detection)
 download_report <- function(url, filename, output_dir) {
   filepath <- file.path(output_dir, filename)
 
-  # Check if file exists and is valid (> 10KB to catch failed redirects)
+  # Check if file exists and is a valid PDF
   if (file.exists(filepath)) {
-    file_size <- file.info(filepath)$size
-    if (file_size > 10000) {
+    if (is_valid_pdf(filepath)) {
       cat("Skipping (exists):", filename, "\n")
       return(invisible(NULL))
     } else {
@@ -120,11 +136,14 @@ download_report <- function(url, filename, output_dir) {
         httr::user_agent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"),
         httr::write_disk(filepath, overwrite = TRUE)
       )
-      # Verify download succeeded
-      if (httr::status_code(resp) == 200 &&
-        file.exists(filepath) &&
-        file.info(filepath)$size > 10000) {
+
+      # Verify download succeeded and is a valid PDF
+      if (httr::status_code(resp) == 200 && is_valid_pdf(filepath)) {
         cat("Done\n")
+      } else if (httr::status_code(resp) == 200 && file.exists(filepath)) {
+        # Downloaded but not a valid PDF (likely HTML redirect page)
+        file.remove(filepath)
+        cat("FAILED (not a valid PDF, deleted)\n")
       } else {
         cat("FAILED (status:", httr::status_code(resp), ")\n")
       }
@@ -148,3 +167,14 @@ purrr::pwalk(
 
 cat("\n--- Downloads complete ---\n")
 cat("Files saved to:", normalizePath(output_dir), "\n")
+
+# Sync to S3 if sync script exists (gitignored, requires credentials)
+sync_script <- "data-raw/sync_to_s3.R"
+if (file.exists(sync_script)) {
+  cat("\n--- Syncing to S3 ---\n\n")
+  source(sync_script)
+  sync_reports_to_s3()
+}
+
+cat("\nTo extract cutoff dates from downloaded reports, run:\n")
+cat("  source('data-raw/report_dates.R')\n")

@@ -37,6 +37,12 @@ mdufa2 <-
     report_date = lubridate::mdy(.data$report_date)
   )
 
+# Validate column structure before saving
+validate_columns(mdufa2, mdufa_cols, "mdufa2")
+
+# Validate unique metrics (no duplicates)
+validate_unique_metrics(mdufa2, "mdufa2")
+
 usethis::use_data(mdufa2, overwrite = TRUE)
 
 # Document the dataset ---------------------------------------------------------
