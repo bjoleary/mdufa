@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">mdufa</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.0</span>
       </span>
     </div>
 
@@ -43,6 +43,37 @@
 
     <div class="section level2">
 <h2 class="page-header" data-toc-text="development version" id="mdufa-development-version">mdufa (development version)<a class="anchor" aria-label="anchor" href="#mdufa-development-version"></a></h2>
+</div>
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="0.3.0" id="mdufa-030">mdufa 0.3.0<a class="anchor" aria-label="anchor" href="#mdufa-030"></a></h2>
+<div class="section level3">
+<h3 id="new-features-0-3-0">New Features<a class="anchor" aria-label="anchor" href="#new-features-0-3-0"></a></h3>
+<ul><li><p>New <code>mdufa_combined</code> dataset provides unified data spanning all MDUFA periods (II through V) with harmonized metric names for cross-period analysis.</p></li>
+<li><p>New <code>mdufa3_oht</code> dataset (experimental) reorganizes MDUFA III data by Office of Health Technology (OHT) to enable comparison with MDUFA IV/V reporting structure. Division-level data is mapped to OHTs with intelligent aggregation.</p></li>
+<li>
+<p>New helper functions for MDUFA data analysis:</p>
+<ul><li>
+<code><a href="../reference/filter_metrics.html">filter_metrics()</a></code> enhanced with additional filtering options</li>
+<li>
+<code><a href="../reference/harmonize_metric_names.html">harmonize_metric_names()</a></code> for case-normalized cross-period comparisons</li>
+<li>
+<code><a href="../reference/identify_aggregation_type.html">identify_aggregation_type()</a></code> determines appropriate aggregation method</li>
+</ul></li>
+<li><p>New <code>cohort_status</code> and <code>report_dates</code> reference datasets for programmatic access to MDUFA reporting metadata.</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="bug-fixes-0-3-0">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-3-0"></a></h3>
+<ul><li><p>Fixed MDUFA III extraction for “Performance Metric” goal value patterns.</p></li>
+<li><p>Fixed wrapped “Current Performance Percent within X FDA Days” metric extraction where text broke across lines.</p></li>
+<li><p>Fixed MDUFA III Table 1.4 CDRH truncated “to Substantive” metrics.</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="internal-0-3-0">Internal<a class="anchor" aria-label="anchor" href="#internal-0-3-0"></a></h3>
+<ul><li><p>Added S3 bucket integration for PDF reports, enabling CI/CD tests to download PDFs from public S3 bucket when not available locally.</p></li>
+<li><p>Fixed MDUFA III filename bug where Roman numeral replacement order caused “MDUFA III” to be mislabeled as “mdufa-2i”. Renamed 23 affected files.</p></li>
+<li><p>Regenerated test-coverage workflow from r-lib/actions template to fix Codecov upload issues.</p></li>
+<li><p>Added verification test infrastructure with <code><a href="../reference/verify_row.html">verify_row()</a></code> for PDF-to-data validation using annotated page images.</p></li>
+</ul></div>
 </div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.2.3" id="mdufa-023">mdufa 0.2.3<a class="anchor" aria-label="anchor" href="#mdufa-023"></a></h2>
