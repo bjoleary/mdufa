@@ -16,11 +16,12 @@ Character string indicating aggregation type
 }
 \description{
 Determines how a metric should be aggregated based on its name
-and metric_type. Returns one of: "sum", "weighted_avg",
-"recalc_percent", "percentile", or "exclude".
+and metric_type. Returns one of: "sum", "max", "weighted_avg",
+"recalc_percent", or "exclude".
 }
 \examples{
 identify_aggregation_type("Number Received", "integer")
 identify_aggregation_type("Average FDA days to MDUFA III decision", "double")
+identify_aggregation_type("Maximum FDA days to decision", "integer")
 identify_aggregation_type("20th Percentile FDA days", "integer")
 }

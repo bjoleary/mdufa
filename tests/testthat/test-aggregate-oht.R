@@ -38,24 +38,24 @@ test_that("identify_aggregation_type correctly classifies metrics", {
     "recalc_percent"
   )
 
-  # Percentile (excluded)
+  # Percentile (excluded - cannot aggregate without raw data)
   expect_equal(
     identify_aggregation_type(
       "20th Percentile FDA days to MDUFA III decision", "integer"
     ),
-    "percentile"
+    "exclude"
   )
   expect_equal(
     identify_aggregation_type("80th Percentile Total days", "integer"),
-    "percentile"
+    "exclude"
   )
 
-  # Maximum (excluded)
+  # Maximum (take max across orgs)
   expect_equal(
     identify_aggregation_type(
       "Maximum FDA days to MDUFA III decision", "integer"
     ),
-    "exclude"
+    "max"
   )
 
   # Text (excluded)
