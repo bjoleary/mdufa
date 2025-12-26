@@ -54,8 +54,8 @@ mdufa_reports <-
       pattern = "MDUFA\\s[IVXL]+"
     ) |>
       tidyr::replace_na("MDUFA II") |>
-      stringr::str_replace("II", "2") |>
       stringr::str_replace("III", "3") |>
+      stringr::str_replace("II", "2") |>
       stringr::str_replace("IV", "4") |>
       stringr::str_replace("V", "5"),
     # Create a clean filename
@@ -167,6 +167,14 @@ purrr::pwalk(
 
 cat("\n--- Downloads complete ---\n")
 cat("Files saved to:", normalizePath(output_dir), "\n")
+
+# Sync to S3 if sync script exists (gitignored, requires credentials)
+sync_script <- "data-raw/sync_to_s3.R"
+if (file.exists(sync_script)) {
+  cat("\n--- Syncing to S3 ---\n\n")
+  source(sync_script)
+  sync_reports_to_s3()
+}
 
 cat("\nTo extract cutoff dates from downloaded reports, run:\n")
 cat("  source('data-raw/report_dates.R')\n")

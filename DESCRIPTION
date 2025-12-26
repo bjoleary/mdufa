@@ -14,6 +14,7 @@ Description: |
     the data and includes the most recent dataset as of publication. 
 License: MIT + file LICENSE
 Suggests:
+    curl,
     lintr,
     magick,
     pdftools,

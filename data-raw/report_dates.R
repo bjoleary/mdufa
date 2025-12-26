@@ -182,7 +182,6 @@ results <- lapply(pdfs, function(pdf) {
 })
 
 # Combine results and deduplicate
-# (mdufa-2i and mdufa-3 files for the same date are the same report)
 report_dates_raw <- dplyr::bind_rows(results) |>
   dplyr::distinct(report_date, report_mdufa_period, .keep_all = TRUE) |>
   dplyr::arrange(report_date)

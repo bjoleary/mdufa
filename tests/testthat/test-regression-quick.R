@@ -50,21 +50,6 @@ extract_with_cache <- function(pdf_path, mdufa_period) {
   get(cache_key, envir = cache)
 }
 
-#' Find local PDF file
-find_local_pdf <- function(pattern) {
-  pdf_dir <- file.path(
-    testthat::test_path(), "..", "..", "data-raw", "pdf_reports"
-  )
-  if (!dir.exists(pdf_dir)) {
-    return(NULL)
-  }
-  files <- list.files(pdf_dir, pattern = pattern, full.names = TRUE)
-  if (length(files) == 0) {
-    return(NULL)
-  }
-  files[1]
-}
-
 #' Map fixture metric to extraction metric pattern
 map_metric_pattern <- function(fixture_name, fixture_metric, mdufa_period) {
   period_suffix <- switch(mdufa_period,

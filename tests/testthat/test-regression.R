@@ -11,31 +11,6 @@
 # 2. Compare extracted values against verified CSV fixtures
 # 3. Any mismatch indicates a regression in the extraction pipeline
 
-# Helper to find local PDF reports
-find_local_pdf <- function(pattern) {
-  pkg_root <- tryCatch(
-    rprojroot::find_package_root_file(),
-    error = function(e) NULL
-  )
-
-  possible_dirs <- c(
-    if (!is.null(pkg_root)) file.path(pkg_root, "data-raw", "pdf_reports"),
-    "data-raw/pdf_reports",
-    "../data-raw/pdf_reports",
-    "../../data-raw/pdf_reports"
-  )
-
-  for (pdf_dir in possible_dirs) {
-    if (!is.null(pdf_dir) && dir.exists(pdf_dir)) {
-      files <- list.files(pdf_dir, pattern = pattern, full.names = TRUE)
-      if (length(files) > 0) {
-        return(files[1])
-      }
-    }
-  }
-  NULL
-}
-
 # =============================================================================
 # LOAD FIXTURES INTO MEMORY ONCE
 # =============================================================================
