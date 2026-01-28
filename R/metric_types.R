@@ -149,7 +149,7 @@ metric_types <- function(report_mdufa_period = "MDUFA IV") {
       "Supplements Pending MDUFA IV Decision", "integer",
       "Supplements Pending MDUFA IV Decision Past Goal", "integer",
       "Supplements Received", "integer",
-      "Which Industry Provided Minutes Within 15", "percent",
+      "Percent of Submissions With Meetings for Which Industry Provided Minutes Within 15 Days", "percent", # nolint: line_length_linter.
       "Written Feedback Sent", "integer",
       # Anual report metrics
       "Premarket Report Submissions", "integer",
@@ -534,7 +534,7 @@ metric_types <- function(report_mdufa_period = "MDUFA IV") {
       "Supplements Pending MDUFA V Decision", "integer",
       "Supplements Pending MDUFA V Decision Past Goal", "integer",
       "Supplements Received", "integer",
-      "Which Industry Provided Minutes Within 15", "percent",
+      "Percent of Submissions With Meetings for Which Industry Provided Minutes Within 15 Days", "percent", # nolint: line_length_linter.
       "Written Feedback Sent", "integer",
       # Anual report metrics
       "Premarket Report Submissions", "integer",
@@ -653,7 +653,7 @@ metric_types <- function(report_mdufa_period = "MDUFA IV") {
       "Number Without a RTA or TS Review and > 15 Days Since Date Received \u00B9", "integer", # nolint: line_length_linter.
       # "Number Without First Cycle RTA Review and > 15 Days Since Date Received 2", "integer", # nolint: line_length_linter.
       "Number Without First Cycle RTA Review and > 15 Days Since Date Received \u00B2", "integer", # nolint: line_length_linter.
-      "Percent of Submissions With Meetings for Which Industry Provided Minutes Within 15 Days", "integer", # nolint: line_length_linter.
+      "Percent of Submissions With Meetings for Which Industry Provided Minutes Within 15 Days", "percent", # nolint: line_length_linter.
       "PMAs Pending MDUFA Decision", "integer",
       "PMAs Pending MDUFA Decision Past Goal", "integer",
       "Rate of Declined Decision", "percent",
