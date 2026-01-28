@@ -200,6 +200,28 @@ extract_report <- function(pdf_path,
         string = .data$source,
         pattern = paste0("(?=", submission_type, ").*$")
       )
+    ) |>
+    # Fix missing table_title for Table 9.5 OHT8 (MDUFA IV PDF defect)
+    # The 2023-11-16 report PDF is missing the subtitle line for this table/org
+    dplyr::mutate(
+      table_title = dplyr::case_when(
+        .data$table_number == "9.5" &
+          .data$organization == "OHT8" &
+          is.na(.data$table_title) ~
+          "Pre-Sub Performance Metrics - Meeting Minutes*",
+        TRUE ~ .data$table_title
+      )
+    ) |>
+    # Fix truncated metric name in Table 9.5 (PDF wraps across 3 lines)
+    # "Percent of Submissions With Meetings for" / "Which Industry..." / "Days"
+    dplyr::mutate(
+      performance_metric = dplyr::case_when(
+        .data$table_number == "9.5" &
+          .data$performance_metric ==
+          "Which Industry Provided Minutes Within 15" ~
+          "Percent of Submissions With Meetings for Which Industry Provided Minutes Within 15 Days", # nolint: line_length_linter.
+        TRUE ~ .data$performance_metric
+      )
     )
 
 

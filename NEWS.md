@@ -1,5 +1,23 @@
 # mdufa (development version)
 
+# mdufa 0.3.1
+
+## Bug Fixes
+
+* Fixed missing `table_title` for Table 9.5 OHT8 in MDUFA IV (PDF defect in
+  2023-11-16 report where subtitle line was missing).
+
+* Fixed truncated metric name in Table 9.5: "Which Industry Provided Minutes
+  Within 15" now extracts as full name "Percent of Submissions With Meetings
+  for Which Industry Provided Minutes Within 15 Days".
+
+* Fixed `metric_type` for the above metric from "integer" to "percent" (values
+  are percentages).
+
+## Data Updates
+
+* Re-extracted `mdufa4` and `mdufa5` datasets with above fixes.
+
 # mdufa 0.3.0
 
 ## New Features
