@@ -1,5 +1,17 @@
 # mdufa (development version)
 
+# mdufa 0.3.2
+
+## Bug Fixes
+
+* Fixed missing `program` and `table_title` for OHT8 Tables 1.1, 1.2, 1.3,
+  and 9.5 in MDUFA IV (PDF defect in 2023-11-16 report where subtitle lines
+  were missing). Closes #3.
+
+## Data Updates
+
+* Re-extracted `mdufa4` dataset with above fixes.
+
 # mdufa 0.3.1
 
 ## Bug Fixes
