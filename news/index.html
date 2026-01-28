@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">mdufa</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.1</span>
       </span>
     </div>
 
@@ -43,6 +43,19 @@
 
     <div class="section level2">
 <h2 class="page-header" data-toc-text="development version" id="mdufa-development-version">mdufa (development version)<a class="anchor" aria-label="anchor" href="#mdufa-development-version"></a></h2>
+</div>
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="0.3.1" id="mdufa-031">mdufa 0.3.1<a class="anchor" aria-label="anchor" href="#mdufa-031"></a></h2>
+<div class="section level3">
+<h3 id="bug-fixes-0-3-1">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-3-1"></a></h3>
+<ul><li><p>Fixed missing <code>table_title</code> for Table 9.5 OHT8 in MDUFA IV (PDF defect in 2023-11-16 report where subtitle line was missing).</p></li>
+<li><p>Fixed truncated metric name in Table 9.5: “Which Industry Provided Minutes Within 15” now extracts as full name “Percent of Submissions With Meetings for Which Industry Provided Minutes Within 15 Days”.</p></li>
+<li><p>Fixed <code>metric_type</code> for the above metric from “integer” to “percent” (values are percentages).</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="data-updates-0-3-1">Data Updates<a class="anchor" aria-label="anchor" href="#data-updates-0-3-1"></a></h3>
+<ul><li>Re-extracted <code>mdufa4</code> and <code>mdufa5</code> datasets with above fixes.</li>
+</ul></div>
 </div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.3.0" id="mdufa-030">mdufa 0.3.0<a class="anchor" aria-label="anchor" href="#mdufa-030"></a></h2>
