@@ -201,13 +201,30 @@ extract_report <- function(pdf_path,
         pattern = paste0("(?=", submission_type, ").*$")
       )
     ) |>
-    # Fix missing table_title for Table 9.5 OHT8 (MDUFA IV PDF defect)
-    # The 2023-11-16 report PDF is missing the subtitle line for this table/org
+    # Fix missing program/table_title for OHT8 tables (MDUFA IV PDF defect)
+    # The 2023-11-16 report PDF is missing the subtitle line for these
+    # tables, so program and table_title fail to extract. See #3, #16.
     dplyr::mutate(
+      program = dplyr::case_when(
+        .data$organization == "OHT8" & is.na(.data$program) &
+          .data$table_number %in% c("1.1", "1.2", "1.3") ~
+          "PMA Original and Panel-Track Supplements",
+        .data$organization == "OHT8" & is.na(.data$program) &
+          .data$table_number == "9.5" ~ "Pre-Sub",
+        TRUE ~ .data$program
+      ),
       table_title = dplyr::case_when(
-        .data$table_number == "9.5" &
-          .data$organization == "OHT8" &
-          is.na(.data$table_title) ~
+        .data$organization == "OHT8" & is.na(.data$table_title) &
+          .data$table_number == "1.1" ~
+          "PMA Original and Panel-Track Supplements - Acceptance Review Decision", # nolint: line_length_linter.
+        .data$organization == "OHT8" & is.na(.data$table_title) &
+          .data$table_number == "1.2" ~
+          "PMA Original and Panel-Track Supplements - Filing Review Decision", # nolint: line_length_linter.
+        .data$organization == "OHT8" & is.na(.data$table_title) &
+          .data$table_number == "1.3" ~
+          "PMA Original and Panel-Track Supplements Substantive Interaction Performance Goal", # nolint: line_length_linter.
+        .data$organization == "OHT8" & is.na(.data$table_title) &
+          .data$table_number == "9.5" ~
           "Pre-Sub Performance Metrics - Meeting Minutes*",
         TRUE ~ .data$table_title
       )
