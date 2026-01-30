@@ -1,4 +1,35 @@
-# mdufa (development version)
+# mdufa 0.4.0
+
+## New Features
+
+### Plotting Functions
+
+- `plot_volume()` - Submission volume over time
+- `plot_otp()` - On-time performance percentages
+- `plot_cycles()` - Review cycles distribution (also supports AINN rate)
+- `plot_decision_rate()` - Decision rates (SE/NSE/Withdrawn) as stacked bars
+- `plot_quintile_days()` - FDA/Industry/Total days quintile distributions
+- `plot_cohort_closure()` - Cohort closure status tracking
+
+### Helper Functions
+
+- `theme_mdufa()` - Standardized ggplot2 theme
+- `scale_x_fy()` - Fiscal year x-axis with MDUFA period breaks
+- `scale_y_days()` - Y-axis scale for days metrics
+- `facet_by_org()` - Facet wrap by organization
+- `geom_phe_rect()` / `geom_phe_label()` - COVID-19 PHE highlighting
+- `annotate_shutdowns()` - Government shutdown markers
+- `extract_percentiles()` - Extract percentile labels from metric names
+- `source_caption_with_dates()` - Generate source captions with cutoff dates
+
+### Data
+
+- `gov_shutdowns` - Tibble of federal government shutdowns affecting FDA
+- `report_dates` - Report metadata with cutoff dates
+
+## Bug Fixes
+
+- Fix alpha scale to prevent over-fading of open cohorts
 
 # mdufa 0.3.2
 

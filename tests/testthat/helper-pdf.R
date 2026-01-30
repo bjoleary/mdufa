@@ -6,7 +6,6 @@ s3_pdf_base_url <- "https://s3.us-east-005.dream.io/boleary-com-blog"
 
 # Cache directory for downloaded PDFs (persists across test runs)
 get_pdf_cache_dir <- function() {
-
   cache_dir <- file.path(tempdir(), "mdufa_pdf_cache")
   if (!dir.exists(cache_dir)) {
     dir.create(cache_dir, recursive = TRUE)

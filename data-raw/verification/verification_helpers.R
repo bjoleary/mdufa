@@ -275,7 +275,7 @@ generate_row_image <- function(table_number,
       page_data$y >= table_start_y & page_data$y <= table_end_y
     ]
     unique_ys <- sort(unique(table_ys))
-    base_row_height <- 24  # Default row height in scaled pixels
+    base_row_height <- 24 # Default row height in scaled pixels
 
     # Try to estimate row height from spacing between lines
     if (length(unique_ys) > 2) {
@@ -526,7 +526,7 @@ check_verification_status <- function(pass_count, fail_count) {
     # Iteratively find minimum n where agreement(n, 0)$lower > 0.90
     samples_needed <- pass_count
     while (dxr::agreement(samples_needed, 0)$lower <= 0.90 &&
-           samples_needed < 500) {
+      samples_needed < 500) {
       samples_needed <- samples_needed + 1
     }
     samples_needed <- samples_needed - pass_count

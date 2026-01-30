@@ -445,7 +445,7 @@ launch_verification_app <- function(sample,
       needed <- 0
       test_passes <- pass_count
       while (dxr::agreement(test_passes, fail_count)$lower <= 0.90 &&
-             needed < 500) {
+        needed < 500) {
         test_passes <- test_passes + 1
         needed <- needed + 1
       }

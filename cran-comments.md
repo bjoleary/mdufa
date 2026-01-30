@@ -1,12 +1,14 @@
 ## Test environments
 
-* GitHub Actions (ubuntu-16.04): devel, release, oldrel, 3.5, 3.4, 3.3
-* GitHub Actions (windows): release, oldrel
-* GitHub Actions (macOS): release
-* win-builder: devel
+* GitHub Actions (ubuntu-latest): devel, release, oldrel
+* GitHub Actions (windows-latest): release
+* GitHub Actions (macOS-latest): release
+* Local: macOS (aarch64-apple-darwin20), R 4.4.3
 
 ## R CMD check results
 
-0 errors | 0 warnings | 1 note
+0 errors | 0 warnings | 0 notes
 
-* This is a new release.
+## Downstream dependencies
+
+This package has no reverse dependencies.

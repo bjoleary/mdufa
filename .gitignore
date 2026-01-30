@@ -21,3 +21,7 @@ local/
 
 # S3 sync script (requires private credentials)
 data-raw/sync_to_s3.R
+
+# Temporary/old files
+old_helper_functions.R
+old_pmn.qmd

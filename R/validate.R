@@ -27,7 +27,7 @@ validate_columns <- function(data, expected_cols, dataset_name = "dataset") {
       paste(missing, collapse = ", "),
       call. = FALSE
     )
- }
+  }
 
   # Check for extra columns
   extra <- setdiff(actual, expected_cols)
@@ -100,11 +100,13 @@ standardize_columns <- function(data, cols = mdufa_cols) {
 #' validate_unique_metrics(mdufa5, "mdufa5")
 validate_unique_metrics <- function(data,
                                     dataset_name = "dataset",
-                                    key_cols = c("table_number",
-                                                 "organization",
-                                                 "program",
-                                                 "performance_metric",
-                                                 "fy")) {
+                                    key_cols = c(
+                                      "table_number",
+                                      "organization",
+                                      "program",
+                                      "performance_metric",
+                                      "fy"
+                                    )) {
   # Find duplicate key combinations
   dups <- data |>
     dplyr::group_by(dplyr::across(dplyr::all_of(key_cols))) |>
@@ -112,7 +114,7 @@ validate_unique_metrics <- function(data,
     dplyr::ungroup()
 
   if (nrow(dups) > 0) {
-    n_combos <- nrow(dups) / 2  # Each duplicate appears twice
+    n_combos <- nrow(dups) / 2 # Each duplicate appears twice
     example <- dups[1, key_cols]
     stop(
       dataset_name, " has ", n_combos, " duplicate key combinations.\n",

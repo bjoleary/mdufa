@@ -235,7 +235,7 @@ extract_report <- function(pdf_path,
       performance_metric = dplyr::case_when(
         .data$table_number == "9.5" &
           .data$performance_metric ==
-          "Which Industry Provided Minutes Within 15" ~
+            "Which Industry Provided Minutes Within 15" ~
           "Percent of Submissions With Meetings for Which Industry Provided Minutes Within 15 Days", # nolint: line_length_linter.
         TRUE ~ .data$performance_metric
       )
@@ -295,6 +295,12 @@ extract_report <- function(pdf_path,
       )
   }
 
+  # Squish performance_metric before join (some tables have trailing spaces)
+  result <- result |>
+    dplyr::mutate(
+      performance_metric = stringr::str_squish(.data$performance_metric)
+    )
+
   # Add metric types
   result <- result |>
     dplyr::left_join(
@@ -336,7 +342,7 @@ extract_report <- function(pdf_path,
       # (These are column header artifacts, not actual data)
       dplyr::filter(
         !(.data$performance_metric == "Performance Metric" &
-            stringr::str_detect(.data$value, "^FY \\d{4}$"))
+          stringr::str_detect(.data$value, "^FY \\d{4}$"))
       ) |>
       # Fix "Performance Metric" goal values missing their unit suffix
       # Table 6.4: "X% within Y" should be "X% within Y FDA days"
@@ -368,7 +374,7 @@ extract_report <- function(pdf_path,
           .data$table_number == "1.4" &
             .data$organization == "CDRH" &
             .data$performance_metric ==
-            "Interaction Maximum FDA days to Substantive Interaction" ~
+              "Interaction Maximum FDA days to Substantive Interaction" ~
             "Maximum FDA days to Substantive Interaction",
           TRUE ~ .data$performance_metric
         )
@@ -389,8 +395,10 @@ extract_report <- function(pdf_path,
   # Remove NA-value duplicates where a non-NA row exists for the same key
   # This handles PDF rendering artifacts where a metric line is duplicated
   # with one row having a value and one having NA
-  key_cols <- c("table_number", "organization", "program",
-                "performance_metric", "fy")
+  key_cols <- c(
+    "table_number", "organization", "program",
+    "performance_metric", "fy"
+  )
   result <- result |>
     dplyr::group_by(dplyr::across(dplyr::all_of(key_cols))) |>
     dplyr::filter(
@@ -594,8 +602,10 @@ extract_report_m5 <- function(pdf_path,
   # This handles PDF rendering artifacts where a metric line is duplicated
   # (once with values, once empty) - e.g., page 210 "Maximum FDA Days..."
   # Also handles tables appearing on multiple pages (e.g., 2023-11-16 Table 8.8)
-  key_cols <- c("table_number", "organization", "program",
-                "performance_metric", "fy")
+  key_cols <- c(
+    "table_number", "organization", "program",
+    "performance_metric", "fy"
+  )
   result <- result |>
     dplyr::group_by(dplyr::across(dplyr::all_of(key_cols))) |>
     dplyr::filter(
