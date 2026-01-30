@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">mdufa</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.0</span>
       </span>
     </div>
 
@@ -42,7 +42,55 @@
     </div>
 
     <div class="section level2">
-<h2 class="page-header" data-toc-text="development version" id="mdufa-development-version">mdufa (development version)<a class="anchor" aria-label="anchor" href="#mdufa-development-version"></a></h2>
+<h2 class="page-header" data-toc-text="0.4.0" id="mdufa-040">mdufa 0.4.0<a class="anchor" aria-label="anchor" href="#mdufa-040"></a></h2>
+<div class="section level3">
+<h3 id="new-features-0-4-0">New Features<a class="anchor" aria-label="anchor" href="#new-features-0-4-0"></a></h3>
+<div class="section level4">
+<h4 id="plotting-functions-0-4-0">Plotting Functions<a class="anchor" aria-label="anchor" href="#plotting-functions-0-4-0"></a></h4>
+<ul><li>
+<code><a href="../reference/plot_volume.html">plot_volume()</a></code> - Submission volume over time</li>
+<li>
+<code><a href="../reference/plot_otp.html">plot_otp()</a></code> - On-time performance percentages</li>
+<li>
+<code><a href="../reference/plot_cycles.html">plot_cycles()</a></code> - Review cycles distribution (also supports AINN rate)</li>
+<li>
+<code><a href="../reference/plot_decision_rate.html">plot_decision_rate()</a></code> - Decision rates (SE/NSE/Withdrawn) as stacked bars</li>
+<li>
+<code><a href="../reference/plot_quintile_days.html">plot_quintile_days()</a></code> - FDA/Industry/Total days quintile distributions</li>
+<li>
+<code><a href="../reference/plot_cohort_closure.html">plot_cohort_closure()</a></code> - Cohort closure status tracking</li>
+</ul></div>
+<div class="section level4">
+<h4 id="helper-functions-0-4-0">Helper Functions<a class="anchor" aria-label="anchor" href="#helper-functions-0-4-0"></a></h4>
+<ul><li>
+<code><a href="../reference/theme_mdufa.html">theme_mdufa()</a></code> - Standardized ggplot2 theme</li>
+<li>
+<code><a href="../reference/scale_x_fy.html">scale_x_fy()</a></code> - Fiscal year x-axis with MDUFA period breaks</li>
+<li>
+<code><a href="../reference/scale_y_days.html">scale_y_days()</a></code> - Y-axis scale for days metrics</li>
+<li>
+<code><a href="../reference/facet_by_org.html">facet_by_org()</a></code> - Facet wrap by organization</li>
+<li>
+<code><a href="../reference/geom_phe_rect.html">geom_phe_rect()</a></code> / <code><a href="../reference/geom_phe_label.html">geom_phe_label()</a></code> - COVID-19 PHE highlighting</li>
+<li>
+<code><a href="../reference/annotate_shutdowns.html">annotate_shutdowns()</a></code> - Government shutdown markers</li>
+<li>
+<code><a href="../reference/extract_percentiles.html">extract_percentiles()</a></code> - Extract percentile labels from metric names</li>
+<li>
+<code><a href="../reference/source_caption_with_dates.html">source_caption_with_dates()</a></code> - Generate source captions with cutoff dates</li>
+</ul></div>
+<div class="section level4">
+<h4 id="data-0-4-0">Data<a class="anchor" aria-label="anchor" href="#data-0-4-0"></a></h4>
+<ul><li>
+<code>gov_shutdowns</code> - Tibble of federal government shutdowns affecting FDA</li>
+<li>
+<code>report_dates</code> - Report metadata with cutoff dates</li>
+</ul></div>
+</div>
+<div class="section level3">
+<h3 id="bug-fixes-0-4-0">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-4-0"></a></h3>
+<ul><li>Fix alpha scale to prevent over-fading of open cohorts</li>
+</ul></div>
 </div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.3.2" id="mdufa-032">mdufa 0.3.2<a class="anchor" aria-label="anchor" href="#mdufa-032"></a></h2>
