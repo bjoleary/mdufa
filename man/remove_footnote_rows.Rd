@@ -20,5 +20,5 @@ that were incorrectly parsed as metric names during PDF extraction.
 \examples{
 # Remove footnotes from MDUFA data
 clean_data <- remove_footnote_rows(mdufa5)
-nrow(mdufa5) - nrow(clean_data)  # Number of footnote rows removed
+nrow(mdufa5) - nrow(clean_data) # Number of footnote rows removed
 }

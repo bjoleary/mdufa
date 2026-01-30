@@ -4,7 +4,7 @@
 #' FDA's MDUFA III Quarterly Medical Device User Performance Metrics in a
 #' tidy data format.
 #'
-#' @format A tibble with 16905 rows and 14 fields:
+#' @format A tibble with 16909 rows and 14 fields:
 #'
 #' \describe{
 #' \item{report_description}{chr "December 10, 2018 MDUFA III Performance

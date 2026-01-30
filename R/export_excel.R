@@ -347,7 +347,7 @@ export_excel <- function(data, filepath) {
   ### Percentages -----
   # Unfortunately, this doesn't really work all that great. See
   # https://github.com/ycphs/openxlsx/issues/368. Nonetheless, at least in the
-  # online verssion of Office365, this results in the right style metadata
+  # online version of Office365, this results in the right style metadata
   # being attached to the cell, and after a cell is opened and closed, the
   # formatting shows up.
   openxlsx::addStyle(

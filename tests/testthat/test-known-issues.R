@@ -43,6 +43,42 @@ test_that("MDUFA V page footers are not extracted as data", {
   )
 })
 
+test_that("MDUFA III Table 5.3 header rows are not extracted as data", {
+  # KNOWN ISSUE: Table 5.3 "Performance Metric" header rows are parsed as data
+  # rows with garbage values like "cohort" and "cohort cohort 385".
+  #
+  # These appear to be column header text being captured as metric values.
+  # Example from MDUFA III 2018-12-10, Table 5.3 CDRH:
+  #   performance_metric: "Performance Metric"
+  #   fy: 2013, 2014, 2015, 2016
+  #   value: "cohort", "cohort", "cohort", "cohort cohort 385"
+  #
+  # Introduced by str_squish() fix in extract_report.R (2026-01)
+
+  skip("Known issue: Table 5.3 header rows extracted as garbage data")
+
+  skip_if_not_installed("pdftools")
+  pdf_path <- find_local_pdf("mdufa-3_2018-12-10")
+  skip_if(is.null(pdf_path), "MDUFA III PDF not available locally")
+
+  data <- suppressMessages(suppressWarnings(
+    extract_report(pdf_path, mdufa_period = "MDUFA III")
+  ))
+
+  # Test: No rows should have "cohort" as a value in Table 5.3
+  garbage_rows <- data |>
+    dplyr::filter(
+      table_number == "5.3",
+      performance_metric == "Performance Metric",
+      grepl("cohort", value, ignore.case = TRUE)
+    )
+
+  expect_equal(
+    nrow(garbage_rows), 0,
+    label = "Rows with garbage 'cohort' values in Table 5.3"
+  )
+})
+
 test_that("All MDUFA III reports can be verified", {
   # Several MDUFA III quarterly reports are no longer available from FDA:
   # - mdufa-3_2017-03-06_quarterly-report.pdf

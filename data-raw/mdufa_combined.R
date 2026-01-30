@@ -111,8 +111,10 @@ validate_columns(mdufa_combined, mdufa_combined_cols, "mdufa_combined")
 # Key includes `derived` to distinguish original vs aggregated rows
 validate_unique_metrics(
   mdufa_combined, "mdufa_combined",
-  key_cols = c("table_number", "organization", "program",
-               "performance_metric", "fy", "derived")
+  key_cols = c(
+    "table_number", "organization", "program",
+    "performance_metric", "fy", "derived"
+  )
 )
 
 # Report summary

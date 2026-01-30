@@ -1,6 +1,6 @@
 Package: mdufa
 Title: Structured Data on FDA's Medical Device User Fee Program Performance 
-Version: 0.3.2
+Version: 0.4.0
 Authors@R: 
     person(given = "Brendan",
            family = "O'Leary",
@@ -19,6 +19,7 @@ Suggests:
     magick,
     pdftools,
     qpdf,
+    readxl,
     rprojroot,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
@@ -29,10 +30,13 @@ RoxygenNote: 7.3.3
 Imports:
     chk,
     dplyr,
+    forcats,
+    ggplot2,
     janitor,
     openxlsx,
     purrr,
     readr,
+    scales,
     stringr,
     tibble,
     tidyr,

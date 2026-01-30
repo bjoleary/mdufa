@@ -221,7 +221,7 @@ is_footnote_row <- function(performance_metric, value) {
 #' @examples
 #' # Remove footnotes from MDUFA data
 #' clean_data <- remove_footnote_rows(mdufa5)
-#' nrow(mdufa5) - nrow(clean_data)  # Number of footnote rows removed
+#' nrow(mdufa5) - nrow(clean_data) # Number of footnote rows removed
 remove_footnote_rows <- function(data) {
   data |>
     dplyr::filter(!is_footnote_row(.data$performance_metric, .data$value))

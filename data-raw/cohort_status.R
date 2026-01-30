@@ -55,7 +55,8 @@ data_received <- mdufa_combined |>
   dplyr::slice_max(.data$report_date, n = 1, with_ties = FALSE) |>
   dplyr::ungroup() |>
   dplyr::select(
-    "fy", "organization", "org", "program", number_received = "value"
+    "fy", "organization", "org", "program",
+    number_received = "value"
   )
 
 # Calculate percent closed

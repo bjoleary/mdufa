@@ -20,7 +20,6 @@
 #'   distinct() |>
 #'   head(10)
 harmonize_metric_names <- function(data) {
-
   # Acronyms that should remain uppercase after title case conversion
 
   acronyms <- c(
