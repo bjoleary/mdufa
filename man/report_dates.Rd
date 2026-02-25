@@ -5,7 +5,7 @@
 \alias{report_dates}
 \title{Report Dates}
 \format{
-A tibble with 80 rows and 5 fields:
+A tibble with 82 rows and 5 fields:
 
 \describe{
 \item{report_date}{date 2009-01-28, 2009-05-04, 2009-08-04, 2009-11-1…}
@@ -20,7 +20,7 @@ II"…}
 }
 \source{
 \href{https://www.fda.gov/industry/medical-device-user-fee-amendments-mdufa-fees/mdufa-reports}{FDA MDUFA Reports} # nolint: line_length_linter.
-accessed 2025-12-13.
+accessed 2026-02-25.
 }
 \usage{
 report_dates

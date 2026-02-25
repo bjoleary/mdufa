@@ -5,7 +5,7 @@
 \alias{cohort_status}
 \title{Cohort Status}
 \format{
-A tibble with 626 rows and 8 fields:
+A tibble with 670 rows and 8 fields:
 
 \describe{
 \item{report_date}{date 2018-12-10, 2018-12-10, 2018-12-10, 2018-12-1…}
@@ -21,7 +21,7 @@ A tibble with 626 rows and 8 fields:
 }
 \source{
 Derived from mdufa_combined dataset.
-Generated 2025-12-13.
+Generated 2026-02-25.
 }
 \usage{
 cohort_status
