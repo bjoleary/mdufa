@@ -1,3 +1,13 @@
+# mdufa 0.4.1
+
+## Data Updates
+
+* Updated `mdufa5` dataset with February 23, 2026 quarterly report (16,440
+  rows). This is a quarterly report, so annual-only CLIA Waiver tables
+  (5.x, 7.x, 11.x, 12.x) are not included.
+
+* Updated `mdufa_combined`, `cohort_status`, and `report_dates` datasets.
+
 # mdufa 0.4.0
 
 ## New Features

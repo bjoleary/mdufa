@@ -11,6 +11,8 @@
 # - report_description: Full description from FDA website
 # - report_link: URL to the report PDF
 
+devtools::load_all()
+
 library(pdftools)
 library(stringr)
 library(dplyr)

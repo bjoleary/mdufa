@@ -4,13 +4,13 @@
 #' FDA's Quarterly Medical Device User Performance Metrics in a tidy data
 #' format.
 #'
-#' @format A tibble with 17510 rows and 14 fields:
+#' @format A tibble with 16440 rows and 14 fields:
 #'
 #' \describe{
-#' \item{report_description}{chr "November 20, 2025 MDUFA V Performance
+#' \item{report_description}{chr "February 23, 2026 MDUFA V Performance
 #' Report"…}
-#' \item{report_link}{chr "https://www.fda.gov/media/190104/download?att…}
-#' \item{report_date}{date 2025-11-20, 2025-11-20, 2025-11-20, 2025-11-2…}
+#' \item{report_link}{chr "https://www.fda.gov/media/191269/download?att…}
+#' \item{report_date}{date 2026-02-23, 2026-02-23, 2026-02-23, 2026-02-2…}
 #' \item{report_mdufa_period}{chr "MDUFA V", "MDUFA V", "MDUFA V", "MDUFA V",
 #' "M…}
 #' \item{source}{chr "Table 1.1 CDRH - PMA Original and Panel-Track…}
@@ -23,10 +23,10 @@
 #' \item{performance_metric}{chr "Number Received", "Number Received", "Number
 #' …}
 #' \item{fy}{chr "2023", "2024", "2025", "2026", "2027", "2023"…}
-#' \item{value}{chr "73", "69", "89", NA, NA, "0", "0", "1", NA, N…}
+#' \item{value}{chr "73", "69", "89", "19", NA, "0", "0", "1", "0"…}
 #' }
 #'
 #' @source
 #' [FDA MDUFA Reports](https://www.fda.gov/industry/medical-device-user-fee-amendments-mdufa-fees/mdufa-reports) # nolint: line_length_linter.
-#' accessed 2026-01-30.
+#' accessed 2026-02-25.
 "mdufa5"
