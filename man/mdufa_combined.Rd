@@ -5,7 +5,7 @@
 \alias{mdufa_combined}
 \title{Combined MDUFA Dataset}
 \format{
-A tibble with 54644 rows and 17 fields:
+A tibble with 54634 rows and 17 fields:
 
 \describe{
 \item{report_description}{chr "January 29, 2014 FDA MDUFA II Performance
@@ -33,7 +33,7 @@ Decisio…}
 }
 \source{
 \href{https://www.fda.gov/industry/medical-device-user-fee-amendments-mdufa-fees/mdufa-reports}{FDA MDUFA Reports} # nolint: line_length_linter.
-accessed 2026-02-25.
+accessed 2026-06-01.
 }
 \usage{
 mdufa_combined
