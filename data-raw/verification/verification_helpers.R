@@ -667,15 +667,8 @@ generate_test_file <- function(results,
 # Verifier: Brendan O\'Leary
 # Sample size: {n_metrics} metrics, {n_values} values
 # Statistical basis: LB of 95% CI > 90% (Wilson score)
-
-# Helper function to find local PDF (works from testthat directory)
-find_local_pdf <- function(pattern) {{
-  # testthat runs from tests/testthat, so go up two levels
-  pdf_dir <- testthat::test_path("..", "..", "data-raw", "pdf_reports")
-  files <- list.files(pdf_dir, pattern = pattern, full.names = TRUE)
-  if (length(files) == 0) return(NULL)
-  files[1]
-}}
+#
+# find_local_pdf() is provided by tests/testthat/helper-pdf.R (S3 fallback).
 
 test_that("{mdufa_period} {report_date} extraction is accurate", {{
   skip_if_not_installed("pdftools")

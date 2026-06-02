@@ -4,17 +4,8 @@
 # Verifier: Brendan O'Leary
 # Sample size: 35 metrics, 175 values
 # Statistical basis: LB of 95% CI > 90% (Wilson score)
-
-# Helper function to find local PDF (works from testthat directory)
-find_local_pdf <- function(pattern) {
-  # testthat runs from tests/testthat, so go up two levels
-  pdf_dir <- testthat::test_path("..", "..", "data-raw", "pdf_reports")
-  files <- list.files(pdf_dir, pattern = pattern, full.names = TRUE)
-  if (length(files) == 0) {
-    return(NULL)
-  }
-  files[1]
-}
+#
+# find_local_pdf() is provided by tests/testthat/helper-pdf.R (S3 fallback).
 
 test_that("MDUFA V 2026-05-19 extraction is accurate", {
   skip_if_not_installed("pdftools")
