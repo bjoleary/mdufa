@@ -186,7 +186,7 @@ mdufa3_oht7_cohort_status <- function() {
 #'
 #' Common footnote patterns include:
 #' - Starts with digit + space (e.g., "1 If FDA's...")
-#' - Starts with "FYs", "In FY", "Subs in FYs"
+#' - Starts with "FYs", "In FY", "Subs in FYs", "Subs in the MDUFA Cohort"
 #' - Contains "goal are met for FY" or "cohort excludes"
 #'
 #' @param performance_metric Character vector of metric names to check
@@ -200,6 +200,8 @@ is_footnote_row <- function(performance_metric, value) {
     grepl("^[0-9]+\\s+", performance_metric) |
       # Starts with fiscal year scope explanations
       grepl("^(FYs|In FY|Subs in FYs)", performance_metric) |
+      # MDUFA V Table 9.2 footnote 1/2 wrap (Pre-Subs cohort threshold)
+      grepl("^Subs in the MDUFA Cohort if", performance_metric) |
       # Goal explanation text
       grepl("goal are met (for|in) FY", performance_metric) |
       # Cohort exclusion explanations

@@ -21,7 +21,7 @@ A tibble with 670 rows and 8 fields:
 }
 \source{
 Derived from mdufa_combined dataset.
-Generated 2026-02-25.
+Generated 2026-06-01.
 }
 \usage{
 cohort_status

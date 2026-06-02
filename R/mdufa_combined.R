@@ -5,7 +5,7 @@
 #' performance metrics from MDUFA II, III, IV, and V. Includes harmonized
 #' organization names and metric names for cross-period comparison.
 #'
-#' @format A tibble with 54644 rows and 17 fields:
+#' @format A tibble with 54614 rows and 17 fields:
 #'
 #' \describe{
 #' \item{report_description}{chr "January 29, 2014 FDA MDUFA II Performance
@@ -33,5 +33,5 @@
 #'
 #' @source
 #' [FDA MDUFA Reports](https://www.fda.gov/industry/medical-device-user-fee-amendments-mdufa-fees/mdufa-reports) # nolint: line_length_linter.
-#' accessed 2026-02-25.
+#' accessed 2026-06-01.
 "mdufa_combined"

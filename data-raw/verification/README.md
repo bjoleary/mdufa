@@ -140,6 +140,7 @@ The following reports have been verified with test files in `tests/testthat/`:
 | MDUFA V 2025-02-27 | 36 | 100% (90.4%; 100%) | 2025-12-08 |
 | MDUFA V 2025-08-27 | 75 | 100% (95.1%; 100%) | 2025-12-08 |
 | MDUFA V 2025-11-20 | 90 | 100% (95.9%; 100%) | 2025-12-10 |
+| MDUFA V 2026-05-19 | 35 | 100% (90.1%; 100%) | 2026-06-01 |
 
 All verifications performed by Brendan O'Leary.
 

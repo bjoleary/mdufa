@@ -1,3 +1,22 @@
+# mdufa 0.4.2
+
+## Bug Fixes
+
+* Extended the footnote filter in `is_footnote_row()` to catch wrapped
+  Table 9.2 footnote 1/2 text that begins "Subs in the MDUFA Cohort if...".
+  Removes 20 garbage rows per MDUFA V report (4 metric variants for the
+  3585/4060 Pre-Sub cohort thresholds, CDRH and CBER, across 5 fiscal
+  years). Surfaced during May 2026 verification.
+
+## Data Updates
+
+* Updated `mdufa5` dataset with May 19, 2026 quarterly report (16,410
+  rows after the footnote filter fix above). This is a quarterly report,
+  so annual-only CLIA Waiver tables (5.x, 7.x, 11.x, 12.x) are not
+  included.
+
+* Updated `mdufa_combined`, `cohort_status`, and `report_dates` datasets.
+
 # mdufa 0.4.1
 
 ## Data Updates

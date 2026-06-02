@@ -84,7 +84,6 @@ view_report <- function(pdf_path,
   end_page <- min(total_pages, page + context)
 
 
-
   # Extract pages to temp file using qpdf
   # (use /tmp so file persists after R exits)
   temp_pdf <- file.path(

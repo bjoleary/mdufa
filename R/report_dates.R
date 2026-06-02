@@ -5,7 +5,7 @@
 #' dates. Each report contains performance data through a specific cutoff
 #' date (typically the end of a fiscal quarter).
 #'
-#' @format A tibble with 82 rows and 5 fields:
+#' @format A tibble with 83 rows and 5 fields:
 #'
 #' \describe{
 #' \item{report_date}{date 2009-01-28, 2009-05-04, 2009-08-04, 2009-11-1…}
@@ -20,5 +20,5 @@
 #'
 #' @source
 #' [FDA MDUFA Reports](https://www.fda.gov/industry/medical-device-user-fee-amendments-mdufa-fees/mdufa-reports) # nolint: line_length_linter.
-#' accessed 2026-02-25.
+#' accessed 2026-06-01.
 "report_dates"

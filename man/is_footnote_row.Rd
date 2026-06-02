@@ -23,7 +23,7 @@ that got parsed as metric names during PDF extraction.
 Common footnote patterns include:
 \itemize{
 \item Starts with digit + space (e.g., "1 If FDA's...")
-\item Starts with "FYs", "In FY", "Subs in FYs"
+\item Starts with "FYs", "In FY", "Subs in FYs", "Subs in the MDUFA Cohort"
 \item Contains "goal are met for FY" or "cohort excludes"
 }
 }
