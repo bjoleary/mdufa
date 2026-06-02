@@ -5,7 +5,7 @@
 \alias{mdufa_combined}
 \title{Combined MDUFA Dataset}
 \format{
-A tibble with 54634 rows and 17 fields:
+A tibble with 54614 rows and 17 fields:
 
 \describe{
 \item{report_description}{chr "January 29, 2014 FDA MDUFA II Performance
