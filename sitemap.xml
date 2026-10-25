@@ -65,6 +65,7 @@
 <url><loc>/reference/index.html</loc></url>
 <url><loc>/reference/insert_delim.html</loc></url>
 <url><loc>/reference/is_footnote_row.html</loc></url>
+<url><loc>/reference/is_page_footer_value.html</loc></url>
 <url><loc>/reference/ivd_divisions.html</loc></url>
 <url><loc>/reference/ivd_divisions_full.html</loc></url>
 <url><loc>/reference/make_clean_tibble.html</loc></url>

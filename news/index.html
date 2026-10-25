@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">mdufa</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.3</span>
       </span>
     </div>
 
@@ -41,6 +41,44 @@
 
     </div>
 
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="0.4.3" id="mdufa-043">mdufa 0.4.3<a class="anchor" aria-label="anchor" href="#mdufa-043"></a></h2>
+<div class="section level3">
+<h3 id="bug-fixes-0-4-3">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-4-3"></a></h3>
+<ul><li>Extraction now drops split “Page N of M” page-footer fragments captured as values (new internal <code><a href="../reference/is_page_footer_value.html">is_page_footer_value()</a></code>), before de-duplication and in all MDUFA III/IV/V paths. The footer layout differs across poppler versions, which made the MDUFA IV 2023-03-01 snapshot fail on macOS and Windows CI.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="data-updates-0-4-3">Data Updates<a class="anchor" aria-label="anchor" href="#data-updates-0-4-3"></a></h3>
+<ul><li><p>Updated <code>mdufa5</code> dataset with August 26, 2026 quarterly report (16,410 rows; same row keys as May, 2,467 values updated, mostly FY 2025-2026).</p></li>
+<li><p>Updated <code>mdufa_combined</code>, <code>cohort_status</code>, and <code>report_dates</code> datasets.</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="maintenance-0-4-3">Maintenance<a class="anchor" aria-label="anchor" href="#maintenance-0-4-3"></a></h3>
+<ul><li><p><code>data-raw/report_dates.R</code> uses <code><a href="https://dplyr.tidyverse.org/reference/recode-and-replace-values.html" class="external-link">dplyr::recode_values()</a></code> in place of <code><a href="https://dplyr.tidyverse.org/reference/case_match.html" class="external-link">case_match()</a></code>, deprecated in dplyr 1.2.0.</p></li>
+<li><p>Replaced <code>.data$</code> inside tidyselect calls (deprecated in tidyselect 1.2.0) in <code><a href="../reference/fix_empty_rows.html">fix_empty_rows()</a></code> and the verification test generator.</p></li>
+<li><p>Verification app: recording the last row now jumps to the first unreviewed row instead of staying put.</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="verification-0-4-3">Verification<a class="anchor" aria-label="anchor" href="#verification-0-4-3"></a></h3>
+<ul><li>Added <code>test-verified-mdufa5-2026-08-26.R</code>: 35 metrics (175 FY values) verified against the August 26, 2026 PDF, 100% agreement (Wilson 95% LB 90.1%).</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="0.4.2" id="mdufa-042">mdufa 0.4.2<a class="anchor" aria-label="anchor" href="#mdufa-042"></a></h2>
+<div class="section level3">
+<h3 id="bug-fixes-0-4-2">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-4-2"></a></h3>
+<ul><li>Extended the footnote filter in <code><a href="../reference/is_footnote_row.html">is_footnote_row()</a></code> to catch wrapped Table 9.2 footnote 1/2 text that begins “Subs in the MDUFA Cohort if…”. Removes 20 garbage rows per MDUFA V report (2 footnote strings for the 3585/4060 Pre-Sub cohort thresholds, CDRH and CBER, across 5 fiscal years). Surfaced during May 2026 verification.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="data-updates-0-4-2">Data Updates<a class="anchor" aria-label="anchor" href="#data-updates-0-4-2"></a></h3>
+<ul><li><p>Updated <code>mdufa5</code> dataset with May 19, 2026 quarterly report (16,410 rows after the footnote filter fix above). This is a quarterly report, so annual-only CLIA Waiver tables (5.x, 7.x, 11.x, 12.x) are not included.</p></li>
+<li><p>Updated <code>mdufa_combined</code>, <code>cohort_status</code>, and <code>report_dates</code> datasets.</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="verification-0-4-2">Verification<a class="anchor" aria-label="anchor" href="#verification-0-4-2"></a></h3>
+<ul><li>Added <code>test-verified-mdufa5-2026-05-19.R</code>: 35 metrics (175 FY values) verified against the May 19, 2026 PDF, 100% agreement (Wilson 95% LB 90.1%).</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.4.1" id="mdufa-041">mdufa 0.4.1<a class="anchor" aria-label="anchor" href="#mdufa-041"></a></h2>
 <div class="section level3">
@@ -257,7 +295,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
       </footer></div>
