@@ -2,10 +2,11 @@
 
 ## Bug Fixes
 
-* MDUFA III/IV extraction now drops metric lines that captured split
-  "Page N of M" page-footer text (new internal `is_page_footer_value()`).
-  The footer layout differs across poppler versions, which made the
-  MDUFA IV 2023-03-01 snapshot fail on macOS and Windows CI.
+* Extraction now drops split "Page N of M" page-footer fragments captured
+  as values (new internal `is_page_footer_value()`), before de-duplication
+  and in all MDUFA III/IV/V paths. The footer layout differs across poppler
+  versions, which made the MDUFA IV 2023-03-01 snapshot fail on macOS and
+  Windows CI.
 
 ## Data Updates
 
@@ -37,7 +38,7 @@
 
 * Extended the footnote filter in `is_footnote_row()` to catch wrapped
   Table 9.2 footnote 1/2 text that begins "Subs in the MDUFA Cohort if...".
-  Removes 20 garbage rows per MDUFA V report (4 metric variants for the
+  Removes 20 garbage rows per MDUFA V report (2 footnote strings for the
   3585/4060 Pre-Sub cohort thresholds, CDRH and CBER, across 5 fiscal
   years). Surfaced during May 2026 verification.
 
@@ -49,6 +50,12 @@
   included.
 
 * Updated `mdufa_combined`, `cohort_status`, and `report_dates` datasets.
+
+## Verification
+
+* Added `test-verified-mdufa5-2026-05-19.R`: 35 metrics (175 FY values)
+  verified against the May 19, 2026 PDF, 100% agreement (Wilson 95% LB
+  90.1%).
 
 # mdufa 0.4.1
 

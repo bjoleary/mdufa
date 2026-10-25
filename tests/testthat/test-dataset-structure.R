@@ -28,6 +28,12 @@ test_that("report_dates has expected columns", {
   expect_equal(names(report_dates), report_dates_cols)
 })
 
+test_that("bundled datasets contain no page footer values", {
+  for (d in list(mdufa3, mdufa4, mdufa5, mdufa_combined)) {
+    expect_false(any(is_page_footer_value(d$value)))
+  }
+})
+
 test_that("validate_columns catches missing columns", {
   test_data <- tibble::tibble(a = 1, b = 2)
   expect_error(
