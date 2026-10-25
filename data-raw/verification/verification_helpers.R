@@ -608,11 +608,7 @@ generate_test_file <- function(results,
   } else {
     expanded_results <- results |>
       dplyr::select(
-        .data$table_number,
-        .data$organization,
-        .data$performance_metric,
-        .data$fy,
-        .data$value
+        "table_number", "organization", "performance_metric", "fy", "value"
       )
     n_new_metrics <- nrow(results)
     n_new_values <- nrow(results)
