@@ -8,10 +8,10 @@
 A tibble with 16410 rows and 14 fields:
 
 \describe{
-\item{report_description}{chr "May 19, 2026 MDUFA V Performance Report",
-"Ma…}
-\item{report_link}{chr "https://www.fda.gov/media/192669/download?att…}
-\item{report_date}{date 2026-05-19, 2026-05-19, 2026-05-19, 2026-05-1…}
+\item{report_description}{chr "August 26, 2026 MDUFA V Performance Report",
+…}
+\item{report_link}{chr "https://www.fda.gov/media/194465/download?att…}
+\item{report_date}{date 2026-08-26, 2026-08-26, 2026-08-26, 2026-08-2…}
 \item{report_mdufa_period}{chr "MDUFA V", "MDUFA V", "MDUFA V", "MDUFA V",
 "M…}
 \item{source}{chr "Table 1.1 CDRH - PMA Original and Panel-Track…}
@@ -24,12 +24,12 @@ A tibble with 16410 rows and 14 fields:
 \item{performance_metric}{chr "Number Received", "Number Received", "Number
 …}
 \item{fy}{chr "2023", "2024", "2025", "2026", "2027", "2023"…}
-\item{value}{chr "73", "69", "89", "45", NA, "0", "0", "1", "1"…}
+\item{value}{chr "74", "69", "88", "63", NA, "0", "0", "1", "1"…}
 }
 }
 \source{
 \href{https://www.fda.gov/industry/medical-device-user-fee-amendments-mdufa-fees/mdufa-reports}{FDA MDUFA Reports} # nolint: line_length_linter.
-accessed 2026-06-01.
+accessed 2026-10-24.
 }
 \usage{
 mdufa5

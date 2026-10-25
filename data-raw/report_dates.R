@@ -156,14 +156,14 @@ results <- lapply(pdfs, function(pdf) {
   # Note: "2i" files are MDUFA III reports (content shows
   # "MDUFA III (FY 2013-2017)"). The "2i" naming was a local convention
   # but they're listed as MDUFA III on FDA site.
-  mdufa_period <- dplyr::case_match(
+  mdufa_period <- dplyr::recode_values(
     mdufa_num,
     "2" ~ "MDUFA II",
     "2i" ~ "MDUFA III",
     "3" ~ "MDUFA III",
     "4" ~ "MDUFA IV",
     "5" ~ "MDUFA V",
-    .default = paste("MDUFA", mdufa_num)
+    default = paste("MDUFA", mdufa_num)
   )
 
   report_date <- lubridate::ymd(report_date_str)
@@ -234,14 +234,14 @@ report_metadata <- tibble::tibble(
       stringr::str_replace("^MDUFA II$", "MDUFA II") |>
       stringr::str_replace("^MDUFA V$", "MDUFA V") |>
       # Normalize to full names
-      dplyr::case_match(
+      dplyr::recode_values(
         "MDUFA II" ~ "MDUFA II",
         "MDUFA III" ~ "MDUFA III",
         "MDUFA MDUFA III" ~ "MDUFA III",
         "MDUFA MDUFA IV" ~ "MDUFA IV",
         "MDUFA IV" ~ "MDUFA IV",
         "MDUFA V" ~ "MDUFA V",
-        .default = "MDUFA II"
+        default = "MDUFA II"
       )
   ) |>
   dplyr::filter(!is.na(report_date))

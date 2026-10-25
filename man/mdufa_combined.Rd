@@ -33,7 +33,7 @@ Decisio…}
 }
 \source{
 \href{https://www.fda.gov/industry/medical-device-user-fee-amendments-mdufa-fees/mdufa-reports}{FDA MDUFA Reports} # nolint: line_length_linter.
-accessed 2026-06-01.
+accessed 2026-10-24.
 }
 \usage{
 mdufa_combined
