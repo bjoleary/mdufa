@@ -19,6 +19,18 @@
 * `data-raw/report_dates.R` uses `dplyr::recode_values()` in place of
   `case_match()`, deprecated in dplyr 1.2.0.
 
+* Replaced `.data$` inside tidyselect calls (deprecated in tidyselect
+  1.2.0) in `fix_empty_rows()` and the verification test generator.
+
+* Verification app: recording the last row now jumps to the first
+  unreviewed row instead of staying put.
+
+## Verification
+
+* Added `test-verified-mdufa5-2026-08-26.R`: 35 metrics (175 FY values)
+  verified against the August 26, 2026 PDF, 100% agreement (Wilson 95% LB
+  90.1%).
+
 # mdufa 0.4.2
 
 ## Bug Fixes
