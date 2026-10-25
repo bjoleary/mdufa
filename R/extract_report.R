@@ -389,6 +389,11 @@ extract_report <- function(pdf_path,
       dplyr::filter(!is.na(.data$metric_type))
   }
 
+  # Remove "Page N of M" footer fragments captured as values. How the footer
+  # splits across rows varies by poppler version.
+  result <- result |>
+    dplyr::filter(!is_page_footer_value(.data$value))
+
   # Remove duplicate rows
   result <- dplyr::distinct(result)
 
@@ -593,6 +598,11 @@ extract_report_m5 <- function(pdf_path,
         values_to = "value"
       )
   }
+
+  # Remove "Page N of M" footer fragments captured as values. How the footer
+  # splits across rows varies by poppler version.
+  result <- result |>
+    dplyr::filter(!is_page_footer_value(.data$value))
 
   # Remove duplicate rows
   result <- dplyr::distinct(result)

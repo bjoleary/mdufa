@@ -1,3 +1,62 @@
+# mdufa 0.4.3
+
+## Bug Fixes
+
+* Extraction now drops split "Page N of M" page-footer fragments captured
+  as values (new internal `is_page_footer_value()`), before de-duplication
+  and in all MDUFA III/IV/V paths. The footer layout differs across poppler
+  versions, which made the MDUFA IV 2023-03-01 snapshot fail on macOS and
+  Windows CI.
+
+## Data Updates
+
+* Updated `mdufa5` dataset with August 26, 2026 quarterly report (16,410
+  rows; same row keys as May, 2,467 values updated, mostly FY 2025-2026).
+
+* Updated `mdufa_combined`, `cohort_status`, and `report_dates` datasets.
+
+## Maintenance
+
+* `data-raw/report_dates.R` uses `dplyr::recode_values()` in place of
+  `case_match()`, deprecated in dplyr 1.2.0.
+
+* Replaced `.data$` inside tidyselect calls (deprecated in tidyselect
+  1.2.0) in `fix_empty_rows()` and the verification test generator.
+
+* Verification app: recording the last row now jumps to the first
+  unreviewed row instead of staying put.
+
+## Verification
+
+* Added `test-verified-mdufa5-2026-08-26.R`: 35 metrics (175 FY values)
+  verified against the August 26, 2026 PDF, 100% agreement (Wilson 95% LB
+  90.1%).
+
+# mdufa 0.4.2
+
+## Bug Fixes
+
+* Extended the footnote filter in `is_footnote_row()` to catch wrapped
+  Table 9.2 footnote 1/2 text that begins "Subs in the MDUFA Cohort if...".
+  Removes 20 garbage rows per MDUFA V report (2 footnote strings for the
+  3585/4060 Pre-Sub cohort thresholds, CDRH and CBER, across 5 fiscal
+  years). Surfaced during May 2026 verification.
+
+## Data Updates
+
+* Updated `mdufa5` dataset with May 19, 2026 quarterly report (16,410
+  rows after the footnote filter fix above). This is a quarterly report,
+  so annual-only CLIA Waiver tables (5.x, 7.x, 11.x, 12.x) are not
+  included.
+
+* Updated `mdufa_combined`, `cohort_status`, and `report_dates` datasets.
+
+## Verification
+
+* Added `test-verified-mdufa5-2026-05-19.R`: 35 metrics (175 FY values)
+  verified against the May 19, 2026 PDF, 100% agreement (Wilson 95% LB
+  90.1%).
+
 # mdufa 0.4.1
 
 ## Data Updates

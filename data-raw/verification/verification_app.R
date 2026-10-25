@@ -646,9 +646,13 @@ launch_verification_app <- function(sample,
       # Auto-save after each action
       utils::write.csv(r, output_path, row.names = FALSE)
 
-      # Move to next row
+      # Move to next row; from the last row, jump back to the first
+      # unrecorded row (status NA or empty; "skip" counts as recorded)
       if (current_idx() < nrow(r)) {
         current_idx(current_idx() + 1)
+      } else {
+        unreviewed <- which(is.na(r$status) | r$status == "")
+        if (length(unreviewed) > 0) current_idx(unreviewed[1])
       }
     }
 

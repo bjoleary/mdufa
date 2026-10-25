@@ -744,6 +744,8 @@ metric_types <- function(report_mdufa_period = "MDUFA IV") {
       "Decision on the remaining cohort.", "text",
       "Average Number of Days to Accept / Refuse to Accept on First RTA Cycle",
       "double",
+      # Footnote-wrap text normally dropped by is_footnote_row(); kept so a
+      # row that ever carries a real value is still typed
       "Subs in the MDUFA Cohort if the MDUFA Cohort is 3585 or more.", "text",
       "Subs in the MDUFA Cohort if the MDUFA Cohort is 4060 or more.", "text",
       "Current SI Performance Percent within 90 FDA days", "percent",

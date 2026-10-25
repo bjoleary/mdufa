@@ -20,5 +20,5 @@
 #' }
 #'
 #' @source Derived from mdufa_combined dataset.
-#' Generated 2026-02-25.
+#' Generated 2026-10-24.
 "cohort_status"

@@ -59,5 +59,5 @@ fix_empty_rows <- function(data, name_column) {
     # Remove empty rows
     dplyr::filter(.data$empty == FALSE) |>
     # Remove helper "empty" column
-    dplyr::select(-.data$empty)
+    dplyr::select(-"empty")
 }
