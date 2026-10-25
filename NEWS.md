@@ -1,3 +1,24 @@
+# mdufa 0.4.3
+
+## Bug Fixes
+
+* MDUFA III/IV extraction now drops metric lines that captured split
+  "Page N of M" page-footer text (new internal `is_page_footer_value()`).
+  The footer layout differs across poppler versions, which made the
+  MDUFA IV 2023-03-01 snapshot fail on macOS and Windows CI.
+
+## Data Updates
+
+* Updated `mdufa5` dataset with August 26, 2026 quarterly report (16,410
+  rows; same row keys as May, 2,467 values updated, mostly FY 2025-2026).
+
+* Updated `mdufa_combined`, `cohort_status`, and `report_dates` datasets.
+
+## Maintenance
+
+* `data-raw/report_dates.R` uses `dplyr::recode_values()` in place of
+  `case_match()`, deprecated in dplyr 1.2.0.
+
 # mdufa 0.4.2
 
 ## Bug Fixes

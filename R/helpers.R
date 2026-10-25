@@ -209,6 +209,22 @@ is_footnote_row <- function(performance_metric, value) {
   )
 }
 
+#' Check if Value is PDF Page Footer Text
+#'
+#' Identifies values that are fragments of the "Page N of M" page footer.
+#' Depending on the poppler version, the footer can be split across lines
+#' (e.g., "Page 307" and "of 310", or "Page" and "307 of 310") and captured
+#' as values of a wrapped metric line.
+#'
+#' @param value Character vector of values to check
+#'
+#' @return Logical vector, TRUE if value looks like page footer text
+#' @keywords internal
+is_page_footer_value <- function(value) {
+  !is.na(value) &
+    grepl("^Page( [0-9]+)?( of [0-9]+)?$|^([0-9]+ )?of [0-9]+$", value)
+}
+
 #' Remove Footnote Rows from MDUFA Data
 #'
 #' Filters out rows that appear to be footnote text rather than actual

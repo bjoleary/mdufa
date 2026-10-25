@@ -416,6 +416,11 @@ extract_report <- function(pdf_path,
         !is.na(.data$organization)
     )
 
+  # Remove "Page N of M" footer fragments captured as values. How the footer
+  # splits across rows varies by poppler version.
+  result <- result |>
+    dplyr::filter(!is_page_footer_value(.data$value))
+
   # Add report metadata if provided
   if (!is.null(report_date)) {
     result$report_date <- report_date

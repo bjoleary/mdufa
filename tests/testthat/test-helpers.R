@@ -45,3 +45,19 @@ test_that("is_footnote_row leaves legitimate metric names alone", {
     "Subs in the MDUFA Cohort that Closed", NA_character_
   ))
 })
+
+test_that("is_page_footer_value catches split page footer fragments", {
+  expect_true(is_page_footer_value("Page 307"))
+  expect_true(is_page_footer_value("Page"))
+  expect_true(is_page_footer_value("307 of 310"))
+  expect_true(is_page_footer_value("of 310"))
+  expect_true(is_page_footer_value("Page 307 of 310"))
+})
+
+test_that("is_page_footer_value leaves data values alone", {
+  expect_false(is_page_footer_value(NA_character_))
+  expect_false(is_page_footer_value("307"))
+  expect_false(is_page_footer_value("95.00%"))
+  expect_false(is_page_footer_value("checklist, is finalized."))
+  expect_false(is_page_footer_value("Pages reviewed"))
+})
